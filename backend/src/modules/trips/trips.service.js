@@ -130,7 +130,7 @@ export const updateTripStatus = async (id, trangThai) => {
     await prisma.vehicle.update({ where: { id: trip.vehicleId }, data: { trangThai: 'AVAILABLE' } });
   }
 
-  return prisma.trip.update({
+  const updatedTrip = await prisma.trip.update({
     where: { id: tripId },
     data,
     include: {
@@ -139,7 +139,69 @@ export const updateTripStatus = async (id, trangThai) => {
       route: true,
     },
   });
+
+  if (trangThai === 'COMPLETED') {
+    try {
+      await grantSafeTripReward(tripId);
+    } catch (e) {
+      console.error('Error awarding safe trip reward:', e);
+    }
+  }
+
+  return updatedTrip;
 };
+
+export const grantSafeTripReward = async (tripId) => {
+  const pTripId = parseInt(tripId, 10);
+  const trip = await prisma.trip.findUnique({
+    where: { id: pTripId },
+    include: { route: true, violations: true, driver: true },
+  });
+
+  if (!trip || trip.trangThai !== 'COMPLETED') return null;
+
+  // Check if reward was already granted
+  const existingRewardLog = await prisma.driverScoreLog.findFirst({
+    where: {
+      tripId: pTripId,
+      loaiThayDoi: 'CONG_DIEM',
+    },
+  });
+  if (existingRewardLog) return null;
+
+  // Check if there are any violations associated with this trip
+  const hasViolations = trip.violations.some((v) =>
+    ['CONFIRMED', 'MANUALLY_CONFIRMED', 'PENDING_MANUAL_REVIEW', 'PENDING_VERIFICATION'].includes(v.trangThai)
+  );
+
+  if (hasViolations) return null;
+
+  const distance = trip.route?.khoangCachKm || 50;
+  const rewardPts = distance >= 100 ? 10 : 5;
+
+  const currentUyTin = trip.driver.uyTin;
+  const newUyTin = Math.min(100, currentUyTin + rewardPts);
+
+  const updatedDriver = await prisma.driver.update({
+    where: { userId: trip.driverId },
+    data: { uyTin: newUyTin },
+  });
+
+  const scoreLog = await prisma.driverScoreLog.create({
+    data: {
+      driverId: trip.driverId,
+      loaiThayDoi: 'CONG_DIEM',
+      soDiemThayDoi: rewardPts,
+      diemTruoc: currentUyTin,
+      diemSau: newUyTin,
+      lyDo: `Thưởng chuyến xe an toàn (${trip.route?.tenTuyen || 'Tuyến đường'}, ${distance}km).`,
+      tripId: pTripId,
+    },
+  });
+
+  return { updatedDriver, scoreLog };
+};
+
 
 export const getTripPlaybackData = async (tripId) => {
   const id = parseInt(tripId, 10);

@@ -50,3 +50,44 @@ export const handleGetMe = async (req, res, next) => {
     return res.status(400).json({ message: error.message });
   }
 };
+
+export const handleGetUsers = async (req, res, next) => {
+  try {
+    const users = await authService.getAllUsers();
+    return res.json({ users });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const handleUpdateUser = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const { trangThai, role } = req.body;
+    const adminId = req.user.id;
+    const user = await authService.updateUserStatus(userId, { trangThai, role }, adminId);
+    return res.json({ message: 'Cập nhật tài khoản thành công.', user });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+export const handleGetConfig = async (req, res, next) => {
+  try {
+    const config = await authService.getSystemConfig();
+    return res.json({ config });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const handleUpdateConfig = async (req, res, next) => {
+  try {
+    const adminId = req.user.id;
+    const config = await authService.updateSystemConfig(req.body, adminId);
+    return res.json({ message: 'Cập nhật tham số AI & Cảm biến thành công.', config });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+

@@ -39,3 +39,21 @@ export const getDriversScore = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const reviewViolation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action, lyDo } = req.body;
+    const reviewerId = req.user.id;
+
+    if (!action || !['CONFIRM', 'REJECT'].includes(action)) {
+      return res.status(400).json({ message: 'Thao tác không hợp lệ. Chỉ chấp nhận CONFIRM hoặc REJECT.' });
+    }
+
+    const result = await violationsService.reviewViolationManual(id, { action, lyDo, reviewerId });
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+

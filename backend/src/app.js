@@ -11,6 +11,9 @@ import tripsRouter from './modules/trips/trips.router.js';
 import iotRouter from './modules/iot/iot.router.js';
 import violationsRouter from './modules/violations/violations.router.js';
 import uploadRouter from './modules/upload/upload.router.js';
+import shiftsRouter from './modules/shifts/shifts.router.js';
+import biometricsRouter from './modules/biometrics/biometrics.router.js';
+import auditRouter from './modules/audit/audit.router.js';
 
 const app = express();
 
@@ -68,6 +71,10 @@ app.use('/api/trips', tripsRouter);
 app.use('/api/iot', iotRouter);
 app.use('/api/violations', violationsRouter);
 app.use('/api/upload', uploadRouter);
+app.use('/api/shifts', shiftsRouter);
+app.use('/api/biometrics', biometricsRouter);
+app.use('/api/audit', auditRouter);
+
 
 // Global Error Handler
 app.use((err, req, res, next) => {

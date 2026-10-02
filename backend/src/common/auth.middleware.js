@@ -23,7 +23,6 @@ export const requireAuth = async (req, res, next) => {
       where: { id: decoded.id },
       include: {
         driver: true,
-        manager: true,
       },
     });
 
