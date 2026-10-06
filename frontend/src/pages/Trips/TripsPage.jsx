@@ -194,7 +194,12 @@ function TripsPage() {
                   {/* Hành động */}
                   <td className="px-4 py-4 text-right">
                     <button
-                      onClick={() => toast(`Chi tiết ca #${shift.id}: Tuyến ${shift.route.ten_tuyen}`, { icon: 'ℹ️' })}
+                      onClick={() =>
+                        toast(
+                          `Chi tiết ca #${shift.id}: Tuyến ${shift.route.ten_tuyen}`,
+                          { icon: "ℹ️" },
+                        )
+                      }
                       className="text-brand-blue text-xs font-bold hover:underline"
                     >
                       Chi tiết

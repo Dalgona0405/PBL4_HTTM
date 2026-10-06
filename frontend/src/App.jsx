@@ -37,29 +37,52 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={["ADMIN"]}>
               <div className="rounded-3xl border border-gray-100 bg-white p-8 shadow-sm">
-                <h2 className="text-xl font-bold text-slate-800">Cấu hình tham số AI & Edge Telemetry</h2>
-                <p className="mt-1 text-sm text-slate-500">Thiết lập ngưỡng phát hiện buồn ngủ, nồng độ CO2 và nhịp thở của tài xế.</p>
-                <div className="mt-6 space-y-4 max-w-lg">
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100">
+                <h2 className="text-xl font-bold text-slate-800">
+                  Cấu hình tham số AI & Edge Telemetry
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Thiết lập ngưỡng phát hiện buồn ngủ, nồng độ CO2 và nhịp thở
+                  của tài xế.
+                </p>
+                <div className="mt-6 max-w-lg space-y-4">
+                  <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4">
                     <div>
-                      <p className="font-semibold text-slate-800 text-sm">Thời gian nhắm mắt báo động</p>
-                      <p className="text-xs text-slate-400">Ngưỡng tính ngủ gật (giây)</p>
+                      <p className="text-sm font-semibold text-slate-800">
+                        Thời gian nhắm mắt báo động
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        Ngưỡng tính ngủ gật (giây)
+                      </p>
                     </div>
-                    <span className="font-mono font-bold text-brand-blue bg-blue-50 px-3 py-1 rounded-lg">1.5s</span>
+                    <span className="text-brand-blue rounded-lg bg-blue-50 px-3 py-1 font-mono font-bold">
+                      1.5s
+                    </span>
                   </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100">
+                  <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4">
                     <div>
-                      <p className="font-semibold text-slate-800 text-sm">Ngưỡng CO2 nguy hiểm</p>
-                      <p className="text-xs text-slate-400">Nồng độ CO2 kích hoạt còi cabin (ppm)</p>
+                      <p className="text-sm font-semibold text-slate-800">
+                        Ngưỡng CO2 nguy hiểm
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        Nồng độ CO2 kích hoạt còi cabin (ppm)
+                      </p>
                     </div>
-                    <span className="font-mono font-bold text-alert-warning bg-amber-50 px-3 py-1 rounded-lg">1200 ppm</span>
+                    <span className="text-alert-warning rounded-lg bg-amber-50 px-3 py-1 font-mono font-bold">
+                      1200 ppm
+                    </span>
                   </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100">
+                  <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4">
                     <div>
-                      <p className="font-semibold text-slate-800 text-sm">Độ tin cậy AI tối thiểu</p>
-                      <p className="text-xs text-slate-400">Ngưỡng tự động gửi bằng chứng video</p>
+                      <p className="text-sm font-semibold text-slate-800">
+                        Độ tin cậy AI tối thiểu
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        Ngưỡng tự động gửi bằng chứng video
+                      </p>
                     </div>
-                    <span className="font-mono font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg">70%</span>
+                    <span className="rounded-lg bg-emerald-50 px-3 py-1 font-mono font-bold text-emerald-600">
+                      70%
+                    </span>
                   </div>
                 </div>
               </div>
@@ -71,20 +94,33 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={["ADMIN"]}>
               <div className="rounded-3xl border border-gray-100 bg-white p-8 shadow-sm">
-                <h2 className="text-xl font-bold text-slate-800">Nhật ký thao tác hệ thống</h2>
-                <p className="mt-1 text-sm text-slate-500">Ghi nhận lịch sử đăng nhập, phân ca và can thiệp thủ công của ban quản trị.</p>
+                <h2 className="text-xl font-bold text-slate-800">
+                  Nhật ký thao tác hệ thống
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Ghi nhận lịch sử đăng nhập, phân ca và can thiệp thủ công của
+                  ban quản trị.
+                </p>
                 <div className="mt-6 divide-y divide-gray-100 text-sm">
-                  <div className="py-3 flex justify-between">
+                  <div className="flex justify-between py-3">
                     <span>Quản trị viên đăng nhập hệ thống</span>
-                    <span className="text-xs text-slate-400 font-mono">Hôm nay, 08:30</span>
+                    <span className="font-mono text-xs text-slate-400">
+                      Hôm nay, 08:30
+                    </span>
                   </div>
-                  <div className="py-3 flex justify-between">
-                    <span>Xác nhận vi phạm #{9931} - Tài xế Nguyễn Văn Hùng</span>
-                    <span className="text-xs text-slate-400 font-mono">Hôm qua, 15:42</span>
+                  <div className="flex justify-between py-3">
+                    <span>
+                      Xác nhận vi phạm #{9931} - Tài xế Nguyễn Văn Hùng
+                    </span>
+                    <span className="font-mono text-xs text-slate-400">
+                      Hôm qua, 15:42
+                    </span>
                   </div>
-                  <div className="py-3 flex justify-between">
+                  <div className="flex justify-between py-3">
                     <span>Điều phối ca chạy Đà Nẵng - Quy Nhơn</span>
-                    <span className="text-xs text-slate-400 font-mono">Hôm qua, 11:20</span>
+                    <span className="font-mono text-xs text-slate-400">
+                      Hôm qua, 11:20
+                    </span>
                   </div>
                 </div>
               </div>

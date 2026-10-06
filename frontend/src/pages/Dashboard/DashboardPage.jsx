@@ -7,7 +7,7 @@ function DashboardPage() {
       ...driver,
       kinh_do: 106.6881 + Math.random() * 0.01,
       vi_do: 20.8449 + Math.random() * 0.01,
-    }))
+    })),
   );
 
   const totalVehicles = fleetStatus.length;

@@ -15,8 +15,8 @@
     "driver_id": 12,
     "trip_id": 5821,
     "telemetry": {
-      "kinh_do": 108.2120,
-      "vi_do": 16.0680,
+      "kinh_do": 108.212,
+      "vi_do": 16.068,
       "toc_do": 62.5,
       "co2_ppm": 850,
       "trang_thai_canh_bao": "NORMAL",
@@ -39,8 +39,8 @@
     "driver_id": 15,
     "trip_id": 5820,
     "telemetry": {
-      "kinh_do": 108.1540,
-      "vi_do": 15.9800,
+      "kinh_do": 108.154,
+      "vi_do": 15.98,
       "toc_do": 54.0,
       "co2_ppm": 1280,
       "trang_thai_canh_bao": "CANH_CAO_VANG",
@@ -87,8 +87,8 @@
     "driver_id": 22,
     "trip_id": null,
     "telemetry": {
-      "kinh_do": 106.7000,
-      "vi_do": 10.7700,
+      "kinh_do": 106.7,
+      "vi_do": 10.77,
       "toc_do": 0,
       "co2_ppm": 450,
       "trang_thai_canh_bao": "NORMAL",

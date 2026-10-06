@@ -74,7 +74,12 @@ export const getDriverScoreLogs = (driverId) => {
   return allLogs.filter((log) => log.driver_id === Number(driverId));
 };
 
-export const updateDriverStatus = (driverId, newStatus, reason = "", adminName = "Trần Quản Trị") => {
+export const updateDriverStatus = (
+  driverId,
+  newStatus,
+  reason = "",
+  adminName = "Trần Quản Trị",
+) => {
   const drivers = getDrivers();
   const driver = drivers.find((d) => d.id === Number(driverId));
   if (!driver) throw new Error("Không tìm thấy tài xế");
@@ -119,7 +124,9 @@ export const validateShiftConstraints = ({ driverId, startTime, endTime }) => {
   }
 
   if (driver.trang_thai_tai_xe === "LOCKED") {
-    errors.push("Tài xế đang bị đình chỉ (LOCKED) do điểm uy tín <= 20. Không được xếp ca!");
+    errors.push(
+      "Tài xế đang bị đình chỉ (LOCKED) do điểm uy tín <= 20. Không được xếp ca!",
+    );
     return { valid: false, warnings, errors };
   }
 
@@ -142,7 +149,8 @@ export const validateShiftConstraints = ({ driverId, startTime, endTime }) => {
   const startHour = start.getHours();
   if (biometric && biometric.khung_gio_yeu_sinh_hoc) {
     const isWeakHour = biometric.khung_gio_yeu_sinh_hoc.some((slot) => {
-      if (slot.includes("13:00") && startHour >= 12 && startHour <= 15) return true;
+      if (slot.includes("13:00") && startHour >= 12 && startHour <= 15)
+        return true;
       if (slot.includes("00:00") || slot.includes("02:00")) {
         if (startHour >= 0 && startHour <= 4) return true;
       }
@@ -159,13 +167,17 @@ export const validateShiftConstraints = ({ driverId, startTime, endTime }) => {
 
   // 3. Kiểm tra khoảng nghỉ giữa 2 ca tối thiểu (10 tiếng theo SRS 422 BUSINESS_RULE_VIOLATION)
   const allShifts = getShifts();
-  const driverShifts = allShifts.filter((s) => s.driver.id === Number(driverId));
+  const driverShifts = allShifts.filter(
+    (s) => s.driver.id === Number(driverId),
+  );
   for (const s of driverShifts) {
     if (s.thoi_gian_ket_thuc_du_kien) {
       const prevEnd = new Date(s.thoi_gian_ket_thuc_du_kien);
       const diffHours = Math.abs((start - prevEnd) / (1000 * 60 * 60));
       if (diffHours < 10 && prevEnd < start) {
-        errors.push(`Vi phạm an toàn: Khoảng nghỉ giữa 2 ca (${diffHours.toFixed(1)}h) chưa bảo đảm tối thiểu 10 giờ.`);
+        errors.push(
+          `Vi phạm an toàn: Khoảng nghỉ giữa 2 ca (${diffHours.toFixed(1)}h) chưa bảo đảm tối thiểu 10 giờ.`,
+        );
       }
     }
   }
@@ -224,7 +236,8 @@ export const reviewViolation = ({
   if (!violation) throw new Error("Không tìm thấy sự kiện vi phạm.");
 
   const oldStatus = violation.trang_thai;
-  const newStatus = decision === "CONFIRMED" ? "MANUALLY_CONFIRMED" : "MANUALLY_REJECTED";
+  const newStatus =
+    decision === "CONFIRMED" ? "MANUALLY_CONFIRMED" : "MANUALLY_REJECTED";
 
   violation.trang_thai = newStatus;
   violation.reviewed_by = reviewerId;
@@ -272,12 +285,17 @@ export const reviewViolation = ({
   // Ghi Audit Log theo FR_3.6
   createAuditLog({
     user_name: reviewerName,
-    hanh_dong: decision === "CONFIRMED" ? "CONFIRM_VIOLATION" : "REJECT_VIOLATION",
+    hanh_dong:
+      decision === "CONFIRMED" ? "CONFIRM_VIOLATION" : "REJECT_VIOLATION",
     doi_tuong_loai: "violation",
     doi_tuong_id: violation.id,
     gia_tri_truoc: { trang_thai: oldStatus },
     gia_tri_sau: { trang_thai: newStatus },
-    ly_do: notes || (decision === "CONFIRMED" ? "Duyệt vi phạm thủ công" : "Bác bỏ do nhận diện nhầm"),
+    ly_do:
+      notes ||
+      (decision === "CONFIRMED"
+        ? "Duyệt vi phạm thủ công"
+        : "Bác bỏ do nhận diện nhầm"),
   });
 
   return violation;
