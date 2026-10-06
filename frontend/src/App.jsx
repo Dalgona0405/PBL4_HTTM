@@ -3,8 +3,11 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import MainLayout from "./components/layout/MainLayout";
 import LoginPage from "./pages/Login/LoginPage";
-import LogsPage from "./pages/Logs/components/LogsPage";
-import DashboardPage from "./pages/Dashboard/components/DashboardPage";
+import LogsPage from "./pages/Logs/LogsPage";
+import DashboardPage from "./pages/Dashboard/DashboardPage";
+import DriversPage from "./pages/Drivers/DriversPage";
+import TripsPage from "./pages/Trips/TripsPage";
+import VehiclesPage from "./pages/Vehicles/VehiclesPage";
 
 // Component tạm để test giao diện
 const Placeholder = ({ title }) => (
@@ -25,14 +28,9 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route element={<MainLayout />}>
         <Route path="/" element={<DashboardPage />} />
-        <Route
-          path="/drivers"
-          element={<Placeholder title=" Quản lý Tài xế & Điểm uy tín" />}
-        />
-        <Route
-          path="/trips"
-          element={<Placeholder title=" Quản lý Ca làm (Trips)" />}
-        />
+        <Route path="/drivers" element={<DriversPage />} />
+        <Route path="/trips" element={<TripsPage />} />
+        <Route path="/vehicles" element={<VehiclesPage />} />
         <Route path="/logs" element={<LogsPage />} />
       </Route>
     </Routes>
