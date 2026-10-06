@@ -1,0 +1,41 @@
+[
+  {
+    "id": 1,
+    "bien_so": "43C-128.45",
+    "loai_xe": "Container 40ft",
+    "tai_trong": "30 Tấn",
+    "trang_thai": "DANG_CHAY",
+    "iot_device": {
+      "mac_address": "00:1B:44:11:3A:B7",
+      "phien_ban": "v2.1 (Pi4 + ESP32)",
+      "trang_thai": "ONLINE"
+    },
+    "tai_xe_hien_tai": "Nguyễn Văn Hùng"
+  },
+  {
+    "id": 2,
+    "bien_so": "43C-901.22",
+    "loai_xe": "Tải thùng 15 tấn",
+    "tai_trong": "15 Tấn",
+    "trang_thai": "SAN_SANG",
+    "iot_device": {
+      "mac_address": "00:1B:44:11:3A:C8",
+      "phien_ban": "v2.1 (Pi4 + ESP32)",
+      "trang_thai": "ONLINE"
+    },
+    "tai_xe_hien_tai": null
+  },
+  {
+    "id": 3,
+    "bien_so": "29H-882.11",
+    "loai_xe": "Container 20ft",
+    "tai_trong": "20 Tấn",
+    "trang_thai": "BAO_DUONG",
+    "iot_device": {
+      "mac_address": "00:1B:44:11:3A:D9",
+      "phien_ban": "v2.0 (Pi3)",
+      "trang_thai": "OFFLINE"
+    },
+    "tai_xe_hien_tai": null
+  }
+]

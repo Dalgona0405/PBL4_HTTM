@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "username": "admin",
+    "password": "123",
+    "ho_ten": "Trần Quản Trị",
+    "role": "ADMIN",
+    "token": "fake-jwt-token-admin-999"
+  },
+  {
+    "id": 2,
+    "username": "dieuphoi",
+    "password": "123",
+    "ho_ten": "Lê Điều Phối",
+    "role": "DISPATCHER",
+    "token": "fake-jwt-token-dispatcher-888"
+  },
+  {
+    "id": 12,
+    "username": "taixe",
+    "password": "123",
+    "ho_ten": "Nguyễn Văn Hùng",
+    "role": "DRIVER",
+    "token": "fake-jwt-token-driver-777"
+  }
+]

@@ -1,0 +1,76 @@
+[
+  {
+    "id": 3390,
+    "driver": {
+      "id": 12,
+      "ho_ten": "Nguyễn Văn Hùng",
+      "sdt": "0905123456"
+    },
+    "vehicle": {
+      "id": 7,
+      "bien_so": "43C-128.45",
+      "loai_xe": "Container 40ft"
+    },
+    "route": {
+      "id": 3,
+      "ten_tuyen": "Đà Nẵng - Quy Nhơn",
+      "khoang_cach_km": 305.5
+    },
+    "thoi_gian_bat_dau_du_kien": "2026-09-24T13:00:00Z",
+    "thoi_gian_ket_thuc_du_kien": "2026-09-24T21:00:00Z",
+    "trang_thai": "IN_PROGRESS",
+    "canh_bao_khi_tao": [
+      {
+        "muc": "LUU_Y",
+        "ly_do": "Trùng khung giờ yếu sinh học (13:00 - 15:00) của tài xế"
+      }
+    ],
+    "trip_id": 5822
+  },
+  {
+    "id": 3391,
+    "driver": {
+      "id": 15,
+      "ho_ten": "Phạm Quốc Bảo",
+      "sdt": "0912987654"
+    },
+    "vehicle": {
+      "id": 8,
+      "bien_so": "43C-901.22",
+      "loai_xe": "Tải thùng 15 tấn"
+    },
+    "route": {
+      "id": 1,
+      "ten_tuyen": "Đà Nẵng - Huế",
+      "khoang_cach_km": 102.0
+    },
+    "thoi_gian_bat_dau_du_kien": "2026-09-25T07:30:00Z",
+    "thoi_gian_ket_thuc_du_kien": "2026-09-25T11:30:00Z",
+    "trang_thai": "SCHEDULED",
+    "canh_bao_khi_tao": [],
+    "trip_id": null
+  },
+  {
+    "id": 3389,
+    "driver": {
+      "id": 18,
+      "ho_ten": "Hoàng Minh Tuấn",
+      "sdt": "0988112233"
+    },
+    "vehicle": {
+      "id": 2,
+      "bien_so": "29H-882.11",
+      "loai_xe": "Container 20ft"
+    },
+    "route": {
+      "id": 5,
+      "ten_tuyen": "Đà Nẵng - Quảng Ngãi",
+      "khoang_cach_km": 145.0
+    },
+    "thoi_gian_bat_dau_du_kien": "2026-09-23T06:00:00Z",
+    "thoi_gian_ket_thuc_du_kien": "2026-09-23T10:30:00Z",
+    "trang_thai": "COMPLETED",
+    "canh_bao_khi_tao": [],
+    "trip_id": 5819
+  }
+]

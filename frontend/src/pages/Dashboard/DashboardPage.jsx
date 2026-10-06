@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import mockDrivers from "../../../mock/mockDrivers";
+import mockDrivers from "../../mock/mockDrivers";
 
 function DashboardPage() {
   const [fleetStatus, setFleetStatus] = useState([]);
@@ -92,7 +92,7 @@ function DashboardPage() {
           </div>
         </div>
       </div>
-      <div className="grid h-[500px] grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid h-125 grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm lg:col-span-2">
           <div className="border-b border-gray-100 bg-gray-50 p-4">
             <h3 className="text-brand-dark font-bold">
