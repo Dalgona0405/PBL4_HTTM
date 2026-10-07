@@ -9,4 +9,5 @@
   --color-alert-danger: #ef4444; /* Đỏ: Ngủ gật / CO2 > 1500ppm / Báo động đỏ */
   --color-alert-warning: #f59e0b; /* Vàng: Ngáp nhiều / CO2 1000-1500ppm / Cảnh cáo */
   --color-alert-safe: #10b981; /* Xanh lá: Bình thường / Ca chạy an toàn */
+  --font-sans: 'Inter', sans-serif;
 }
