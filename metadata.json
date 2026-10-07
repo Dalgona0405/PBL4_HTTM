@@ -1,0 +1,6 @@
+{
+  "name": "IoT Driver Safety Dashboard",
+  "description": "Hệ thống giám sát an toàn tài xế và quản lý vận hành đội xe thời gian thực với cảnh báo buồn ngủ, nồng độ CO2 và vi phạm.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
