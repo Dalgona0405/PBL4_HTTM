@@ -28,6 +28,7 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route element={<MainLayout />}>
         <Route path="/" element={<DashboardPage />} />
+        <Route path="/map" element={<DashboardPage />} />
         <Route path="/drivers" element={<DriversPage />} />
         <Route path="/trips" element={<TripsPage />} />
         <Route path="/vehicles" element={<VehiclesPage />} />
