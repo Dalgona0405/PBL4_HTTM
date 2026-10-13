@@ -57,18 +57,18 @@ function LoginPage() {
   };
 
   return (
-    <div className="bg-brand-light flex min-h-screen flex-col font-sans">
-      <header className="flex h-20 shrink-0 items-center justify-between bg-white px-8 shadow-xs border-b border-slate-100">
+    <div className="bg-brand-deep flex min-h-screen flex-col font-sans text-brand-text-secondary">
+      <header className="flex h-20 shrink-0 items-center justify-between bg-brand-dark px-8 shadow-md border-b border-brand-border-dark">
         <div
           className="flex items-center gap-3 cursor-pointer"
           onClick={() => navigate("/")}
         >
-          <img src={logoImg} alt="FleetGuard Logo" className="h-10 w-10 object-contain" />
+          <img src={logoImg} alt="FleetGuard Logo" className="h-10 w-10 object-contain drop-shadow" />
           <div>
-            <h1 className="text-xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-xl font-black text-brand-text-primary tracking-tight">
               FleetGuard
             </h1>
-            <p className="text-[10px] font-bold tracking-widest text-blue-600 uppercase">
+            <p className="text-[10px] font-bold tracking-widest text-brand-blue-sky uppercase">
               Telematics & Safety
             </p>
           </div>
@@ -76,13 +76,13 @@ function LoginPage() {
       </header>
 
       <div className="flex flex-1 items-center justify-center px-4 py-8">
-        <div className="border-blue-600 w-full max-w-md rounded-3xl border-t-8 bg-white p-10 shadow-xl border border-slate-100">
+        <div className="w-full max-w-md rounded-3xl card-glass p-10 shadow-2xl border border-brand-border">
           <div className="mb-8 text-center">
-            <img src={logoImg} alt="FleetGuard Logo" className="h-14 w-14 object-contain mx-auto mb-3" />
-            <h2 className="mb-1 text-2xl font-black text-slate-900">
+            <img src={logoImg} alt="FleetGuard Logo" className="h-14 w-14 object-contain mx-auto mb-3 drop-shadow" />
+            <h2 className="mb-1 text-2xl font-black text-brand-text-primary">
               FleetGuard Telematics
             </h2>
-            <p className="text-xs text-slate-500">Đăng nhập hệ thống điều phối an toàn xe tải</p>
+            <p className="text-xs text-brand-text-muted">Đăng nhập hệ thống điều phối an toàn xe tải</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">

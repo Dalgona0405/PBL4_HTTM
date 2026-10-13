@@ -11,7 +11,7 @@ import {
   Sliders,
   LogOut,
   PhoneCall,
-  Serach,
+  Search,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import NotificationBell from "../notification/NotificationBell";
@@ -62,7 +62,7 @@ const MainLayout = () => {
       id: "violations",
       path: "/logs",
       label: "Xác thực Vi phạm AI",
-      tag: "14 Vi phạm",
+      tag: "Violation",
       hasBadgeDot: true,
       icon: ShieldAlert,
     },
@@ -100,11 +100,12 @@ const MainLayout = () => {
   ];
 
   return (
-    <div className="bg-brand-blue-dark flex h-screen overflow-hidden font-sans text-slate-100">
-      <aside className="bg-brand-dark z-20 flex w-20 shrink-0 flex-col items-center border-r border-slate-800 py-4 shadow-xl">
+    <div className="bg-brand-deep flex h-screen overflow-hidden font-sans text-brand-text-secondary">
+      {/* SIDEBAR NAVIGATION - SLATE 900 DARK */}
+      <aside className="bg-brand-dark z-20 flex w-20 shrink-0 flex-col items-center border-r border-brand-border-dark py-4 shadow-xl">
         <button
           onClick={() => navigate("/")}
-          className="mb-5 flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl transition-all hover:bg-slate-800/80"
+          className="mb-5 flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl transition-all hover:bg-brand-surface/80"
           title="Trang chủ FleetGuard"
         >
           <img
@@ -124,8 +125,8 @@ const MainLayout = () => {
                   onClick={() => navigate(item.path)}
                   className={`relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl transition-all ${
                     active
-                      ? "border border-blue-400/40 bg-linear-to-br from-blue-500 to-blue-700 text-white shadow-lg shadow-blue-500/35"
-                      : "text-slate-400 hover:bg-slate-800/80 hover:text-slate-100"
+                      ? "border border-brand-border-active bg-linear-to-br from-brand-primary to-brand-primary-dark text-white shadow-lg shadow-blue-500/35"
+                      : "text-brand-text-muted hover:bg-brand-surface/80 hover:text-brand-text-primary"
                   }`}
                   aria-label={item.label}
                 >
@@ -138,10 +139,10 @@ const MainLayout = () => {
                   )}
                 </button>
                 <div className="pointer-events-none absolute top-1/2 left-full z-50 ml-3.5 hidden -translate-y-1/2 items-center group-hover:flex">
-                  <div className="flex items-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900 px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-slate-100 shadow-2xl">
+                  <div className="flex items-center gap-2 rounded-xl border border-brand-border bg-brand-dark px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-brand-text-primary shadow-2xl">
                     <span>{item.label}</span>
                     {item.tag && (
-                      <span className="rounded-md border border-blue-400/30 bg-blue-500/20 px-1.5 py-0.5 text-[10px] font-bold text-blue-300">
+                      <span className="rounded-md border border-brand-primary/30 bg-brand-blue-night px-1.5 py-0.5 text-[10px] font-bold text-brand-blue-light">
                         {item.tag}
                       </span>
                     )}
@@ -150,9 +151,9 @@ const MainLayout = () => {
               </div>
             );
           })}
-          <div className="my-1 h-px w-8 bg-slate-800" />
+          <div className="my-1 h-px w-8 bg-brand-border-dark" />
           {user?.role === "admin" && (
-            <div className="my-1 h-px w-8 bg-slate-800" />
+            <div className="my-1 h-px w-8 bg-brand-border-dark" />
           )}
           {user?.role === "admin" &&
             adminNavItems.map((item) => {
@@ -167,8 +168,8 @@ const MainLayout = () => {
                     onClick={() => navigate(item.path)}
                     className={`relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl transition-all ${
                       active
-                        ? "bg-linear-to border border-blue-400/40 from-blue-500 to-blue-700 text-white shadow-lg shadow-blue-500/35"
-                        : "text-slate-400 hover:bg-slate-800/80 hover:text-slate-100"
+                        ? "border border-brand-border-active bg-linear-to-br from-brand-primary to-brand-primary-dark text-white shadow-lg shadow-blue-500/35"
+                        : "text-brand-text-muted hover:bg-brand-surface/80 hover:text-brand-text-primary"
                     }`}
                     aria-label={item.label}
                   >
@@ -176,10 +177,10 @@ const MainLayout = () => {
                   </button>
 
                   <div className="pointer-events-none absolute top-1/2 left-full z-50 ml-3.5 hidden -translate-y-1/2 items-center group-hover:flex">
-                    <div className="flex items-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900 px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-slate-100 shadow-2xl">
+                    <div className="flex items-center gap-2 rounded-xl border border-brand-border bg-brand-dark px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-brand-text-primary shadow-2xl">
                       <span>{item.label}</span>
                       {item.tag && (
-                        <span className="rounded-md border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-[10px] font-bold text-slate-400">
+                        <span className="rounded-md border border-brand-border bg-brand-surface px-1.5 py-0.5 text-[10px] font-bold text-brand-text-muted">
                           {item.tag}
                         </span>
                       )}
@@ -189,7 +190,7 @@ const MainLayout = () => {
               );
             })}
         </nav>
-        <div className="flex w-full flex-col items-center gap-2.5 border-t border-slate-800 px-3 pt-3">
+        <div className="flex w-full flex-col items-center gap-2.5 border-t border-brand-border-dark px-3 pt-3">
           <div className="group relative flex justify-center">
             <a
               href="tel:19008899"
@@ -199,7 +200,7 @@ const MainLayout = () => {
               <PhoneCall className="h-4.5 w-4.5" />
             </a>
             <div className="pointer-events-none absolute top-1/2 left-full z-50 ml-3.5 hidden -translate-y-1/2 items-center group-hover:flex">
-              <div className="rounded-xl border border-rose-500/30 bg-slate-900 px-3 py-1.5 text-xs font-bold whitespace-nowrap text-rose-400 shadow-2xl">
+              <div className="rounded-xl border border-rose-500/30 bg-brand-dark px-3 py-1.5 text-xs font-bold whitespace-nowrap text-rose-400 shadow-2xl">
                 Hotline SOS: 1900 8899
               </div>
             </div>
@@ -213,7 +214,7 @@ const MainLayout = () => {
               <LogOut className="h-4.5 w-4.5" />
             </button>
             <div className="pointer-events-none absolute top-1/2 left-full z-50 ml-3.5 hidden -translate-y-1/2 items-center group-hover:flex">
-              <div className="rounded-xl border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-slate-300 shadow-2xl">
+              <div className="rounded-xl border border-brand-border bg-brand-dark px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-brand-text-muted shadow-2xl">
                 Đăng xuất
               </div>
             </div>
@@ -221,39 +222,39 @@ const MainLayout = () => {
         </div>
       </aside>
       <div className="bg-brand-deep flex flex-1 flex-col overflow-hidden">
-        <header className="bg-brand-dark flex h-18 shrink-0 items-center justify-between border-b border-slate-800 px-8 shadow-md">
+        <header className="bg-brand-dark flex h-18 shrink-0 items-center justify-between border-b border-brand-border-dark px-8 shadow-md">
           <div className="mr-4 max-w-xl flex-1">
             <div className="relative">
-              <Serach className="h-4 w-4" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-text-subtle" />
               <input
                 type="text"
                 placeholder="Tra cứu biển số xe (29C-882.14), tên tài xế, mã ca chạy..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-lg border border-slate-700/80 bg-slate-900/90 py-2 pr-4 pl-9 text-xs text-slate-100 transition-all outline-none placeholder:text-slate-500 focus:border-blue-500 focus:bg-slate-900 focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-brand-border bg-brand-dark/90 py-2 pr-4 pl-9 text-xs text-brand-text-primary transition-all outline-none placeholder:text-brand-text-subtle focus:border-brand-primary focus:bg-brand-surface focus:ring-1 focus:ring-brand-primary"
               />
             </div>
           </div>
           <div className="flex items-center gap-4">
             <NotificationBell />
-            <div className="flex items-center gap-3 border-l border-slate-800 pl-3">
-              <div className="bg-linear-to relative flex h-9 w-9 items-center justify-center rounded-full from-blue-500 to-blue-700 text-xs font-bold text-white shadow-md ring-2 ring-blue-500/30">
+            <div className="flex items-center gap-3 border-l border-brand-border-dark pl-3">
+              <div className="bg-linear-to-br relative flex h-9 w-9 items-center justify-center rounded-full from-brand-primary to-brand-primary-dark text-xs font-bold text-white shadow-md ring-2 ring-brand-primary/30">
                 {user?.name ? user.name.charAt(0) : "TN"}
               </div>
               <div className="hidden text-left leading-tight sm:block">
-                <p className="text-xs font-bold text-slate-100">
-                  {user?.name || "Trần Nam"}
+                <p className="text-xs font-bold text-brand-text-primary">
+                  {user?.name}
                 </p>
                 <p className="flex items-center gap-1 text-[11px] font-semibold text-emerald-400">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-                  Trực ban Điều phối
+                  {user?.role?.toLowerCase() === "admin" ? "Quản trị viên" : "Điều phối viên"}
                 </p>
               </div>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto bg-[#090d16] p-6 text-slate-100">
+        <main className="flex-1 overflow-y-auto bg-brand-deep p-6 text-brand-text-secondary">
           <Outlet />
         </main>
       </div>

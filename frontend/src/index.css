@@ -1,20 +1,92 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-blue: #3b82f6; /* Active Blue Glow */
-  --color-brand-blue-dark: #090d16;
-  --color-brand-dark: #0f172a; /* Slate 900: Sidebar & Header */
-  --color-brand-surface: #1e293b; /* Slate 800: Glass Cards & Inactive Containers */
-  --color-brand-deep: #090d16; /* Slate 950: Base background */
+  /* Core Brand Dark Backgrounds */
+  --color-brand-deep: #090d16;             /* Canvas base dark background */
+  --color-brand-dark: #0f172a;             /* Slate 900: Sidebar, Header, Base card */
+  --color-brand-surface: #1e293b;          /* Slate 800: Containers, Inactive buttons, Cards */
+  --color-brand-surface-elevated: #334155; /* Slate 700: Hover surface */
 
-  --color-alert-danger: #ef4444; /* Đỏ: Báo động đỏ */
-  --color-alert-warning: #f59e0b; /* Vàng: Cảnh cáo & Vi phạm */
-  --color-alert-safe: #10b981; /* Xanh lá: Bình thường */
-  --font-sans: "Montserrat";
+  /* Brand Primary & Active Blue */
+  --color-brand-primary: #3b82f6;          /* Active Blue / Primary Accent */
+  --color-brand-primary-hover: #2563eb;    /* Primary hover */
+  --color-brand-primary-dark: #1d4ed8;     /* Gradient stop dark blue */
+  --color-brand-blue: #3b82f6;             /* Alias for brand-primary */
+  --color-brand-blue-dark: #1d4ed8;        /* Alias for primary dark */
+  --color-brand-blue-night: #1e3a8a;       /* Deep blue tag & badge container */
+  --color-brand-blue-subtle: #1e40af;      /* Badge highlight */
+  --color-brand-blue-light: #93c5fd;       /* Soft light blue text */
+  --color-brand-blue-sky: #60a5fa;         /* Sky blue active label */
+
+  /* Borders & Dividers */
+  --color-brand-border: #334155;           /* Standard card & container border */
+  --color-brand-border-dark: #1e293b;      /* Subtle divider */
+  --color-brand-border-active: #2563eb;    /* Active state border */
+
+  /* Typography Colors */
+  --color-brand-text-primary: #ffffff;     /* Headings, white */
+  --color-brand-text-secondary: #e2e8f0;   /* Body text, slate 200 */
+  --color-brand-text-muted: #94a3b8;       /* Secondary text, slate 400 */
+  --color-brand-text-subtle: #64748b;      /* Muted hints, slate 500 */
+
+  /* System Telemetry & Alert Status */
+  --color-alert-danger: #ef4444;           /* Red: Critical alert / SOS / Alarm */
+  --color-alert-warning: #f59e0b;          /* Yellow / Amber: Warning & Violation */
+  --color-alert-safe: #10b981;             /* Green / Emerald: Safe / Normal */
+  --color-alert-info: #38bdf8;             /* Sky: Information */
+
+  --font-sans: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+:root {
+  /* CSS Variables for direct CSS / SVG usage */
+  --bg-deep: #090d16;
+  --bg-dark: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-surface-elevated: #334155;
+
+  --color-primary: #3b82f6;
+  --color-primary-dark: #1d4ed8;
+  --color-primary-hover: #2563eb;
+  --color-blue-night: #1e3a8a;
+  --color-blue-subtle: #1e40af;
+  --color-blue-light: #93c5fd;
+  --color-blue-sky: #60a5fa;
+
+  --border-card: #334155;
+  --border-divider: #1e293b;
+  --border-active: #2563eb;
+
+  --text-primary: #ffffff;
+  --text-secondary: #e2e8f0;
+  --text-muted: #94a3b8;
+  --text-subtle: #64748b;
+
+  --status-danger: #ef4444;
+  --status-warning: #f59e0b;
+  --status-safe: #10b981;
+  --status-info: #38bdf8;
 }
 
 body {
-  background-color: #090d16;
-  color: #f8fafc;
+  background-color: var(--bg-deep);
+  color: var(--text-secondary);
   font-family: var(--font-sans);
+}
+
+/* Custom design system card and button utility styles */
+.card-glass {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
+  border: 1px solid var(--border-card);
+}
+
+.card-glass-active {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border: 1.5px solid var(--border-active);
+  box-shadow: 0 4px 16px -2px rgba(59, 130, 246, 0.45);
+}
+
+.btn-nav-active {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.4);
 }

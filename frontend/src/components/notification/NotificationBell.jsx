@@ -68,11 +68,11 @@ function NotificationBell() {
       {/* NÚT QUẢ CHUÔNG */}
       <button
         onClick={handleToggleBell}
-        className="hover:text-brand-blue relative rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-100"
+        className="relative rounded-xl p-2 text-brand-text-muted transition-colors hover:bg-brand-surface hover:text-brand-text-primary"
       >
-        <span className="text-2xl">🔔</span>
+        <span className="text-xl">🔔</span>
         {unreadCount > 0 && (
-          <span className="bg-alert-danger absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white text-[10px] font-bold text-white shadow-sm">
+          <span className="bg-alert-danger absolute top-1 right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-brand-dark text-[10px] font-bold text-white shadow-sm">
             {unreadCount}
           </span>
         )}
@@ -80,13 +80,13 @@ function NotificationBell() {
 
       {/* HỘP THOẠI DROPDOWN */}
       {isOpen && (
-        <div className="absolute right-0 z-50 mt-3 w-80 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl md:w-96">
-          <div className="flex items-center justify-between border-b border-gray-50 bg-gray-50 px-5 py-4">
-            <h3 className="text-brand-dark text-lg font-bold">Thông báo</h3>
+        <div className="absolute right-0 z-50 mt-3 w-80 overflow-hidden rounded-2xl border border-brand-border bg-brand-dark shadow-2xl md:w-96">
+          <div className="flex items-center justify-between border-b border-brand-border-dark bg-brand-surface/70 px-5 py-3.5">
+            <h3 className="text-sm font-bold text-brand-text-primary">Thông báo</h3>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
-                className="text-brand-blue text-xs font-bold hover:underline"
+                className="text-xs font-bold text-brand-blue-sky hover:underline"
               >
                 Đánh dấu đọc hết ✔️
               </button>
@@ -95,7 +95,7 @@ function NotificationBell() {
 
           <div className="max-h-100 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="p-8 text-center text-gray-400">
+              <div className="p-8 text-center text-brand-text-subtle text-xs">
                 Không có thông báo nào.
               </div>
             ) : (
@@ -104,11 +104,11 @@ function NotificationBell() {
                   <div
                     key={notif.id}
                     onClick={() => handleNotificationClick(notif)}
-                    className={`flex cursor-pointer gap-4 border-b border-gray-50 p-4 transition-colors hover:bg-gray-50 ${
-                      notif.isRead ? "bg-white opacity-60" : "bg-blue-50/30"
+                    className={`flex cursor-pointer gap-3.5 border-b border-brand-border-dark/60 p-3.5 transition-colors hover:bg-brand-surface/60 ${
+                      notif.isRead ? "bg-transparent opacity-60" : "bg-brand-blue-night/20"
                     }`}
                   >
-                    <div className="text-2xl">
+                    <div className="text-xl">
                       {notif.type === "DANGER"
                         ? "🚨"
                         : notif.type === "WARNING"
@@ -117,11 +117,11 @@ function NotificationBell() {
                     </div>
                     <div>
                       <p
-                        className={`text-sm ${notif.isRead ? "text-gray-600" : "text-brand-dark font-bold"}`}
+                        className={`text-xs ${notif.isRead ? "text-brand-text-muted" : "font-bold text-brand-text-primary"}`}
                       >
                         {notif.message}
                       </p>
-                      <p className="mt-1 text-xs text-gray-400">
+                      <p className="mt-1 text-[11px] text-brand-text-subtle">
                         {new Date(notif.createdAt).toLocaleString("vi-VN")}
                       </p>
                     </div>

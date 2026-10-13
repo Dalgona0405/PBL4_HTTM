@@ -1,37 +1,33 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import {
+  getPriorityFleet,
+  getLiveMonitoringStats,
+  getDefaultSelectedVehicle,
+  dispatchVehicleToRestStop,
+  mockLiveMonitoring,
+} from "../../mock";
 
 function DashboardPage() {
-  // Trạng thái xe đang chọn xem trên bản đồ & bảng điều phối
-  const [selectedVehicle, setSelectedVehicle] = useState({
-    plate: "29C-882.14",
-    model: "Đầu kéo Dongfeng Tianlong 420HP",
-    driverName: "Nguyễn Văn Hùng",
-    driverCode: "TX-0182",
-    experience: "6 năm",
-    score: 88,
-    speed: 58,
-    co2: 1120,
-    route: "Tuyến HN - Đà Nẵng",
-    alertType: "MICROSLEEP",
-    alertDesc:
-      "Phát hiện mi mắt khép 1.8s (Microsleep). Đã tự động hú còi 85dB & loa cảnh báo lúc 14:32:10.",
-    nearestRestStop: {
-      name: "Trạm Dừng Nghỉ Vực Vòng (Km 227)",
-      distance: "4.2 km",
-      eta: "~6 phút",
-      emptySlots: 14,
-    },
-    altRestStop: {
-      name: "Trạm Dịch Vụ Liêm Tuyền",
-      distance: "18.5 km",
-      eta: "~21 phút",
-      emptySlots: 5,
-    },
-  });
+  // Trạng thái xe đang chọn xem trên bản đồ & bảng điều phối (lấy từ tầng mock repository)
+  const [selectedVehicle, setSelectedVehicle] = useState(() =>
+    getDefaultSelectedVehicle()
+  );
+  const [fleetList, setFleetList] = useState(() => getPriorityFleet());
+  const [stats, setStats] = useState(() => getLiveMonitoringStats());
 
   // Đồng hồ đếm ngược tuân thủ an toàn (T + 15p) theo SRS 3.1 & 3.3
-  const [countdownSeconds, setCountdownSeconds] = useState(12 * 60 + 49);
+  const [countdownSeconds, setCountdownSeconds] = useState(
+    () => selectedVehicle?.countdownSeconds || 12 * 60 + 49
+  );
+
+  const handleSelectVehicle = (vehicle) => {
+    setSelectedVehicle(vehicle);
+    if (vehicle?.countdownSeconds !== undefined) {
+      setCountdownSeconds(vehicle.countdownSeconds);
+    }
+  };
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCountdownSeconds((prev) => (prev > 0 ? prev - 1 : 0));
@@ -50,124 +46,26 @@ function DashboardPage() {
   const [showCallModal, setShowCallModal] = useState(false);
 
   // Gửi lệnh dẫn đường vào trạm dừng
-  const handleDispatchNav = (stopName = "Trạm Dừng Nghỉ Vực Vòng") => {
+  const handleDispatchNav = (stopName) => {
+    const targetStop =
+      stopName ||
+      (selectedRestStopOpt === 1
+        ? selectedVehicle?.nearestRestStop?.name
+        : selectedVehicle?.altRestStop?.name) ||
+      "Trạm Dừng Nghỉ Vực Vòng";
+
+    dispatchVehicleToRestStop({
+      vehiclePlate: selectedVehicle.plate,
+      restStopName: targetStop,
+    });
+    setFleetList(getPriorityFleet());
+    setStats(getLiveMonitoringStats());
+
     toast.success(
-      `🚀 Đã gửi lệnh điều hướng rẽ vào [${stopName}] tới màn hình Cabin xe ${selectedVehicle.plate} & App Driver!`,
+      `🚀 Đã gửi lệnh điều hướng rẽ vào [${targetStop}] tới màn hình Cabin xe ${selectedVehicle.plate} & App Driver!`,
       { duration: 5000, icon: "📡" }
     );
   };
-
-  // Danh sách xe trong "Bảng ưu tiên Can thiệp & Điều phối Đội xe" đúng như hình mẫu
-  const priorityFleet = [
-    {
-      id: 1,
-      priorityLevel: "DANGER",
-      priorityBadge: "CAN THIỆP GẤP",
-      priorityDesc: "Microsleep 1.8s • Hú còi 85dB",
-      plate: "29C-882.14",
-      driver: "Nguyễn Văn Hùng",
-      driverCode: "TX-0182",
-      route: "HN - Đà Nẵng",
-      location: "Km 222+800 (CT01 Phủ Lý)",
-      speed: "58 km/h",
-      co2: "1,120 ppm",
-      co2Status: "danger",
-      score: "88/100",
-      restStop: "Trạm Vực Vòng (Km 227)",
-      restStopDistance: "Cách 4.2 km (~6 phút)",
-      actionType: "EMERGENCY_DISPATCH",
-    },
-    {
-      id: 2,
-      priorityLevel: "WARNING",
-      priorityBadge: "CẢNH BÁO MỆT MỎI",
-      priorityDesc: "Ngáp 4 lần/5p • Mắt lim dim",
-      plate: "51D-401.99",
-      driver: "Lê Hoàng Nam",
-      driverCode: "TX-0441",
-      route: "Pháp Vân - Ninh Bình",
-      location: "Km 233+100",
-      speed: "64 km/h",
-      co2: "920 ppm",
-      co2Status: "warning",
-      score: "91/100",
-      restStop: "Trạm Liêm Tuyền (Km 245)",
-      restStopDistance: "Cách 12.3 km (~11 phút)",
-      actionType: "REMIND_REST",
-    },
-    {
-      id: 3,
-      priorityLevel: "WARNING",
-      priorityBadge: "CẢNH BÁO MỆT MỎI",
-      priorityDesc: "Dao động làn • Giảm tốc đột ngột",
-      plate: "43C-198.52",
-      driver: "Phan Quốc Bảo",
-      driverCode: "TX-0298",
-      route: "Hà Nội - Nghệ An",
-      location: "Km 210+400",
-      speed: "45 km/h",
-      co2: "890 ppm",
-      co2Status: "normal",
-      score: "85/100",
-      restStop: "Trạm Cầu Giẽ (Km 212)",
-      restStopDistance: "Cách 1.8 km (~3 phút)",
-      actionType: "CHECK_VEHICLE",
-    },
-    {
-      id: 4,
-      priorityLevel: "CO2_HIGH",
-      priorityBadge: "GIÁM SÁT CO2 CAO",
-      priorityDesc: "Thiếu oxy cabin (đếm ngược 5p)",
-      plate: "36H-021.45",
-      driver: "Vũ Đức Trọng",
-      driverCode: "TX-0511",
-      route: "Thanh Hóa - Hải Phòng",
-      location: "Km 260+500",
-      speed: "62 km/h",
-      co2: "1,350 ppm",
-      co2Status: "danger",
-      score: "90/100",
-      restStop: "Trạm Cao Bồ (Km 282)",
-      restStopDistance: "Cách 2.1 km (~4 phút)",
-      actionType: "VENTILATE_CABIN",
-    },
-    {
-      id: 5,
-      priorityLevel: "SAFE",
-      priorityBadge: "AN TOÀN",
-      priorityDesc: "Tình trạng ổn định",
-      plate: "15C-312.80",
-      driver: "Trần Đình Trọng",
-      driverCode: "TX-0114",
-      route: "HN - Hải Phòng (Cao tốc 5B)",
-      location: "Km 18+200",
-      speed: "68 km/h",
-      co2: "650 ppm",
-      co2Status: "safe",
-      score: "96/100",
-      restStop: "Trạm dừng Hưng Yên (Km 24)",
-      restStopDistance: "Cách 5.8 km (~6 phút)",
-      actionType: "STABLE",
-    },
-    {
-      id: 6,
-      priorityLevel: "SAFE",
-      priorityBadge: "AN TOÀN",
-      priorityDesc: "Tình trạng ổn định",
-      plate: "29H-772.19",
-      driver: "Ngô Quang Huy",
-      driverCode: "TX-0322",
-      route: "HN - Thanh Hóa",
-      location: "Km 42+150",
-      speed: "72 km/h",
-      co2: "610 ppm",
-      co2Status: "safe",
-      score: "94/100",
-      restStop: "Trạm Tiên Hiệp (Km 185)",
-      restStopDistance: "Cách 8.5 km (~9 phút)",
-      actionType: "STABLE",
-    },
-  ];
 
   return (
     <div className="space-y-5 animate-fade-in-up">
@@ -175,16 +73,13 @@ function DashboardPage() {
       {/* 1. HEADER: BREADCRUMB & TIÊU ĐỀ TRUNG TÂM GIÁM SÁT */}
       {/* ========================================================================= */}
       <div>
-        <p className="text-[11px] font-black tracking-wider text-blue-600 uppercase">
-          Trung tâm giám sát điều phối thời gian thực
-        </p>
-        <h1 className="mt-0.5 text-2xl font-black tracking-tight text-slate-900">
+        <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-slate-500">
           Bản đồ Giám sát GPS & Điều phối Trạm dừng khẩn cấp
         </h1>
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. STATS SUMMARY ROW (4 THẺ KPI ĐÚNG HÌNH MẪU) */}
+      {/* 2. STATS SUMMARY ROW (4 THẺ KPI LẤY TỪ MOCK DATA LAYER) */}
       {/* ========================================================================= */}
       <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         {/* Card 1: Đang hoạt động */}
@@ -195,7 +90,7 @@ function DashboardPage() {
           <div>
             <p className="text-[11px] font-medium text-slate-400">Đang hoạt động</p>
             <p className="text-lg font-black text-slate-900">
-              42 <span className="text-xs font-semibold text-slate-400">xe IoT</span>
+              {stats.activeVehicles} <span className="text-xs font-semibold text-slate-400">xe IoT</span>
             </p>
           </div>
         </div>
@@ -210,7 +105,8 @@ function DashboardPage() {
               Ngủ gật (Microsleep)
             </p>
             <p className="text-lg font-black text-rose-600">
-              01 <span className="text-xs font-bold text-rose-500">Cần can thiệp gấp</span>
+              {String(stats.microsleepAlerts).padStart(2, "0")}{" "}
+              <span className="text-xs font-bold text-rose-500">Cần can thiệp gấp</span>
             </p>
           </div>
         </div>
@@ -225,7 +121,8 @@ function DashboardPage() {
               Cảnh báo Mệt mỏi
             </p>
             <p className="text-lg font-black text-amber-700">
-              03 <span className="text-xs font-semibold text-amber-600">xe</span>
+              {String(stats.fatigueWarnings).padStart(2, "0")}{" "}
+              <span className="text-xs font-semibold text-amber-600">xe</span>
             </p>
           </div>
         </div>
@@ -238,7 +135,7 @@ function DashboardPage() {
           <div>
             <p className="text-[11px] font-medium text-slate-400">Trạng thái Bình thường</p>
             <p className="text-lg font-black text-slate-900">
-              38 <span className="text-xs font-semibold text-slate-400">xe</span>
+              {stats.normalVehicles} <span className="text-xs font-semibold text-slate-400">xe</span>
             </p>
           </div>
         </div>
@@ -306,57 +203,57 @@ function DashboardPage() {
               <path
                 d="M 60,-30 C 160,140 180,280 230,420 C 290,560 320,700 350,800"
                 fill="none"
-                stroke="#bae6fd"
+                stroke="var(--color-blue-light, #bae6fd)"
                 strokeWidth="20"
                 strokeLinecap="round"
                 opacity="0.75"
               />
 
               {/* Quốc lộ 1A */}
-              <path d="M 270,0 L 270,670" fill="none" stroke="#e2e8f0" strokeWidth="5" />
+              <path d="M 270,0 L 270,670" fill="none" stroke="var(--text-secondary, #e2e8f0)" strokeWidth="5" />
 
               {/* Tuyến Cao tốc CT01 */}
               <path
                 d="M 440,0 Q 420,180 450,330 T 510,670"
                 fill="none"
-                stroke="#cbd5e1"
+                stroke="var(--text-muted, #cbd5e1)"
                 strokeWidth="12"
               />
               <path
                 d="M 440,0 Q 420,180 450,330 T 510,670"
                 fill="none"
-                stroke="#3b82f6"
+                stroke="var(--color-primary, #3b82f6)"
                 strokeWidth="7"
                 strokeDasharray="14, 5"
               />
 
-              {/* DÒNG CHỈ DẪN DẪN ĐƯỜNG MÀU CAM DẤU CHẤM TỚI TRẠM DỪNG NGHỈ (ĐÚNG NHƯ HÌNH MẪU!) */}
+              {/* DÒNG CHỈ DẪN DẪN ĐƯỜNG MÀU CAM DẤU CHẤM TỚI TRẠM DỪNG NGHỈ */}
               <path
                 d="M 440,260 C 480,310 520,330 600,340"
                 fill="none"
-                stroke="#f97316"
+                stroke="var(--status-warning, #f97316)"
                 strokeWidth="5"
                 strokeDasharray="6, 5"
                 className="animate-pulse"
               />
 
               {/* Nhãn địa danh */}
-              <text x="170" y="230" fill="#64748b" fontSize="12" fontWeight="bold">
+              <text x="170" y="230" fill="var(--text-subtle, #64748b)" fontSize="12" fontWeight="bold">
                 Đại Học Công Nghiệp Hà Nam
               </text>
-              <text x="210" y="300" fill="#0f766e" fontSize="13" fontWeight="black">
+              <text x="210" y="300" fill="var(--status-safe, #0f766e)" fontSize="13" fontWeight="black">
                 Phủ Lý
               </text>
-              <text x="180" y="440" fill="#64748b" fontSize="11">
+              <text x="180" y="440" fill="var(--text-subtle, #64748b)" fontSize="11">
                 Chùa Phật Quang
               </text>
-              <text x="210" y="540" fill="#64748b" fontSize="11">
+              <text x="210" y="540" fill="var(--text-subtle, #64748b)" fontSize="11">
                 Tân Thanh
               </text>
-              <text x="490" y="240" fill="#64748b" fontSize="11">
+              <text x="490" y="240" fill="var(--text-subtle, #64748b)" fontSize="11">
                 Liêm Tuyền
               </text>
-              <text x="560" y="100" fill="#64748b" fontSize="11">
+              <text x="560" y="100" fill="var(--text-subtle, #64748b)" fontSize="11">
                 Duy Tiên
               </text>
             </svg>
@@ -700,7 +597,7 @@ function DashboardPage() {
         {/* PILL TỔNG SỐ XE ĐANG THEO DÕI */}
         <div className="mb-3">
           <span className="rounded-lg bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-700">
-            Tổng: 6 xe đang theo dõi trọng điểm
+            Tổng: {fleetList.length} xe đang theo dõi trọng điểm
           </span>
         </div>
 
@@ -718,11 +615,12 @@ function DashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
-              {priorityFleet.map((item) => (
+              {fleetList.map((item) => (
                 <tr
                   key={item.id}
-                  className={`transition-colors hover:bg-slate-50/80 ${
-                    item.id === 1 ? "bg-rose-50/30" : ""
+                  onClick={() => handleSelectVehicle(item)}
+                  className={`cursor-pointer transition-colors hover:bg-slate-50/80 ${
+                    selectedVehicle.plate === item.plate ? "bg-rose-50/30" : ""
                   }`}
                 >
                   {/* Cột 1: Mức ưu tiên & Trạng thái */}
@@ -898,10 +796,10 @@ function DashboardPage() {
             <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4">
               <div>
                 <h3 className="text-base font-bold text-slate-900">
-                  Clip Bằng Chứng Edge AI (10 Giây)
+                  Clip Bằng Chứng Edge AI ({mockLiveMonitoring?.evidenceClip?.durationSeconds || 10} Giây)
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Xe: 29C-882.14 • Tài xế: Nguyễn Văn Hùng
+                  Xe: {selectedVehicle.plate} • Tài xế: {selectedVehicle.driverName || selectedVehicle.driver}
                 </p>
               </div>
               <button
@@ -915,7 +813,7 @@ function DashboardPage() {
             <div className="p-6 space-y-4">
               <div className="overflow-hidden rounded-2xl bg-black">
                 <video
-                  src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+                  src={mockLiveMonitoring?.evidenceClip?.videoUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"}
                   controls
                   autoPlay
                   className="max-h-64 w-full object-contain"
@@ -924,7 +822,9 @@ function DashboardPage() {
 
               <div className="flex items-center justify-between rounded-xl bg-rose-50 p-3 text-xs text-rose-800 border border-rose-100">
                 <span>🎯 Độ tin cậy AI xác thực:</span>
-                <span className="font-bold text-rose-600 text-sm">92%</span>
+                <span className="font-bold text-rose-600 text-sm">
+                  {mockLiveMonitoring?.evidenceClip?.aiConfidence || 92}%
+                </span>
               </div>
             </div>
 
@@ -953,7 +853,7 @@ function DashboardPage() {
               Đang kết nối Cabin xe...
             </h3>
             <p className="text-xs text-slate-500">
-              Tài xế: Nguyễn Văn Hùng (29C-882.14)
+              Tài xế: {selectedVehicle.driverName || selectedVehicle.driver} ({selectedVehicle.plate})
             </p>
             <p className="mt-2 text-xs font-mono text-emerald-600">
               Kênh đàm thoại hai chiều IoT ESP32 đã sẵn sàng
