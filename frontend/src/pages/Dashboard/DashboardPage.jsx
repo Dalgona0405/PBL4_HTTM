@@ -73,7 +73,7 @@ function DashboardPage() {
       {/* 1. HEADER: BREADCRUMB & TIÊU ĐỀ TRUNG TÂM GIÁM SÁT */}
       {/* ========================================================================= */}
       <div>
-        <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-slate-500">
+        <h1 className="text-2xl font-bold text-slate-800">
           Bản đồ Giám sát GPS & Điều phối Trạm dừng khẩn cấp
         </h1>
       </div>

@@ -50,12 +50,12 @@ function DriversPage() {
   };
 
   return (
-    <div className="animate-fade-in-up rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+    <div className="animate-fade-in-up space-y-6">
       {/* HEADER CỦA TRANG */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Quản lý Tài xế</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <h2 className="text-2xl font-bold text-slate-800">Quản lý Tài xế</h2>
+          <p className="mt-1 text-sm text-slate-700">
             Theo dõi điểm uy tín và trạng thái hoạt động của đội ngũ tài xế
           </p>
         </div>
@@ -65,6 +65,7 @@ function DriversPage() {
       </div>
 
       {/* BẢNG DANH SÁCH TÀI XẾ */}
+      <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-left">
           <thead>
@@ -150,6 +151,7 @@ function DriversPage() {
             ))}
           </tbody>
         </table>
+      </div>
       </div>
     </div>
   );

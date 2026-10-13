@@ -100,9 +100,9 @@ const MainLayout = () => {
   ];
 
   return (
-    <div className="bg-brand-deep flex h-screen overflow-hidden font-sans text-brand-text-secondary">
+    <div className="flex h-screen overflow-hidden font-sans text-brand-text-secondary bg-transparent">
       {/* SIDEBAR NAVIGATION - SLATE 900 DARK */}
-      <aside className="bg-brand-dark z-20 flex w-20 shrink-0 flex-col items-center border-r border-brand-border-dark py-4 shadow-xl">
+      <aside className="bg-brand-dark/90 z-20 flex w-20 shrink-0 flex-col items-center border-r border-brand-border-dark py-4 shadow-xl backdrop-blur-md">
         <button
           onClick={() => navigate("/")}
           className="mb-5 flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl transition-all hover:bg-brand-surface/80"
@@ -221,8 +221,8 @@ const MainLayout = () => {
           </div>
         </div>
       </aside>
-      <div className="bg-brand-deep flex flex-1 flex-col overflow-hidden">
-        <header className="bg-brand-dark flex h-18 shrink-0 items-center justify-between border-b border-brand-border-dark px-8 shadow-md">
+      <div className="flex flex-1 flex-col overflow-hidden bg-transparent">
+        <header className="bg-brand-dark/90 flex h-18 shrink-0 items-center justify-between border-b border-brand-border-dark px-8 shadow-md backdrop-blur-md">
           <div className="mr-4 max-w-xl flex-1">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-text-subtle" />
@@ -254,7 +254,7 @@ const MainLayout = () => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto bg-brand-deep p-6 text-brand-text-secondary">
+        <main className="flex-1 overflow-y-auto bg-slate-950/15 p-6 text-brand-text-secondary">
           <Outlet />
         </main>
       </div>

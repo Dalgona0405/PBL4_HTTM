@@ -6,7 +6,6 @@ import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
 import mockUsers from "../../mock/mockUsers.json";
 import logoImg from "../../assets/Logo.png";
-import bgImg from "../../assets/bg.png";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -58,8 +57,8 @@ function LoginPage() {
   };
 
   return (
-    <div className="bg-brand-deep text-brand-text-secondary flex min-h-screen flex-col font-sans">
-      <header className="bg-brand-dark border-brand-border-dark flex h-20 shrink-0 items-center justify-between border-b px-8 shadow-md">
+    <div className="flex min-h-screen flex-col bg-transparent font-sans text-brand-text-secondary">
+      <header className="flex h-20 shrink-0 items-center justify-between border-b border-brand-border-dark/60 bg-brand-dark/85 px-8 shadow-md backdrop-blur-md">
         <div
           className="flex cursor-pointer items-center gap-3"
           onClick={() => navigate("/")}
@@ -80,13 +79,9 @@ function LoginPage() {
         </div>
       </header>
 
-      <div className="flex flex-1 items-center justify-center px-4 py-8">
-        <img
-          src={bgImg}
-          alt="Background"
-          className="absolute inset-0 h-full w-full object-cover opacity-50"
-        />
-        <div className="card-glass border-brand-border w-full max-w-md rounded-3xl border p-10 shadow-2xl">
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden px-4 py-8">
+        {/* Khối thẻ đăng nhập nổi trên lớp nền ảnh của body */}
+        <div className="card-glass border-brand-border relative z-10 w-full max-w-md rounded-3xl border p-10 shadow-2xl backdrop-blur-md">
           <div className="mb-8 text-center">
             <img
               src={logoImg}

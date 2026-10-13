@@ -1,45 +1,40 @@
 @import "tailwindcss";
 
 @theme {
-  /* Core Brand Dark Backgrounds */
-  --color-brand-deep: #090d16;             /* Canvas base dark background */
-  --color-brand-dark: #0f172a;             /* Slate 900: Sidebar, Header, Base card */
-  --color-brand-surface: #1e293b;          /* Slate 800: Containers, Inactive buttons, Cards */
-  --color-brand-surface-elevated: #334155; /* Slate 700: Hover surface */
+  --color-brand-deep: #090d16;
+  --color-brand-dark: #0f172a;
+  --color-brand-surface: #1e293b;
+  --color-brand-surface-elevated: #334155;
 
-  /* Brand Primary & Active Blue */
-  --color-brand-primary: #3b82f6;          /* Active Blue / Primary Accent */
-  --color-brand-primary-hover: #2563eb;    /* Primary hover */
-  --color-brand-primary-dark: #1d4ed8;     /* Gradient stop dark blue */
-  --color-brand-blue: #3b82f6;             /* Alias for brand-primary */
-  --color-brand-blue-dark: #1d4ed8;        /* Alias for primary dark */
-  --color-brand-blue-night: #1e3a8a;       /* Deep blue tag & badge container */
-  --color-brand-blue-subtle: #1e40af;      /* Badge highlight */
-  --color-brand-blue-light: #93c5fd;       /* Soft light blue text */
-  --color-brand-blue-sky: #60a5fa;         /* Sky blue active label */
+  --color-brand-primary: #3b82f6;
+  --color-brand-primary-hover: #2563eb;
+  --color-brand-primary-dark: #1d4ed8;
+  --color-brand-blue: #3b82f6;
+  --color-brand-blue-dark: #1d4ed8;
+  --color-brand-blue-night: #1e3a8a;
+  --color-brand-blue-subtle: #1e40af;
+  --color-brand-blue-light: #93c5fd;
+  --color-brand-blue-sky: #60a5fa;
 
-  /* Borders & Dividers */
-  --color-brand-border: #334155;           /* Standard card & container border */
-  --color-brand-border-dark: #1e293b;      /* Subtle divider */
-  --color-brand-border-active: #2563eb;    /* Active state border */
+  --color-brand-border: #334155;
+  --color-brand-border-dark: #1e293b;
+  --color-brand-border-active: #2563eb;
 
-  /* Typography Colors */
-  --color-brand-text-primary: #ffffff;     /* Headings, white */
-  --color-brand-text-secondary: #e2e8f0;   /* Body text, slate 200 */
-  --color-brand-text-muted: #94a3b8;       /* Secondary text, slate 400 */
-  --color-brand-text-subtle: #64748b;      /* Muted hints, slate 500 */
+  --color-brand-text-primary: #ffffff;
+  --color-brand-text-secondary: #e2e8f0;
+  --color-brand-text-muted: #94a3b8;
+  --color-brand-text-subtle: #64748b;
 
-  /* System Telemetry & Alert Status */
-  --color-alert-danger: #ef4444;           /* Red: Critical alert / SOS / Alarm */
-  --color-alert-warning: #f59e0b;          /* Yellow / Amber: Warning & Violation */
-  --color-alert-safe: #10b981;             /* Green / Emerald: Safe / Normal */
-  --color-alert-info: #38bdf8;             /* Sky: Information */
+  --color-alert-danger: #ef4444;
+  --color-alert-warning: #f59e0b;
+  --color-alert-safe: #10b981;
+  --color-alert-info: #38bdf8;
 
   --font-sans: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 :root {
-  /* CSS Variables for direct CSS / SVG usage */
+  --font-sans: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --bg-deep: #090d16;
   --bg-dark: #0f172a;
   --bg-surface: #1e293b;
@@ -68,13 +63,29 @@
   --status-info: #38bdf8;
 }
 
+html {
+  min-height: 100vh;
+  background: transparent;
+}
+
 body {
-  background-color: var(--bg-deep);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-image: url("./assets/bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: var(--text-secondary);
   font-family: var(--font-sans);
 }
 
-/* Custom design system card and button utility styles */
+#root {
+  min-height: 100vh;
+  background: transparent;
+}
+
 .card-glass {
   background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
   border: 1px solid var(--border-card);

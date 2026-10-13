@@ -38,7 +38,7 @@ function VehiclesPage() {
           <h2 className="text-2xl font-bold text-slate-800">
             Quản lý Đội xe & Thiết bị IoT
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-700">
             Kiểm soát tình trạng phương tiện và kết nối của các hộp đen AI trên
             xe
           </p>

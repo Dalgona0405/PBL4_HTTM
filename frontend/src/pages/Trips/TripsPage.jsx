@@ -65,7 +65,7 @@ function TripsPage() {
           <h2 className="text-2xl font-bold text-slate-800">
             Quản lý Ca làm việc
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-700">
             Lập lịch, điều phối và kiểm soát các chuyến xe vận hành
           </p>
         </div>
