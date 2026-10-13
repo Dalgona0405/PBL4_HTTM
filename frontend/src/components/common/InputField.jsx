@@ -15,7 +15,7 @@ function InputField({
     <div className="w-full">
       {/* Nếu có truyền label vào thì mới hiển thị */}
       {label && (
-        <label className="mb-2 block text-sm font-bold text-gray-700">
+        <label className="text-brand-text-primary mb-2 block text-sm font-bold">
           {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}

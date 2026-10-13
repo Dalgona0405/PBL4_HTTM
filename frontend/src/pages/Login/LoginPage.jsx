@@ -6,6 +6,7 @@ import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
 import mockUsers from "../../mock/mockUsers.json";
 import logoImg from "../../assets/Logo.png";
+import bgImg from "../../assets/bg.png";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -57,18 +58,22 @@ function LoginPage() {
   };
 
   return (
-    <div className="bg-brand-deep flex min-h-screen flex-col font-sans text-brand-text-secondary">
-      <header className="flex h-20 shrink-0 items-center justify-between bg-brand-dark px-8 shadow-md border-b border-brand-border-dark">
+    <div className="bg-brand-deep text-brand-text-secondary flex min-h-screen flex-col font-sans">
+      <header className="bg-brand-dark border-brand-border-dark flex h-20 shrink-0 items-center justify-between border-b px-8 shadow-md">
         <div
-          className="flex items-center gap-3 cursor-pointer"
+          className="flex cursor-pointer items-center gap-3"
           onClick={() => navigate("/")}
         >
-          <img src={logoImg} alt="FleetGuard Logo" className="h-10 w-10 object-contain drop-shadow" />
+          <img
+            src={logoImg}
+            alt="FleetGuard Logo"
+            className="h-10 w-10 object-contain drop-shadow"
+          />
           <div>
-            <h1 className="text-xl font-black text-brand-text-primary tracking-tight">
+            <h1 className="text-brand-text-primary text-xl font-black tracking-tight">
               FleetGuard
             </h1>
-            <p className="text-[10px] font-bold tracking-widest text-brand-blue-sky uppercase">
+            <p className="text-brand-blue-sky text-[10px] font-bold tracking-widest uppercase">
               Telematics & Safety
             </p>
           </div>
@@ -76,13 +81,24 @@ function LoginPage() {
       </header>
 
       <div className="flex flex-1 items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md rounded-3xl card-glass p-10 shadow-2xl border border-brand-border">
+        <img
+          src={bgImg}
+          alt="Background"
+          className="absolute inset-0 h-full w-full object-cover opacity-50"
+        />
+        <div className="card-glass border-brand-border w-full max-w-md rounded-3xl border p-10 shadow-2xl">
           <div className="mb-8 text-center">
-            <img src={logoImg} alt="FleetGuard Logo" className="h-14 w-14 object-contain mx-auto mb-3 drop-shadow" />
-            <h2 className="mb-1 text-2xl font-black text-brand-text-primary">
+            <img
+              src={logoImg}
+              alt="FleetGuard Logo"
+              className="mx-auto mb-3 h-14 w-14 object-contain drop-shadow"
+            />
+            <h2 className="text-brand-text-primary mb-1 text-2xl font-black">
               FleetGuard Telematics
             </h2>
-            <p className="text-xs text-brand-text-muted">Đăng nhập hệ thống điều phối an toàn xe tải</p>
+            <p className="text-brand-text-muted text-xs">
+              Đăng nhập hệ thống điều phối an toàn xe tải
+            </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
