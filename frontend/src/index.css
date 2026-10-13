@@ -1,9 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  /* Tùy chỉnh màu sắc nhận diện hệ thống Dashboard FleetGuard - Theo SVG Design System */
   --color-brand-blue: #3b82f6; /* Active Blue Glow */
-  --color-brand-blue-dark: #1d4ed8;
+  --color-brand-blue-dark: #090d16;
   --color-brand-dark: #0f172a; /* Slate 900: Sidebar & Header */
   --color-brand-surface: #1e293b; /* Slate 800: Glass Cards & Inactive Containers */
   --color-brand-deep: #090d16; /* Slate 950: Base background */
@@ -11,7 +10,7 @@
   --color-alert-danger: #ef4444; /* Đỏ: Báo động đỏ */
   --color-alert-warning: #f59e0b; /* Vàng: Cảnh cáo & Vi phạm */
   --color-alert-safe: #10b981; /* Xanh lá: Bình thường */
-  --font-sans: 'Montserrat'
+  --font-sans: "Montserrat";
 }
 
 body {
