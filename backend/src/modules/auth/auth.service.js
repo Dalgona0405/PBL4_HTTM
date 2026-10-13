@@ -4,7 +4,7 @@ import prisma from '../../common/prisma.js';
 
 const JWT_SECRET = process.env.ACCESS_JWT_SECRET || 'pbl4_access_token_secret_key_2026_super_secure_node_jwt_auth_key';
 
-export const registerUser = async ({ username, password, hoTen, sdt, role, bangLai }) => {
+export const registerUser = async ({ username, password, hoTen, sdt, bangLai }) => {
   const existingUser = await prisma.user.findUnique({ where: { username } });
   if (existingUser) {
     throw new Error('Tên đăng nhập đã tồn tại trong hệ thống.');
@@ -19,17 +19,16 @@ export const registerUser = async ({ username, password, hoTen, sdt, role, bangL
       passwordHash,
       hoTen,
       sdt,
-      role: role || 'DRIVER',
+      role: 'DRIVER',
       trangThai: 'ACTIVE',
-      ...(role === 'DRIVER'
-        ? { driver: { create: { bangLai: bangLai || 'B2', uyTin: 100, trangThaiTaiXe: 'AVAILABLE' } } }
-        : {}),
+      driver: { create: { bangLai: bangLai || 'B2', uyTin: 100, trangThaiTaiXe: 'AVAILABLE' } },
     },
     include: {
       driver: true,
     },
   });
 
+  delete newUser.passwordHash;
   return newUser;
 };
 
@@ -96,16 +95,18 @@ export const getUserProfile = async (userId) => {
     throw new Error('Không tìm thấy người dùng.');
   }
 
+  delete user.passwordHash;
   return user;
 };
 
 export const getAllUsers = async () => {
-  return prisma.user.findMany({
+  const users = await prisma.user.findMany({
     include: {
       driver: true,
     },
     orderBy: { createdAt: 'desc' },
   });
+  return users.map(u => { const { passwordHash, ...rest } = u; return rest; });
 };
 
 export const updateUserStatus = async (userId, { trangThai, role }, adminId) => {

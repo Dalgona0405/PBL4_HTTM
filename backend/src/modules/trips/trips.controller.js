@@ -52,6 +52,17 @@ export const updateTripStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { trangThai } = req.body;
+
+    // Kiểm tra quyền sở hữu: DRIVER chỉ được cập nhật chuyến xe của mình
+    if (req.user.role === 'DRIVER') {
+      const trip = await tripsService.getTripById(id);
+      if (!trip) return res.status(404).json({ message: 'Chuyến xe không tồn tại.' });
+      const driverId = req.user.driver?.userId || req.user.id;
+      if (trip.driverId !== driverId) {
+        return res.status(403).json({ message: 'Bạn không có quyền cập nhật chuyến xe này.' });
+      }
+    }
+
     const trip = await tripsService.updateTripStatus(id, trangThai);
     res.json({ trip });
   } catch (error) {

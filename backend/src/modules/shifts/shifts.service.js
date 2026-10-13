@@ -1,5 +1,6 @@
 import prisma from '../../common/prisma.js';
 import { logAuditAction } from '../../common/audit.service.js';
+import { getSystemConfig } from '../auth/auth.service.js';
 
 export const getAllShifts = async ({ driverId, status }) => {
   const where = {};
@@ -27,10 +28,48 @@ export const createShift = async ({ driverId, vehicleId, routeId, thoiGianBatDau
   const startTime = new Date(thoiGianBatDauDuKien);
   const endTime = new Date(thoiGianKetThucDuKien);
 
+  if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+    throw new Error('Thời gian ca làm việc không hợp lệ.');
+  }
+
+  if (startTime >= endTime) {
+    throw new Error('Thời gian bắt đầu ca phải diễn ra trước thời gian kết thúc.');
+  }
+
   const warnings = [];
 
-  // FR_2.3.2 Constraint 1: Check minimum rest window between consecutive shifts (< 8 hours) -> BLOCK
-  const lastShift = await prisma.shift.findFirst({
+  // Lấy cấu hình hệ thống động
+  const config = await getSystemConfig();
+  const minRestHours = config.minRestHours ?? 8.0;
+
+  // 1. Kiểm tra trùng lặp ca trực của Tài xế (Driver Overlap Check)
+  const overlappingDriverShift = await prisma.shift.findFirst({
+    where: {
+      driverId: pDriverId,
+      trangThai: { notIn: ['CANCELLED', 'DECLINED'] },
+      thoiGianBatDauDuKien: { lt: endTime },
+      thoiGianKetThucDuKien: { gt: startTime },
+    },
+  });
+  if (overlappingDriverShift) {
+    throw new Error('CHẶN: Tài xế này đã có một ca làm việc khác trùng với khoảng thời gian đã chọn.');
+  }
+
+  // 2. Kiểm tra trùng lặp lịch phương tiện (Vehicle Overlap Check)
+  const overlappingVehicleShift = await prisma.shift.findFirst({
+    where: {
+      vehicleId: pVehicleId,
+      trangThai: { notIn: ['CANCELLED', 'DECLINED'] },
+      thoiGianBatDauDuKien: { lt: endTime },
+      thoiGianKetThucDuKien: { gt: startTime },
+    },
+  });
+  if (overlappingVehicleShift) {
+    throw new Error('CHẶN: Phương tiện này đã được xếp vào một ca làm việc khác trong khoảng thời gian đã chọn.');
+  }
+
+  // 3. Kiểm tra khoảng thời gian nghỉ tối thiểu (trước và sau ca)
+  const prevShift = await prisma.shift.findFirst({
     where: {
       driverId: pDriverId,
       trangThai: { notIn: ['CANCELLED', 'DECLINED'] },
@@ -39,21 +78,36 @@ export const createShift = async ({ driverId, vehicleId, routeId, thoiGianBatDau
     orderBy: { thoiGianKetThucDuKien: 'desc' },
   });
 
-  if (lastShift) {
-    const restHours = (startTime.getTime() - new Date(lastShift.thoiGianKetThucDuKien).getTime()) / (1000 * 3600);
-    if (restHours < 8.0) {
-      throw new Error(`CHẶN: Khoảng thời gian nghỉ giữa 2 ca của tài xế chỉ có ${restHours.toFixed(1)}h (< 8h tối thiểu theo quy định). Không thể tạo ca.`);
+  if (prevShift) {
+    const restHoursBefore = (startTime.getTime() - new Date(prevShift.thoiGianKetThucDuKien).getTime()) / (1000 * 3600);
+    if (restHoursBefore < minRestHours) {
+      throw new Error(`CHẶN: Khoảng thời gian nghỉ giữa ca trước và ca này chỉ có ${restHoursBefore.toFixed(1)}h (< ${minRestHours}h tối thiểu theo quy định). Không thể tạo ca.`);
     }
   }
 
-  // FR_2.3.2 Constraint 2: Check Biometric Profile
+  const nextShift = await prisma.shift.findFirst({
+    where: {
+      driverId: pDriverId,
+      trangThai: { notIn: ['CANCELLED', 'DECLINED'] },
+      thoiGianBatDauDuKien: { gte: endTime },
+    },
+    orderBy: { thoiGianBatDauDuKien: 'asc' },
+  });
+
+  if (nextShift) {
+    const restHoursAfter = (new Date(nextShift.thoiGianBatDauDuKien).getTime() - endTime.getTime()) / (1000 * 3600);
+    if (restHoursAfter < minRestHours) {
+      throw new Error(`CHẶN: Khoảng thời gian nghỉ giữa ca này và ca sau chỉ có ${restHoursAfter.toFixed(1)}h (< ${minRestHours}h tối thiểu theo quy định). Không thể tạo ca.`);
+    }
+  }
+
+  // 4. Kiểm tra Hồ sơ Sinh học (Biometric Profile Check)
   const profile = await prisma.driverBiometricProfile.findFirst({
     where: { driverId: pDriverId },
     orderBy: { createdAt: 'desc' },
   });
 
   if (profile) {
-    // Check total drive duration vs max recommended
     const shiftMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
     if (shiftMinutes > profile.thoiGianLaiToiDaKhuyenNghi) {
       warnings.push(`CẢNH BÁO: Tổng thời gian lái ca dự kiến (${(shiftMinutes / 60).toFixed(1)}h) vượt mức khuyến nghị sinh học (${(profile.thoiGianLaiToiDaKhuyenNghi / 60).toFixed(1)}h).`);
@@ -120,4 +174,15 @@ export const respondToShift = async (shiftId, { trangThai, lyDoTuChoi }) => {
   });
 
   return updatedShift;
+};
+
+export const getShiftById = async (id) => {
+  return prisma.shift.findUnique({
+    where: { id: parseInt(id, 10) },
+    include: {
+      driver: { include: { user: true } },
+      vehicle: true,
+      route: true,
+    },
+  });
 };

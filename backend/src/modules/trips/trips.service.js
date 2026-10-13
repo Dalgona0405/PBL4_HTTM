@@ -112,32 +112,43 @@ export const updateTripStatus = async (id, trangThai) => {
 
   const data = { trangThai };
 
-  if (trangThai === 'IN_PROGRESS') {
-    // Check constraint before starting
-    const activeDriverTrip = await prisma.trip.findFirst({
-      where: { driverId: trip.driverId, trangThai: 'IN_PROGRESS', id: { not: tripId } },
-    });
-    if (activeDriverTrip) {
-      throw new Error('Tài xế đang có một chuyến xe khác đang chạy (IN_PROGRESS). Vui lòng kết thúc chuyến cũ trước.');
+  // Dùng prisma.$transaction đảm bảo cập nhật đồng thời trip, driver, vehicle
+  const updatedTrip = await prisma.$transaction(async (tx) => {
+    if (trangThai === 'IN_PROGRESS') {
+      // Kiểm tra tài xế có chuyến xe khác đang chạy không
+      const activeDriverTrip = await tx.trip.findFirst({
+        where: { driverId: trip.driverId, trangThai: 'IN_PROGRESS', id: { not: tripId } },
+      });
+      if (activeDriverTrip) {
+        throw new Error('Tài xế đang có một chuyến xe khác đang chạy (IN_PROGRESS). Vui lòng kết thúc chuyến cũ trước.');
+      }
+
+      // Kiểm tra phương tiện có chuyến xe khác đang chạy không
+      const activeVehicleTrip = await tx.trip.findFirst({
+        where: { vehicleId: trip.vehicleId, trangThai: 'IN_PROGRESS', id: { not: tripId } },
+      });
+      if (activeVehicleTrip) {
+        throw new Error('Phương tiện này đang thuộc về một chuyến xe khác đang chạy (IN_PROGRESS).');
+      }
+
+      data.thoiGianBatDau = new Date();
+      await tx.driver.update({ where: { userId: trip.driverId }, data: { trangThaiTaiXe: 'ON_TRIP' } });
+      await tx.vehicle.update({ where: { id: trip.vehicleId }, data: { trangThai: 'IN_USE' } });
+    } else if (trangThai === 'COMPLETED' || trangThai === 'CANCELLED') {
+      data.thoiGianKetThuc = new Date();
+      await tx.driver.update({ where: { userId: trip.driverId }, data: { trangThaiTaiXe: 'AVAILABLE' } });
+      await tx.vehicle.update({ where: { id: trip.vehicleId }, data: { trangThai: 'AVAILABLE' } });
     }
 
-    data.thoiGianBatDau = new Date();
-    await prisma.driver.update({ where: { userId: trip.driverId }, data: { trangThaiTaiXe: 'ON_TRIP' } });
-    await prisma.vehicle.update({ where: { id: trip.vehicleId }, data: { trangThai: 'IN_USE' } });
-  } else if (trangThai === 'COMPLETED' || trangThai === 'CANCELLED') {
-    data.thoiGianKetThuc = new Date();
-    await prisma.driver.update({ where: { userId: trip.driverId }, data: { trangThaiTaiXe: 'AVAILABLE' } });
-    await prisma.vehicle.update({ where: { id: trip.vehicleId }, data: { trangThai: 'AVAILABLE' } });
-  }
-
-  const updatedTrip = await prisma.trip.update({
-    where: { id: tripId },
-    data,
-    include: {
-      driver: { include: { user: true } },
-      vehicle: true,
-      route: true,
-    },
+    return tx.trip.update({
+      where: { id: tripId },
+      data,
+      include: {
+        driver: { include: { user: true } },
+        vehicle: true,
+        route: true,
+      },
+    });
   });
 
   if (trangThai === 'COMPLETED') {
@@ -159,6 +170,14 @@ export const grantSafeTripReward = async (tripId) => {
   });
 
   if (!trip || trip.trangThai !== 'COMPLETED') return null;
+
+  // Kiểm tra thời lượng chuyến đi thực tế (chống cày điểm ảo bằng cách tạo rồi ấn kết thúc ngay)
+  if (!trip.thoiGianBatDau || !trip.thoiGianKetThuc) return null;
+  const durationSeconds = (new Date(trip.thoiGianKetThuc).getTime() - new Date(trip.thoiGianBatDau).getTime()) / 1000;
+  if (durationSeconds < 30) {
+    // Chuyến đi ngắn hơn 30 giây không được nhận thưởng an toàn
+    return null;
+  }
 
   // Check if reward was already granted
   const existingRewardLog = await prisma.driverScoreLog.findFirst({
@@ -182,24 +201,26 @@ export const grantSafeTripReward = async (tripId) => {
   const currentUyTin = trip.driver.uyTin;
   const newUyTin = Math.min(100, currentUyTin + rewardPts);
 
-  const updatedDriver = await prisma.driver.update({
-    where: { userId: trip.driverId },
-    data: { uyTin: newUyTin },
-  });
+  return prisma.$transaction(async (tx) => {
+    const updatedDriver = await tx.driver.update({
+      where: { userId: trip.driverId },
+      data: { uyTin: newUyTin },
+    });
 
-  const scoreLog = await prisma.driverScoreLog.create({
-    data: {
-      driverId: trip.driverId,
-      loaiThayDoi: 'CONG_DIEM',
-      soDiemThayDoi: rewardPts,
-      diemTruoc: currentUyTin,
-      diemSau: newUyTin,
-      lyDo: `Thưởng chuyến xe an toàn (${trip.route?.tenTuyen || 'Tuyến đường'}, ${distance}km).`,
-      tripId: pTripId,
-    },
-  });
+    const scoreLog = await tx.driverScoreLog.create({
+      data: {
+        driverId: trip.driverId,
+        loaiThayDoi: 'CONG_DIEM',
+        soDiemThayDoi: rewardPts,
+        diemTruoc: currentUyTin,
+        diemSau: newUyTin,
+        lyDo: `Thưởng chuyến xe an toàn (${trip.route?.tenTuyen || 'Tuyến đường'}, ${distance}km).`,
+        tripId: pTripId,
+      },
+    });
 
-  return { updatedDriver, scoreLog };
+    return { updatedDriver, scoreLog };
+  });
 };
 
 

@@ -2,12 +2,12 @@ import * as authService from './auth.service.js';
 
 export const handleRegister = async (req, res, next) => {
   try {
-    const { username, password, hoTen, sdt, role, bangLai, vaiTro } = req.body;
+    const { username, password, hoTen, sdt, bangLai } = req.body;
     if (!username || !password || !hoTen) {
       return res.status(400).json({ message: 'Vui lòng cung cấp username, password và hoTen.' });
     }
 
-    const newUser = await authService.registerUser({ username, password, hoTen, sdt, role, bangLai, vaiTro });
+    const newUser = await authService.registerUser({ username, password, hoTen, sdt, bangLai });
     return res.status(201).json({
       message: 'Đăng ký tài khoản thành công.',
       user: newUser,

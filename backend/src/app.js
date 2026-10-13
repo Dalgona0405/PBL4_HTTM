@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
 import path from 'path';
+import jwt from 'jsonwebtoken';
 
 import authRouter from './modules/auth/auth.router.js';
 import assetsRouter from './modules/assets/assets.router.js';
@@ -39,7 +40,8 @@ app.use(
       if (!origin || ALLOWED_ORIGINS.includes(origin)) {
         callback(null, true);
       } else {
-        callback(null, true); // Permissive for local dev & mobile apps
+        console.warn(`⚠️ CORS blocked origin: ${origin}`);
+        callback(new Error('CORS: Origin không được phép.'));
       }
     },
     credentials: true,
@@ -61,8 +63,20 @@ app.use(globalLimiter);
 app.use(express.json());
 app.use(cookieParser());
 
-// Static File Serving (Uploaded Videos)
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+// Static File Serving (Uploaded Videos) - Yêu cầu xác thực
+app.use('/uploads', (req, res, next) => {
+  const token = req.query.token || req.headers.authorization?.split(' ')[1] || req.cookies?.accessToken;
+  if (!token) {
+    return res.status(401).json({ message: 'Yêu cầu xác thực để truy cập video bằng chứng.' });
+  }
+  try {
+    const secret = process.env.ACCESS_JWT_SECRET || 'pbl4_access_token_secret_key_2026_super_secure_node_jwt_auth_key';
+    jwt.verify(token, secret);
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: 'Token không hợp lệ hoặc đã hết hạn.' });
+  }
+}, express.static(path.join(process.cwd(), 'uploads')));
 
 // Routes Registration
 app.use('/api/auth', authRouter);

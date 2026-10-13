@@ -40,6 +40,17 @@ export const respondToShift = async (req, res) => {
   try {
     const { id } = req.params;
     const { trangThai, lyDoTuChoi } = req.body;
+
+    // Kiểm tra quyền sở hữu: DRIVER chỉ được phản hồi ca trực của mình
+    if (req.user.role === 'DRIVER') {
+      const existingShift = await shiftsService.getShiftById(id);
+      if (!existingShift) return res.status(404).json({ message: 'Ca làm việc không tồn tại.' });
+      const driverId = req.user.driver?.userId || req.user.id;
+      if (existingShift.driverId !== driverId) {
+        return res.status(403).json({ message: 'Bạn không có quyền phản hồi ca trực này.' });
+      }
+    }
+
     const shift = await shiftsService.respondToShift(id, { trangThai, lyDoTuChoi });
     res.json({ shift });
   } catch (error) {

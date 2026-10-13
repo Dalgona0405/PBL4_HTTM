@@ -1,5 +1,7 @@
 import prisma from '../../common/prisma.js';
-import { sendViolationEmailAlert } from '../../common/email.service.js';
+import { createViolationRecord } from '../violations/violations.service.js';
+import { getSystemConfig } from '../auth/auth.service.js';
+import { resolveViolationFromFlag } from '../../common/constants/violationTypes.js';
 
 let ioInstance = null;
 
@@ -81,36 +83,24 @@ export const processIotDataPacket = async ({ tripId, deviceId, kinhDo, viDo, toc
     let videoUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
     let moTa = '';
 
-    // Check specific AI Violation Flags from Pi 4 (YOLO Camera) & ESP32
-    if (aiViolationFlag === 'EYES_CLOSED') {
-      loaiViPham = '😴 NGỦ GẬT (AI - Nhắm mắt > 2s)';
-      diemTru = 10;
-      moTa = `Mô hình AI YOLO trên Raspberry Pi phát hiện nhắm mắt liên tục > 2 giây. Tự động trừ ${diemTru} điểm uy tín & bật loa/rung ghế cảnh báo gắt.`;
-    } else if (aiViolationFlag === 'PHONE') {
-      loaiViPham = '📱 DÙNG ĐIỆN THOẠI (AI - Mất tập trung)';
-      diemTru = 5;
-      moTa = `Mô hình AI YOLO phát hiện cầm điện thoại khi lái xe. Tự động trừ ${diemTru} điểm uy tín.`;
-    } else if (aiViolationFlag === 'YAWN') {
-      loaiViPham = '🥱 NGÁP DÀI LIÊN TỤC (AI - Dấu hiệu mệt mỏi)';
-      diemTru = 2;
-      moTa = `Phát hiện ngáp dài liên tục > 3 giây. Bật quạt gió cabin & nhắc nhở tài xế nghỉ ngơi. Trừ ${diemTru} điểm uy tín.`;
-    } else if (co2 && co2 > 1000 && !aiViolationFlag) {
-      loaiViPham = `💨 NỒNG ĐỘ CO2 CAO (${co2.toFixed(0)} ppm - Nguy cơ thiếu oxy)`;
-      diemTru = 0; // Cảnh báo môi trường, không trừ điểm
-      moTa = `Cảm biến MQ-135 ghi nhận Nồng độ CO2 trong cabin vượt ${co2.toFixed(0)} ppm (> 1000 ppm). Tự động bật quạt gió lấy gió ngoài.`;
-    } else if (speed > 80.0 && !aiViolationFlag) {
-      loaiViPham = `⚡ QUÁ TỐC ĐỘ (${speed.toFixed(1)} km/h - Giới hạn 80 km/h)`;
-      diemTru = 5;
-      moTa = `Hệ thống GPS phát hiện tốc độ ${speed.toFixed(1)} km/h tại tọa độ (${lat.toFixed(4)}, ${lng.toFixed(4)}). Tự động trừ ${diemTru} điểm uy tín.`;
-    }
+    const config = await getSystemConfig();
+    const co2Threshold = config.co2PpmThreshold || 1000;
+
+    // Chuẩn hóa loại lỗi thông qua bộ từ điển VIOLATION_TYPES
+    const detectedType = resolveViolationFromFlag({
+      aiViolationFlag,
+      co2,
+      speed,
+      co2Threshold,
+    });
 
     // Process violation if triggered with anti-spam check window (45s)
-    if (loaiViPham) {
+    if (detectedType) {
       const recentViolation = await prisma.violation.findFirst({
         where: {
           driverId,
           tripId: parsedTripId,
-          loaiViPham: { contains: loaiViPham.slice(0, 10) },
+          loaiViPham: detectedType.code,
           thoiGianViPham: {
             gte: new Date(Date.now() - 45 * 1000), // anti-spam window 45s
           },
@@ -118,29 +108,19 @@ export const processIotDataPacket = async ({ tripId, deviceId, kinhDo, viDo, toc
       });
 
       if (!recentViolation) {
-        console.log(`🚨 [AI/IOT TRIGGER] ${loaiViPham} - Vehicle ${tripInfo.vehicle.bienSo} - Driver ${tripInfo.driver.user.hoTen}`);
+        console.log(`🚨 [AI/IOT TRIGGER] [ID ${detectedType.id}] ${detectedType.code} (${detectedType.name}) - Vehicle ${tripInfo.vehicle.bienSo} - Driver ${tripInfo.driver.user.hoTen}`);
 
-        let updatedDriver = tripInfo.driver;
-        if (diemTru > 0) {
-          const currentScore = tripInfo.driver.uyTin;
-          const newScore = Math.max(0, currentScore - diemTru); // Clamp score min at 0
-
-          updatedDriver = await prisma.driver.update({
-            where: { userId: driverId },
-            data: { uyTin: newScore },
-          });
-        }
-
-        const newViolation = await prisma.violation.create({
-          data: {
-            driverId,
-            tripId: parsedTripId,
-            loaiViPham,
-            diemTru,
-            videoUrl,
-            videoDuration: 15,
-            moTa,
-          },
+        // Gọi createViolationRecord chuẩn hóa (đã bao gồm ID, Code chuẩn, atomic transaction, trừ điểm uy tín, ghi score log, và gửi email)
+        const { violation: newViolation, updatedDriver } = await createViolationRecord({
+          driverId,
+          tripId: parsedTripId,
+          violationTypeId: detectedType.id,
+          loaiViPham: detectedType.code,
+          diemTru: detectedType.defaultPoints,
+          videoUrl,
+          videoDuration: 15,
+          aiConfidenceScore: 0.95, // Hardware AI Edge triggers have high confidence
+          moTa: `${detectedType.icon} ${detectedType.description}`,
         });
 
         // Broadcast violation alert event via Socket.io
@@ -152,18 +132,6 @@ export const processIotDataPacket = async ({ tripId, deviceId, kinhDo, viDo, toc
             updatedUyTin: updatedDriver.uyTin,
           });
         }
-
-        // Send Email Alert
-        sendViolationEmailAlert({
-          driverName: tripInfo.driver.user.hoTen,
-          driverEmail: tripInfo.driver.user.username + '@gmail.com',
-          bienSo: tripInfo.vehicle.bienSo,
-          loaiViPham,
-          diemTru,
-          uyTinConLai: updatedDriver.uyTin,
-          tocDo: speed.toFixed(1),
-          videoUrl,
-        }).catch((err) => console.error('Error sending violation email:', err));
       }
     }
   }

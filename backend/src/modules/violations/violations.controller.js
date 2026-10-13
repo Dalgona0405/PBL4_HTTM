@@ -15,15 +15,31 @@ export const getViolations = async (req, res) => {
   }
 };
 
+export const getViolationTypes = (req, res) => {
+  try {
+    const types = violationsService.getAllViolationTypes();
+    res.json({ types });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const createViolation = async (req, res) => {
   try {
-    const { driverId, tripId, loaiViPham, diemTru, videoUrl, videoDuration, moTa } = req.body;
-    if (!driverId || !tripId || !loaiViPham) {
-      return res.status(400).json({ message: 'Vui lòng cung cấp driverId, tripId và loaiViPham.' });
+    const { driverId, tripId, loaiViPham, violationTypeId, diemTru, videoUrl, videoDuration, moTa } = req.body;
+    if (!driverId || !tripId || (!loaiViPham && !violationTypeId)) {
+      return res.status(400).json({ message: 'Vui lòng cung cấp driverId, tripId và loaiViPham hoặc violationTypeId.' });
     }
 
     const result = await violationsService.createViolationRecord({
-      driverId, tripId, loaiViPham, diemTru, videoUrl, videoDuration, moTa,
+      driverId,
+      tripId,
+      loaiViPham,
+      violationTypeId,
+      diemTru,
+      videoUrl,
+      videoDuration,
+      moTa,
     });
     res.status(201).json(result);
   } catch (error) {

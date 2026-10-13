@@ -6,11 +6,16 @@ import { setSocketIO } from './modules/iot/iot.service.js';
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 
+const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173')
+  .split(',')
+  .map((o) => o.trim());
+
 // Initialize Socket.io Server for Real-time Telemetry & Live Map Updates
 const io = new SocketIOServer(server, {
   cors: {
-    origin: '*',
+    origin: ALLOWED_ORIGINS,
     methods: ['GET', 'POST'],
+    credentials: true,
   },
 });
 

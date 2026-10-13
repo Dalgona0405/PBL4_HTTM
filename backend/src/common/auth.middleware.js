@@ -43,7 +43,7 @@ export const requireRole = (...roles) => {
       return res.status(401).json({ message: 'Yêu cầu đăng nhập.' });
     }
 
-    if (!roles.includes(req.user.role)) {
+    if (req.user.role !== 'ADMIN' && !roles.includes(req.user.role)) {
       return res.status(403).json({ message: `Bạn không có quyền truy cập. Yêu cầu vai trò: ${roles.join(' hoặc ')}.` });
     }
 
