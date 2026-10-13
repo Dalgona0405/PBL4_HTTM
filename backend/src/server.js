@@ -6,9 +6,21 @@ import { setSocketIO } from './modules/iot/iot.service.js';
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 
-const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173')
+const envOrigins = (process.env.CORS_ORIGINS || '')
   .split(',')
-  .map((o) => o.trim());
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+const ALLOWED_ORIGINS = [
+  ...new Set([
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://127.0.0.1:5173',
+    `http://localhost:${PORT}`,
+    `http://127.0.0.1:${PORT}`,
+    ...envOrigins,
+  ]),
+];
 
 // Initialize Socket.io Server for Real-time Telemetry & Live Map Updates
 const io = new SocketIOServer(server, {

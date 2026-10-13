@@ -15,6 +15,7 @@ import uploadRouter from './modules/upload/upload.router.js';
 import shiftsRouter from './modules/shifts/shifts.router.js';
 import biometricsRouter from './modules/biometrics/biometrics.router.js';
 import auditRouter from './modules/audit/audit.router.js';
+import { setupSwagger } from './config/swagger.js';
 
 const app = express();
 
@@ -24,19 +25,36 @@ app.set('trust proxy', 1);
 app.get('/health', (req, res) => res.json({ status: 'ok', system: 'PBL4 Fleet IoT Management', uptime: process.uptime() }));
 app.get('/api/health', (req, res) => res.json({ status: 'ok', system: 'PBL4 Fleet IoT Management', uptime: process.uptime() }));
 
-// Helmet Security
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
+// Helmet Security (Disable CSP to allow Swagger UI inline styles & scripts)
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: false,
+  })
+);
 
 // CORS Configuration
-const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173')
+const PORT = process.env.PORT || 3000;
+const envOrigins = (process.env.CORS_ORIGINS || '')
   .split(',')
-  .map((o) => o.trim());
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+const ALLOWED_ORIGINS = [
+  ...new Set([
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://127.0.0.1:5173',
+    `http://localhost:${PORT}`,
+    `http://127.0.0.1:${PORT}`,
+    ...envOrigins,
+  ]),
+];
 
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Cho phép request cùng origin (Swagger UI, nội bộ), Postman/cURL (không có origin), hoặc nằm trong danh sách whitelist
       if (!origin || ALLOWED_ORIGINS.includes(origin)) {
         callback(null, true);
       } else {
@@ -77,6 +95,9 @@ app.use('/uploads', (req, res, next) => {
     return res.status(401).json({ message: 'Token không hợp lệ hoặc đã hết hạn.' });
   }
 }, express.static(path.join(process.cwd(), 'uploads')));
+
+// Swagger API Documentation & Testing Interface
+setupSwagger(app);
 
 // Routes Registration
 app.use('/api/auth', authRouter);
