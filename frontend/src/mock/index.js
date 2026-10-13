@@ -16,6 +16,7 @@ import mockRoutes from "./mockRoutes.json";
 import mockViolationTypes from "./mockViolationTypes.json";
 import mockRestStops from "./mockRestStops.json";
 import mockAiConfig from "./mockAiConfig.json";
+import mockLiveMonitoring from "./mockLiveMonitoring.json";
 
 // Khởi tạo LocalStorage để lưu giữ trạng thái khi thao tác trên giao diện
 const STORAGE_KEYS = {
@@ -26,6 +27,7 @@ const STORAGE_KEYS = {
   SCORE_LOGS: "pbl4_mock_score_logs",
   AUDIT_LOGS: "pbl4_mock_audit_logs",
   AI_CONFIG: "pbl4_mock_ai_config",
+  LIVE_MONITORING: "pbl4_mock_live_monitoring",
 };
 
 const getStoredData = (key, defaultData) => {
@@ -378,6 +380,58 @@ export const updateAiConfig = (newConfig, adminName = "Trần Quản Trị") => 
   return updated;
 };
 
+// ==============================================================================
+// 6. GIÁM SÁT LIVE & ĐIỀU PHỐI KHẨN CẤP (SRS FR_2.2, FR_3.1)
+// ==============================================================================
+
+export const getLiveMonitoringData = () => {
+  return getStoredData(STORAGE_KEYS.LIVE_MONITORING, mockLiveMonitoring);
+};
+
+export const getPriorityFleet = () => {
+  const liveData = getLiveMonitoringData();
+  return liveData?.priorityFleet || mockLiveMonitoring.priorityFleet;
+};
+
+export const getLiveMonitoringStats = () => {
+  const liveData = getLiveMonitoringData();
+  return liveData?.kpiStats || mockLiveMonitoring.kpiStats;
+};
+
+export const getDefaultSelectedVehicle = () => {
+  const liveData = getLiveMonitoringData();
+  return liveData?.defaultSelectedVehicle || mockLiveMonitoring.defaultSelectedVehicle;
+};
+
+export const dispatchVehicleToRestStop = ({
+  vehiclePlate,
+  restStopName,
+  dispatcherName = "Lê Điều Phối",
+}) => {
+  const liveData = getLiveMonitoringData();
+  const fleet = [...(liveData?.priorityFleet || mockLiveMonitoring.priorityFleet)];
+  const target = fleet.find((v) => v.plate === vehiclePlate);
+  if (target) {
+    target.actionType = "DISPATCHED";
+    target.priorityBadge = "ĐÃ ĐIỀU PHỐI";
+    target.priorityLevel = "SAFE";
+    target.priorityDesc = `Đang di chuyển vào ${restStopName}`;
+    setStoredData(STORAGE_KEYS.LIVE_MONITORING, { ...liveData, priorityFleet: fleet });
+  }
+
+  createAuditLog({
+    user_name: dispatcherName,
+    hanh_dong: "DISPATCH_REST_STOP",
+    doi_tuong_loai: "vehicle",
+    doi_tuong_id: vehiclePlate,
+    gia_tri_truoc: null,
+    gia_tri_sau: { restStop: restStopName, status: "DISPATCHED" },
+    ly_do: `Gửi lệnh khẩn cấp điều hướng vào trạm dừng nghỉ ${restStopName}`,
+  });
+
+  return target;
+};
+
 // Export toàn bộ mock raw nếu UI cần import trực tiếp
 export {
   mockUsers,
@@ -392,4 +446,6 @@ export {
   mockViolationTypes,
   mockRestStops,
   mockAiConfig,
+  mockLiveMonitoring,
 };
+

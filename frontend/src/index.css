@@ -1,12 +1,103 @@
 @import "tailwindcss";
 
 @theme {
-  /* Tùy chỉnh màu sắc nhận diện hệ thống Dashboard IoT */
-  --color-brand-blue: #1e40af; /* Xanh dương đậm: Màu chủ đạo của Header/Nút bấm */
-  --color-brand-dark: #0f172a; /* Xanh đen (Slate 900): Màu của Sidebar */
-  --color-brand-light: #f8fafc; /* Xám nhạt (Slate 50): Màu nền của trang */
+  --color-brand-deep: #090d16;
+  --color-brand-dark: #0f172a;
+  --color-brand-surface: #1e293b;
+  --color-brand-surface-elevated: #334155;
 
-  --color-alert-danger: #ef4444; /* Đỏ: Ngủ gật / CO2 > 1500ppm / Báo động đỏ */
-  --color-alert-warning: #f59e0b; /* Vàng: Ngáp nhiều / CO2 1000-1500ppm / Cảnh cáo */
-  --color-alert-safe: #10b981; /* Xanh lá: Bình thường / Ca chạy an toàn */
+  --color-brand-primary: #3b82f6;
+  --color-brand-primary-hover: #2563eb;
+  --color-brand-primary-dark: #1d4ed8;
+  --color-brand-blue: #3b82f6;
+  --color-brand-blue-dark: #1d4ed8;
+  --color-brand-blue-night: #1e3a8a;
+  --color-brand-blue-subtle: #1e40af;
+  --color-brand-blue-light: #93c5fd;
+  --color-brand-blue-sky: #60a5fa;
+
+  --color-brand-border: #334155;
+  --color-brand-border-dark: #1e293b;
+  --color-brand-border-active: #2563eb;
+
+  --color-brand-text-primary: #ffffff;
+  --color-brand-text-secondary: #e2e8f0;
+  --color-brand-text-muted: #94a3b8;
+  --color-brand-text-subtle: #64748b;
+
+  --color-alert-danger: #ef4444;
+  --color-alert-warning: #f59e0b;
+  --color-alert-safe: #10b981;
+  --color-alert-info: #38bdf8;
+
+  --font-sans: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+:root {
+  --font-sans: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --bg-deep: #090d16;
+  --bg-dark: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-surface-elevated: #334155;
+
+  --color-primary: #3b82f6;
+  --color-primary-dark: #1d4ed8;
+  --color-primary-hover: #2563eb;
+  --color-blue-night: #1e3a8a;
+  --color-blue-subtle: #1e40af;
+  --color-blue-light: #93c5fd;
+  --color-blue-sky: #60a5fa;
+
+  --border-card: #334155;
+  --border-divider: #1e293b;
+  --border-active: #2563eb;
+
+  --text-primary: #ffffff;
+  --text-secondary: #e2e8f0;
+  --text-muted: #94a3b8;
+  --text-subtle: #64748b;
+
+  --status-danger: #ef4444;
+  --status-warning: #f59e0b;
+  --status-safe: #10b981;
+  --status-info: #38bdf8;
+}
+
+html {
+  min-height: 100vh;
+  background: transparent;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-image: url("./assets/bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+}
+
+#root {
+  min-height: 100vh;
+  background: transparent;
+}
+
+.card-glass {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
+  border: 1px solid var(--border-card);
+}
+
+.card-glass-active {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border: 1.5px solid var(--border-active);
+  box-shadow: 0 4px 16px -2px rgba(59, 130, 246, 0.45);
+}
+
+.btn-nav-active {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.4);
 }

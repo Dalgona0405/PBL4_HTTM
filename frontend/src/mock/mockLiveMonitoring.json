@@ -1,0 +1,260 @@
+{
+  "kpiStats": {
+    "activeVehicles": 42,
+    "microsleepAlerts": 1,
+    "fatigueWarnings": 2,
+    "normalVehicles": 38
+  },
+  "mapMeta": {
+    "highwayCode": "CT01",
+    "highwayName": "Cao tốc Bắc - Nam (Pháp Vân - Cầu Giẽ - Ninh Bình)",
+    "trafficDensity": "Thông",
+    "currentLocation": "Km 222 + 800 | Phủ Lý - Hà Nam"
+  },
+  "defaultSelectedVehicle": {
+    "plate": "29C-882.14",
+    "model": "Đầu kéo Dongfeng Tianlong 420HP",
+    "driverName": "Nguyễn Văn Hùng",
+    "driverCode": "TX-0182",
+    "experience": "6 năm",
+    "score": 88,
+    "speed": 58,
+    "co2": 1120,
+    "route": "Tuyến HN - Đà Nẵng",
+    "alertType": "MICROSLEEP",
+    "alertDesc": "Phát hiện mi mắt khép 1.8s (Microsleep). Đã tự động hú còi 85dB & loa cảnh báo lúc 14:32:10.",
+    "countdownSeconds": 769,
+    "nearestRestStop": {
+      "name": "Trạm Dừng Nghỉ Vực Vòng (Km 227)",
+      "distance": "4.2 km",
+      "eta": "~6 phút",
+      "emptySlots": 14
+    },
+    "altRestStop": {
+      "name": "Trạm Dịch Vụ Liêm Tuyền",
+      "distance": "18.5 km",
+      "eta": "~21 phút",
+      "emptySlots": 5
+    }
+  },
+  "priorityFleet": [
+    {
+      "id": 1,
+      "priorityLevel": "DANGER",
+      "priorityBadge": "CAN THIỆP GẤP",
+      "priorityDesc": "Microsleep 1.8s • Hú còi 85dB",
+      "plate": "29C-882.14",
+      "model": "Đầu kéo Dongfeng Tianlong 420HP",
+      "driver": "Nguyễn Văn Hùng",
+      "driverCode": "TX-0182",
+      "experience": "6 năm",
+      "route": "HN - Đà Nẵng",
+      "location": "Km 222+800 (CT01 Phủ Lý)",
+      "speed": "58 km/h",
+      "co2": "1,120 ppm",
+      "co2Status": "danger",
+      "score": "88/100",
+      "restStop": "Trạm Vực Vòng (Km 227)",
+      "restStopDistance": "Cách 4.2 km (~6 phút)",
+      "actionType": "EMERGENCY_DISPATCH",
+      "alertType": "MICROSLEEP",
+      "alertDesc": "Phát hiện mi mắt khép 1.8s (Microsleep). Đã tự động hú còi 85dB & loa cảnh báo lúc 14:32:10.",
+      "countdownSeconds": 769,
+      "nearestRestStop": {
+        "name": "Trạm Dừng Nghỉ Vực Vòng (Km 227)",
+        "distance": "4.2 km",
+        "eta": "~6 phút",
+        "emptySlots": 14
+      },
+      "altRestStop": {
+        "name": "Trạm Dịch Vụ Liêm Tuyền",
+        "distance": "18.5 km",
+        "eta": "~21 phút",
+        "emptySlots": 5
+      }
+    },
+    {
+      "id": 2,
+      "priorityLevel": "WARNING",
+      "priorityBadge": "CẢNH BÁO MỆT MỎI",
+      "priorityDesc": "Ngáp 4 lần/5p • Mắt lim dim",
+      "plate": "51D-401.99",
+      "model": "Xe tải Hino 500 Series 8T",
+      "driver": "Lê Hoàng Nam",
+      "driverCode": "TX-0441",
+      "experience": "4 năm",
+      "route": "Pháp Vân - Ninh Bình",
+      "location": "Km 233+100",
+      "speed": "64 km/h",
+      "co2": "920 ppm",
+      "co2Status": "warning",
+      "score": "91/100",
+      "restStop": "Trạm Liêm Tuyền (Km 245)",
+      "restStopDistance": "Cách 12.3 km (~11 phút)",
+      "actionType": "REMIND_REST",
+      "alertType": "FATIGUE_WARNING",
+      "alertDesc": "Ngáp 4 lần liên tiếp trong 5 phút. Tần suất nháy mắt giảm 40%.",
+      "countdownSeconds": 900,
+      "nearestRestStop": {
+        "name": "Trạm Dịch Vụ Liêm Tuyền (Km 245)",
+        "distance": "12.3 km",
+        "eta": "~11 phút",
+        "emptySlots": 8
+      },
+      "altRestStop": {
+        "name": "Trạm Dừng Nghỉ Cao Bồ",
+        "distance": "32 km",
+        "eta": "~28 phút",
+        "emptySlots": 12
+      }
+    },
+    {
+      "id": 3,
+      "priorityLevel": "WARNING",
+      "priorityBadge": "CẢNH BÁO MỆT MỎI",
+      "priorityDesc": "Dao động làn • Giảm tốc đột ngột",
+      "plate": "43C-198.52",
+      "model": "Đầu kéo Hyundai Xcient 440HP",
+      "driver": "Phan Quốc Bảo",
+      "driverCode": "TX-0298",
+      "experience": "8 năm",
+      "route": "Hà Nội - Nghệ An",
+      "location": "Km 210+400",
+      "speed": "45 km/h",
+      "co2": "890 ppm",
+      "co2Status": "normal",
+      "score": "85/100",
+      "restStop": "Trạm Cầu Giẽ (Km 212)",
+      "restStopDistance": "Cách 1.8 km (~3 phút)",
+      "actionType": "CHECK_VEHICLE",
+      "alertType": "LANE_WEAVING",
+      "alertDesc": "Xe chao đảo làn đường 3 lần trong 2 phút, vận tốc biến động bất thường.",
+      "countdownSeconds": 900,
+      "nearestRestStop": {
+        "name": "Trạm Dừng Nghỉ Cầu Giẽ (Km 212)",
+        "distance": "1.8 km",
+        "eta": "~3 phút",
+        "emptySlots": 6
+      },
+      "altRestStop": {
+        "name": "Trạm Vực Vòng",
+        "distance": "15 km",
+        "eta": "~15 phút",
+        "emptySlots": 14
+      }
+    },
+    {
+      "id": 4,
+      "priorityLevel": "CO2_HIGH",
+      "priorityBadge": "GIÁM SÁT CO2 CAO",
+      "priorityDesc": "Thiếu oxy cabin (đếm ngược 5p)",
+      "plate": "36H-021.45",
+      "model": "Isuzu Giga 4 chân 17.9T",
+      "driver": "Vũ Đức Trọng",
+      "driverCode": "TX-0511",
+      "experience": "5 năm",
+      "route": "Thanh Hóa - Hải Phòng",
+      "location": "Km 260+500",
+      "speed": "62 km/h",
+      "co2": "1,350 ppm",
+      "co2Status": "danger",
+      "score": "90/100",
+      "restStop": "Trạm Cao Bồ (Km 282)",
+      "restStopDistance": "Cách 2.1 km (~4 phút)",
+      "actionType": "VENTILATE_CABIN",
+      "alertType": "CO2_OVERLIMIT",
+      "alertDesc": "Nồng độ CO2 vượt 1,350 ppm, khoang kín thiếu oxy gây buồn ngủ tiềm ẩn.",
+      "countdownSeconds": 300,
+      "nearestRestStop": {
+        "name": "Trạm Dừng Nghỉ Cao Bồ (Km 282)",
+        "distance": "2.1 km",
+        "eta": "~4 phút",
+        "emptySlots": 11
+      },
+      "altRestStop": {
+        "name": "Trạm Mai Sơn",
+        "distance": "24 km",
+        "eta": "~22 phút",
+        "emptySlots": 7
+      }
+    },
+    {
+      "id": 5,
+      "priorityLevel": "SAFE",
+      "priorityBadge": "AN TOÀN",
+      "priorityDesc": "Tình trạng ổn định",
+      "plate": "15C-312.80",
+      "model": "Howo A7 380HP",
+      "driver": "Trần Đình Trọng",
+      "driverCode": "TX-0114",
+      "experience": "7 năm",
+      "route": "HN - Hải Phòng (Cao tốc 5B)",
+      "location": "Km 18+200",
+      "speed": "68 km/h",
+      "co2": "650 ppm",
+      "co2Status": "safe",
+      "score": "96/100",
+      "restStop": "Trạm dừng Hưng Yên (Km 24)",
+      "restStopDistance": "Cách 5.8 km (~6 phút)",
+      "actionType": "STABLE",
+      "alertType": "NORMAL",
+      "alertDesc": "Trạng thái tỉnh táo hoàn toàn, nhịp tim và nhãn cầu bình thường.",
+      "countdownSeconds": 0,
+      "nearestRestStop": {
+        "name": "Trạm Dừng Nghỉ Hưng Yên (Km 24)",
+        "distance": "5.8 km",
+        "eta": "~6 phút",
+        "emptySlots": 20
+      },
+      "altRestStop": {
+        "name": "Trạm V52 Hải Dương",
+        "distance": "28 km",
+        "eta": "~25 phút",
+        "emptySlots": 16
+      }
+    },
+    {
+      "id": 6,
+      "priorityLevel": "SAFE",
+      "priorityBadge": "AN TOÀN",
+      "priorityDesc": "Tình trạng ổn định",
+      "plate": "29H-772.19",
+      "model": "Thaco Auman C160",
+      "driver": "Ngô Quang Huy",
+      "driverCode": "TX-0322",
+      "experience": "3 năm",
+      "route": "HN - Thanh Hóa",
+      "location": "Km 42+150",
+      "speed": "72 km/h",
+      "co2": "610 ppm",
+      "co2Status": "safe",
+      "score": "94/100",
+      "restStop": "Trạm Tiên Hiệp (Km 185)",
+      "restStopDistance": "Cách 8.5 km (~9 phút)",
+      "actionType": "STABLE",
+      "alertType": "NORMAL",
+      "alertDesc": "Tài xế trong trạng thái tốt, chỉ số môi trường cabin lý tưởng.",
+      "countdownSeconds": 0,
+      "nearestRestStop": {
+        "name": "Trạm Dừng Nghỉ Tiên Hiệp (Km 185)",
+        "distance": "8.5 km",
+        "eta": "~9 phút",
+        "emptySlots": 15
+      },
+      "altRestStop": {
+        "name": "Trạm Vực Vòng",
+        "distance": "25 km",
+        "eta": "~22 phút",
+        "emptySlots": 14
+      }
+    }
+  ],
+  "evidenceClip": {
+    "plate": "29C-882.14",
+    "driver": "Nguyễn Văn Hùng",
+    "durationSeconds": 10,
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "aiConfidence": 92,
+    "eventType": "MICROSLEEP"
+  }
+}

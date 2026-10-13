@@ -57,97 +57,176 @@ Hệ thống giúp các doanh nghiệp vận tải giám sát trạng thái xe t
 
 ---
 
-## 🗄️ Kiến Trúc Cơ Sở Dữ Liệu (9 Bảng Prisma ORM)
+## 🗄️ Kiến Trúc Cơ Sở Dữ Liệu (14 Bảng Prisma ORM)
 
 ```mermaid
 erDiagram
-    users ||--o| drivers : "1-1 user_id"
-    users ||--o| managers : "1-1 user_id"
-    vehicles ||--o| iot_devices : "1-1 vehicle_id"
-    drivers ||--o{ trips : "1-N driver_id"
-    vehicles ||--o{ trips : "1-N vehicle_id"
-    routes ||--o{ trips : "1-N route_id"
-    trips ||--o{ iot_data_logs : "1-N trip_id"
-    iot_devices ||--o{ iot_data_logs : "1-N device_id"
-    trips ||--o{ violations : "1-N trip_id"
-    drivers ||--o{ violations : "1-N driver_id"
-
     users {
         int id PK
-        string username UK
-        string password_hash
-        string ho_ten
-        string sdt
-        string role "MANAGER | DRIVER"
-        string trang_thai "ACTIVE | INACTIVE"
+        varchar username UK
+        varchar password_hash
+        varchar vai_tro
+        varchar ho_ten
+        varchar sdt
+        varchar trang_thai
     }
 
     drivers {
         int user_id PK, FK
-        string bang_lai
-        int uy_tin "Quỹ điểm uy tín (Default 100)"
-        string trang_thai_tai_xe "AVAILABLE | ON_TRIP | OFFLINE"
-    }
-
-    managers {
-        int user_id PK, FK
-        string vai_tro "ADMIN | COORDINATOR"
+        varchar bang_lai UK
+        int uy_tin
+        varchar trang_thai_tai_xe
+        datetime created_at
     }
 
     vehicles {
         int id PK
-        string bien_so UK
-        string loai_xe
-        string trang_thai "AVAILABLE | IN_USE | MAINTENANCE"
-    }
-
-    iot_devices {
-        int id PK
-        string mac_address UK
-        string phien_ban
-        int vehicle_id FK
+        varchar bien_so UK
+        varchar loai_xe
+        varchar trang_thai
     }
 
     routes {
         int id PK
-        string ten_tuyen
-        float khoang_cach_km
+        varchar ten_tuyen
+        decimal khoang_cach_km
     }
 
-    trips {
+    iot_devices {
+        int id PK
+        varchar mac_address UK
+        varchar phien_ban
+        int vehicle_id FK
+    }
+
+    violation_types {
+        int id PK
+        varchar ma_loai UK
+        varchar ten_loai
+        int diem_tru_mac_dinh
+    }
+
+    shifts {
         int id PK
         int driver_id FK
         int vehicle_id FK
         int route_id FK
-        datetime thoi_gian_bat_dau
-        datetime thoi_gian_ket_thuc
-        string trang_thai "PLANNED | IN_PROGRESS | COMPLETED | CANCELLED"
+        datetime thoi_gian_bat_dau_du_kien
+        datetime thoi_gian_ket_thuc_du_kien
+        enum trang_thai
+        text ly_do_tu_choi
+        int created_by FK
+        json canh_bao_khi_tao
+        datetime created_at
     }
 
-    iot_data_logs {
+    trips {
         int id PK
-        int trip_id FK
-        int device_id FK
-        float kinh_do
-        float vi_do
-        float toc_do
-        float co2_level "MQ-135 Sensor (ppm)"
-        datetime thoi_gian_ghi_nhan
+        int shift_id FK, UK
+        datetime thoi_gian_bat_dau
+        datetime thoi_gian_ket_thuc
+        varchar trang_thai
+        datetime created_at
     }
 
     violations {
         int id PK
-        int driver_id FK
         int trip_id FK
-        string loai_vi_pham "NGỦ GẬT (AI) | DÙNG ĐIỆN THOẠI (AI) | QUÁ TỐC ĐỘ"
-        int diem_tru
-        string video_url
+        int violation_type_id FK
+        varchar video_url
         int video_duration
         datetime thoi_gian_vi_pham
+        enum trang_thai
+        decimal ai_confidence_score
+        int reviewed_by FK
+        datetime reviewed_at
+        datetime thoi_gian_bat_dau_theo_doi
+        datetime thoi_gian_chot_vi_pham
         text mo_ta
     }
-```
 
+    iot_data_logs {
+        bigint id PK
+        int trip_id FK
+        int device_id FK
+        decimal kinh_do
+        decimal vi_do
+        decimal toc_do
+        decimal co2_ppm
+        datetime thoi_gian_ghi_nhan
+    }
+
+    driver_score_logs {
+        int id PK
+        int driver_id FK
+        int violation_id FK
+        enum loai_thay_doi
+        int so_diem_thay_doi
+        int diem_sau
+        text ly_do
+        datetime created_at
+    }
+
+    driver_biometric_profiles {
+        int id PK
+        int driver_id FK
+        json khung_gio_yeu_sinh_hoc
+        int thoi_gian_lai_toi_da
+        int thoi_gian_lai_trung_binh
+        json tan_suat_vi_pham_30_ngay
+        boolean is_default_profile
+        date ky_tinh_toan_tu
+        date ky_tinh_toan_den
+    }
+
+    driver_calibration_data {
+        int id PK
+        int driver_id FK
+        int trip_id FK
+        json vector_dac_trung
+        datetime thoi_gian_hieu_chuan
+        enum ket_qua
+    }
+
+    audit_logs {
+        bigint id PK
+        int user_id FK
+        varchar hanh_dong
+        varchar doi_tuong_loai
+        int doi_tuong_id
+        json gia_tri_truoc
+        json gia_tri_sau
+        text ly_do
+        datetime created_at
+    }
+
+    users ||--o| drivers : "is"
+    users ||--o{ audit_logs : "creates"
+    users ||--o{ shifts : "creates (dispatchers)"
+    users ||--o{ violations : "reviews (dispatchers)"
+
+    vehicles ||--o{ iot_devices : "has"
+    vehicles ||--o{ shifts : "assigned to"
+
+    routes ||--o{ shifts : "planned for"
+
+    drivers ||--o{ shifts : "assigned to"
+    drivers ||--o{ driver_score_logs : "has history"
+    drivers ||--o| driver_biometric_profiles : "owns"
+    drivers ||--o{ driver_calibration_data : "calibrates"
+
+    shifts ||--|| trips : "executes as"
+
+    trips ||--o{ iot_data_logs : "generates"
+    trips ||--o{ violations : "contains"
+    trips ||--o{ driver_calibration_data : "requires"
+
+    iot_devices ||--o{ iot_data_logs : "records"
+
+    violation_types ||--o{ violations : "categorizes"
+    violations ||--o{ driver_score_logs : "results in"
+
+```
 ---
 
 ## 🔌 Kiến Trúc Phần Cứng IoT & AI Edge

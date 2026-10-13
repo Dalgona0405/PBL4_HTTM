@@ -124,7 +124,7 @@ function LogsPage() {
           <h2 className="text-2xl font-bold text-slate-800">
             Lịch sử Cảnh báo & Vi phạm IoT
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-700">
             Giám sát cảnh báo cảm biến Edge AI, bằng chứng video và duyệt vi
             phạm lái xe
           </p>
