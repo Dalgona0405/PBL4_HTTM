@@ -100,12 +100,12 @@ const MainLayout = () => {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden font-sans text-brand-text-secondary bg-transparent">
+    <div className="text-brand-text-secondary flex h-screen overflow-hidden bg-transparent font-sans">
       {/* SIDEBAR NAVIGATION - SLATE 900 DARK */}
-      <aside className="bg-brand-dark/90 z-20 flex w-20 shrink-0 flex-col items-center border-r border-brand-border-dark py-4 shadow-xl backdrop-blur-md">
+      <aside className="bg-brand-dark/90 border-brand-border-dark z-20 flex w-20 shrink-0 flex-col items-center border-r py-4 shadow-xl backdrop-blur-md">
         <button
           onClick={() => navigate("/")}
-          className="mb-5 flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl transition-all hover:bg-brand-surface/80"
+          className="hover:bg-brand-surface/80 mb-5 flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl transition-all"
           title="Trang chủ FleetGuard"
         >
           <img
@@ -125,7 +125,7 @@ const MainLayout = () => {
                   onClick={() => navigate(item.path)}
                   className={`relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl transition-all ${
                     active
-                      ? "border border-brand-border-active bg-linear-to-br from-brand-primary to-brand-primary-dark text-white shadow-lg shadow-blue-500/35"
+                      ? "border-brand-border-active from-brand-primary to-brand-primary-dark border bg-linear-to-br text-white shadow-lg shadow-blue-500/35"
                       : "text-brand-text-muted hover:bg-brand-surface/80 hover:text-brand-text-primary"
                   }`}
                   aria-label={item.label}
@@ -139,10 +139,10 @@ const MainLayout = () => {
                   )}
                 </button>
                 <div className="pointer-events-none absolute top-1/2 left-full z-50 ml-3.5 hidden -translate-y-1/2 items-center group-hover:flex">
-                  <div className="flex items-center gap-2 rounded-xl border border-brand-border bg-brand-dark px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-brand-text-primary shadow-2xl">
+                  <div className="border-brand-border bg-brand-dark text-brand-text-primary flex items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-semibold whitespace-nowrap shadow-2xl">
                     <span>{item.label}</span>
                     {item.tag && (
-                      <span className="rounded-md border border-brand-primary/30 bg-brand-blue-night px-1.5 py-0.5 text-[10px] font-bold text-brand-blue-light">
+                      <span className="border-brand-primary/30 bg-brand-blue-night text-brand-blue-light rounded-md border px-1.5 py-0.5 text-[10px] font-bold">
                         {item.tag}
                       </span>
                     )}
@@ -151,11 +151,11 @@ const MainLayout = () => {
               </div>
             );
           })}
-          <div className="my-1 h-px w-8 bg-brand-border-dark" />
+          <div className="bg-brand-border-dark my-1 h-px w-8" />
           {user?.role === "admin" && (
-            <div className="my-1 h-px w-8 bg-brand-border-dark" />
+            <div className="bg-brand-border-dark my-1 h-px w-8" />
           )}
-          {user?.role === "admin" &&
+          {user?.role?.toLowerCase() === "admin" &&
             adminNavItems.map((item) => {
               const active = isActive(item.path);
               const Icon = item.icon;
@@ -168,7 +168,7 @@ const MainLayout = () => {
                     onClick={() => navigate(item.path)}
                     className={`relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl transition-all ${
                       active
-                        ? "border border-brand-border-active bg-linear-to-br from-brand-primary to-brand-primary-dark text-white shadow-lg shadow-blue-500/35"
+                        ? "border-brand-border-active from-brand-primary to-brand-primary-dark border bg-linear-to-br text-white shadow-lg shadow-blue-500/35"
                         : "text-brand-text-muted hover:bg-brand-surface/80 hover:text-brand-text-primary"
                     }`}
                     aria-label={item.label}
@@ -177,10 +177,10 @@ const MainLayout = () => {
                   </button>
 
                   <div className="pointer-events-none absolute top-1/2 left-full z-50 ml-3.5 hidden -translate-y-1/2 items-center group-hover:flex">
-                    <div className="flex items-center gap-2 rounded-xl border border-brand-border bg-brand-dark px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-brand-text-primary shadow-2xl">
+                    <div className="border-brand-border bg-brand-dark text-brand-text-primary flex items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-semibold whitespace-nowrap shadow-2xl">
                       <span>{item.label}</span>
                       {item.tag && (
-                        <span className="rounded-md border border-brand-border bg-brand-surface px-1.5 py-0.5 text-[10px] font-bold text-brand-text-muted">
+                        <span className="border-brand-border bg-brand-surface text-brand-text-muted rounded-md border px-1.5 py-0.5 text-[10px] font-bold">
                           {item.tag}
                         </span>
                       )}
@@ -190,7 +190,7 @@ const MainLayout = () => {
               );
             })}
         </nav>
-        <div className="flex w-full flex-col items-center gap-2.5 border-t border-brand-border-dark px-3 pt-3">
+        <div className="border-brand-border-dark flex w-full flex-col items-center gap-2.5 border-t px-3 pt-3">
           <div className="group relative flex justify-center">
             <a
               href="tel:19008899"
@@ -200,7 +200,7 @@ const MainLayout = () => {
               <PhoneCall className="h-4.5 w-4.5" />
             </a>
             <div className="pointer-events-none absolute top-1/2 left-full z-50 ml-3.5 hidden -translate-y-1/2 items-center group-hover:flex">
-              <div className="rounded-xl border border-rose-500/30 bg-brand-dark px-3 py-1.5 text-xs font-bold whitespace-nowrap text-rose-400 shadow-2xl">
+              <div className="bg-brand-dark rounded-xl border border-rose-500/30 px-3 py-1.5 text-xs font-bold whitespace-nowrap text-rose-400 shadow-2xl">
                 Hotline SOS: 1900 8899
               </div>
             </div>
@@ -214,7 +214,7 @@ const MainLayout = () => {
               <LogOut className="h-4.5 w-4.5" />
             </button>
             <div className="pointer-events-none absolute top-1/2 left-full z-50 ml-3.5 hidden -translate-y-1/2 items-center group-hover:flex">
-              <div className="rounded-xl border border-brand-border bg-brand-dark px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-brand-text-muted shadow-2xl">
+              <div className="border-brand-border bg-brand-dark text-brand-text-muted rounded-xl border px-3 py-1.5 text-xs font-semibold whitespace-nowrap shadow-2xl">
                 Đăng xuất
               </div>
             </div>
@@ -222,39 +222,41 @@ const MainLayout = () => {
         </div>
       </aside>
       <div className="flex flex-1 flex-col overflow-hidden bg-transparent">
-        <header className="bg-brand-dark/90 flex h-18 shrink-0 items-center justify-between border-b border-brand-border-dark px-8 shadow-md backdrop-blur-md">
+        <header className="bg-brand-dark/90 border-brand-border-dark flex h-18 shrink-0 items-center justify-between border-b px-8 shadow-md backdrop-blur-md">
           <div className="mr-4 max-w-xl flex-1">
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-text-subtle" />
+              <Search className="text-brand-text-subtle pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Tra cứu biển số xe (29C-882.14), tên tài xế, mã ca chạy..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-lg border border-brand-border bg-brand-dark/90 py-2 pr-4 pl-9 text-xs text-brand-text-primary transition-all outline-none placeholder:text-brand-text-subtle focus:border-brand-primary focus:bg-brand-surface focus:ring-1 focus:ring-brand-primary"
+                className="border-brand-border bg-brand-dark/90 text-brand-text-primary placeholder:text-brand-text-subtle focus:border-brand-primary focus:bg-brand-surface focus:ring-brand-primary w-full rounded-lg border py-2 pr-4 pl-9 text-xs transition-all outline-none focus:ring-1"
               />
             </div>
           </div>
           <div className="flex items-center gap-4">
             <NotificationBell />
-            <div className="flex items-center gap-3 border-l border-brand-border-dark pl-3">
-              <div className="bg-linear-to-br relative flex h-9 w-9 items-center justify-center rounded-full from-brand-primary to-brand-primary-dark text-xs font-bold text-white shadow-md ring-2 ring-brand-primary/30">
+            <div className="border-brand-border-dark flex items-center gap-3 border-l pl-3">
+              <div className="from-brand-primary to-brand-primary-dark ring-brand-primary/30 relative flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br text-xs font-bold text-white shadow-md ring-2">
                 {user?.name ? user.name.charAt(0) : "TN"}
               </div>
               <div className="hidden text-left leading-tight sm:block">
-                <p className="text-xs font-bold text-brand-text-primary">
+                <p className="text-brand-text-primary text-xs font-bold">
                   {user?.name}
                 </p>
                 <p className="flex items-center gap-1 text-[11px] font-semibold text-emerald-400">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-                  {user?.role?.toLowerCase() === "admin" ? "Quản trị viên" : "Điều phối viên"}
+                  {user?.role?.toLowerCase() === "admin"
+                    ? "Quản trị viên"
+                    : "Điều phối viên"}
                 </p>
               </div>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto bg-slate-950/15 p-6 text-brand-text-secondary">
+        <main className="text-brand-text-secondary flex-1 overflow-y-auto bg-slate-950/15 p-6">
           <Outlet />
         </main>
       </div>
