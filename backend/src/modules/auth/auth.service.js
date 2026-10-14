@@ -4,7 +4,7 @@ import prisma from '../../common/prisma.js';
 
 const JWT_SECRET = process.env.ACCESS_JWT_SECRET || 'pbl4_access_token_secret_key_2026_super_secure_node_jwt_auth_key';
 
-export const registerUser = async ({ username, password, hoTen, sdt, role, bangLai, vaiTro }) => {
+export const registerUser = async ({ username, password, hoTen, sdt, bangLai }) => {
   const existingUser = await prisma.user.findUnique({ where: { username } });
   if (existingUser) {
     throw new Error('Tên đăng nhập đã tồn tại trong hệ thống.');
@@ -19,18 +19,16 @@ export const registerUser = async ({ username, password, hoTen, sdt, role, bangL
       passwordHash,
       hoTen,
       sdt,
-      role: role || 'DRIVER',
+      role: 'DRIVER',
       trangThai: 'ACTIVE',
-      ...(role === 'MANAGER'
-        ? { manager: { create: { vaiTro: vaiTro || 'COORDINATOR' } } }
-        : { driver: { create: { bangLai: bangLai || 'B2', uyTin: 100, trangThaiTaiXe: 'AVAILABLE' } } }),
+      driver: { create: { bangLai: bangLai || 'B2', uyTin: 100, trangThaiTaiXe: 'AVAILABLE' } },
     },
     include: {
       driver: true,
-      manager: true,
     },
   });
 
+  delete newUser.passwordHash;
   return newUser;
 };
 
@@ -39,7 +37,6 @@ export const loginUser = async ({ username, password }) => {
     where: { username },
     include: {
       driver: true,
-      manager: true,
     },
   });
 
@@ -62,7 +59,6 @@ export const loginUser = async ({ username, password }) => {
     role: user.role,
     hoTen: user.hoTen,
     driverId: user.driver?.userId || null,
-    managerId: user.manager?.userId || null,
   };
 
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' });
@@ -75,7 +71,6 @@ export const loginUser = async ({ username, password }) => {
       sdt: user.sdt,
       role: user.role,
       driver: user.driver,
-      manager: user.manager,
     },
     token,
   };
@@ -93,7 +88,6 @@ export const getUserProfile = async (userId) => {
           },
         },
       },
-      manager: true,
     },
   });
 
@@ -101,5 +95,82 @@ export const getUserProfile = async (userId) => {
     throw new Error('Không tìm thấy người dùng.');
   }
 
+  delete user.passwordHash;
   return user;
 };
+
+export const getAllUsers = async () => {
+  const users = await prisma.user.findMany({
+    include: {
+      driver: true,
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+  return users.map(u => { const { passwordHash, ...rest } = u; return rest; });
+};
+
+export const updateUserStatus = async (userId, { trangThai, role }, adminId) => {
+  const pUserId = parseInt(userId, 10);
+  const oldUser = await prisma.user.findUnique({ where: { id: pUserId } });
+  if (!oldUser) throw new Error('Người dùng không tồn tại.');
+
+  const data = {};
+  if (trangThai) data.trangThai = trangThai;
+  if (role) data.role = role;
+
+  const updatedUser = await prisma.user.update({
+    where: { id: pUserId },
+    data,
+    include: { driver: true },
+  });
+
+  if (adminId) {
+    const { logAuditAction } = await import('../../common/audit.service.js');
+    logAuditAction({
+      userId: adminId,
+      hanhDong: 'UPDATE_USER_ACCOUNT',
+      doiTuongLoai: 'USER',
+      doiTuongId: pUserId,
+      giaTriTruoc: { trangThai: oldUser.trangThai, role: oldUser.role },
+      giaTriSau: { trangThai: updatedUser.trangThai, role: updatedUser.role },
+      lyDo: `Quản trị viên cập nhật tài khoản: ${oldUser.username}`,
+    });
+  }
+
+  return updatedUser;
+};
+
+// In-memory System Configuration Store (can be persisted to file / DB)
+let systemConfig = {
+  aiConfidenceConfirmThreshold: 0.85,
+  aiConfidenceRejectThreshold: 0.60,
+  co2PpmThreshold: 1000,
+  minRestHours: 8,
+  eyeClosedDurationSeconds: 2,
+  yawnDurationSeconds: 3,
+};
+
+export const getSystemConfig = async () => {
+  return systemConfig;
+};
+
+export const updateSystemConfig = async (newConfig, adminId) => {
+  const oldConfig = { ...systemConfig };
+  systemConfig = { ...systemConfig, ...newConfig };
+
+  if (adminId) {
+    const { logAuditAction } = await import('../../common/audit.service.js');
+    logAuditAction({
+      userId: adminId,
+      hanhDong: 'UPDATE_SYSTEM_CONFIG',
+      doiTuongLoai: 'SYSTEM',
+      doiTuongId: 1,
+      giaTriTruoc: oldConfig,
+      giaTriSau: systemConfig,
+      lyDo: 'Quản trị viên cập nhật tham số AI & Cảm biến hệ thống',
+    });
+  }
+
+  return systemConfig;
+};
+

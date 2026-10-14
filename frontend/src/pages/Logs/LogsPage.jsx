@@ -9,38 +9,47 @@ function LogsPage() {
   const [selectedViolation, setSelectedViolation] = useState(null);
 
   const getViolationBadge = (type) => {
-    switch (type) {
-      case "BUON_NGU":
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-bold text-red-700">
-            <span>🚨</span> Buồn ngủ gật
-          </span>
-        );
-      case "CO2_CAO":
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
-            <span>⚠️</span> CO2 vượt ngưỡng
-          </span>
-        );
-      case "DIEN_THOAI":
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-            <span>📱</span> Dùng điện thoại
-          </span>
-        );
-      case "MET_MOI_NGAP":
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full border border-purple-200 bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700">
-            <span>🥱</span> Mệt mỏi / Ngáp
-          </span>
-        );
-      default:
-        return (
-          <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-bold text-gray-700">
-            {type}
-          </span>
-        );
+    const raw = String(type || "").toUpperCase();
+    if (raw.includes("BUON_NGU") || raw.includes("NGỦ GẬT") || raw.includes("EYES_CLOSED")) {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-bold text-red-700">
+          <span>🚨</span> Buồn ngủ gật
+        </span>
+      );
     }
+    if (raw.includes("CO2")) {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
+          <span>⚠️</span> CO2 vượt ngưỡng
+        </span>
+      );
+    }
+    if (raw.includes("DIEN_THOAI") || raw.includes("ĐIỆN THOẠI") || raw.includes("PHONE")) {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+          <span>📱</span> Dùng điện thoại
+        </span>
+      );
+    }
+    if (raw.includes("MET_MOI") || raw.includes("NGÁP") || raw.includes("YAWN")) {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-full border border-purple-200 bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700">
+          <span>🥱</span> Mệt mỏi / Ngáp
+        </span>
+      );
+    }
+    if (raw.includes("QUA_TOC_DO") || raw.includes("TỐC ĐỘ") || raw.includes("SPEED")) {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700">
+          <span>⚡</span> Quá tốc độ
+        </span>
+      );
+    }
+    return (
+      <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-bold text-gray-700">
+        {type}
+      </span>
+    );
   };
 
   const getStatusBadge = (status) => {
