@@ -11,14 +11,14 @@ import {
 function DashboardPage() {
   // Trạng thái xe đang chọn xem trên bản đồ & bảng điều phối (lấy từ tầng mock repository)
   const [selectedVehicle, setSelectedVehicle] = useState(() =>
-    getDefaultSelectedVehicle()
+    getDefaultSelectedVehicle(),
   );
   const [fleetList, setFleetList] = useState(() => getPriorityFleet());
   const [stats, setStats] = useState(() => getLiveMonitoringStats());
 
   // Đồng hồ đếm ngược tuân thủ an toàn (T + 15p) theo SRS 3.1 & 3.3
   const [countdownSeconds, setCountdownSeconds] = useState(
-    () => selectedVehicle?.countdownSeconds || 12 * 60 + 49
+    () => selectedVehicle?.countdownSeconds || 12 * 60 + 49,
   );
 
   const handleSelectVehicle = (vehicle) => {
@@ -63,12 +63,12 @@ function DashboardPage() {
 
     toast.success(
       `🚀 Đã gửi lệnh điều hướng rẽ vào [${targetStop}] tới màn hình Cabin xe ${selectedVehicle.plate} & App Driver!`,
-      { duration: 5000, icon: "📡" }
+      { duration: 5000, icon: "📡" },
     );
   };
 
   return (
-    <div className="space-y-5 animate-fade-in-up">
+    <div className="animate-fade-in-up space-y-5">
       {/* ========================================================================= */}
       {/* 1. HEADER: BREADCRUMB & TIÊU ĐỀ TRUNG TÂM GIÁM SÁT */}
       {/* ========================================================================= */}
@@ -88,9 +88,14 @@ function DashboardPage() {
             <span className="text-lg">📡</span>
           </div>
           <div>
-            <p className="text-[11px] font-medium text-slate-400">Đang hoạt động</p>
+            <p className="text-[11px] font-medium text-slate-400">
+              Đang hoạt động
+            </p>
             <p className="text-lg font-black text-slate-900">
-              {stats.activeVehicles} <span className="text-xs font-semibold text-slate-400">xe IoT</span>
+              {stats.activeVehicles}{" "}
+              <span className="text-xs font-semibold text-slate-400">
+                xe IoT
+              </span>
             </p>
           </div>
         </div>
@@ -106,7 +111,9 @@ function DashboardPage() {
             </p>
             <p className="text-lg font-black text-rose-600">
               {String(stats.microsleepAlerts).padStart(2, "0")}{" "}
-              <span className="text-xs font-bold text-rose-500">Cần can thiệp gấp</span>
+              <span className="text-xs font-bold text-rose-500">
+                Cần can thiệp gấp
+              </span>
             </p>
           </div>
         </div>
@@ -133,9 +140,12 @@ function DashboardPage() {
             <span className="text-lg">✔️</span>
           </div>
           <div>
-            <p className="text-[11px] font-medium text-slate-400">Trạng thái Bình thường</p>
+            <p className="text-[11px] font-medium text-slate-400">
+              Trạng thái Bình thường
+            </p>
             <p className="text-lg font-black text-slate-900">
-              {stats.normalVehicles} <span className="text-xs font-semibold text-slate-400">xe</span>
+              {stats.normalVehicles}{" "}
+              <span className="text-xs font-semibold text-slate-400">xe</span>
             </p>
           </div>
         </div>
@@ -148,17 +158,17 @@ function DashboardPage() {
         {/* --------------------------------------------------------------------- */}
         {/* CỘT TRÁI: BẢN ĐỒ LIVE (7/12 COLS) */}
         {/* --------------------------------------------------------------------- */}
-        <div className="relative flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-slate-900 shadow-xs lg:col-span-7 h-[670px]">
+        <div className="relative flex h-[670px] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-slate-900 shadow-xs lg:col-span-7">
           {/* BANNER CAO TỐC TRÊN ĐẦU BẢN ĐỒ */}
-          <div className="absolute top-4 left-4 z-10 flex items-center gap-2 rounded-2xl bg-white/95 px-3 py-1.5 backdrop-blur-md shadow-md border border-slate-100 text-xs">
-            <span className="rounded bg-blue-600 px-1.5 py-0.5 font-mono text-[10px] font-black text-white">
+          <div className="absolute top-4 left-4 z-10 flex items-center gap-2 rounded-2xl border border-slate-100 bg-white/95 px-3 py-1.5 text-xs shadow-md backdrop-blur-md">
+            <span className="rounded bg-blue-600 px-1.5 py-0.5 font-sans text-[10px] font-black text-white">
               CT01
             </span>
-            <span className="font-bold text-slate-800 text-[11px]">
+            <span className="text-[11px] font-bold text-slate-800">
               Cao tốc Bắc - Nam (Pháp Vân - Cầu Giẽ - Ninh Bình)
             </span>
             <span className="text-slate-300">|</span>
-            <span className="text-[10px] font-semibold text-emerald-600 flex items-center gap-1">
+            <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
               Mật độ: Thông
             </span>
@@ -169,7 +179,7 @@ function DashboardPage() {
             <button className="flex items-center gap-1.5 rounded-xl bg-white/90 px-2.5 py-1 text-[11px] font-bold text-slate-700 shadow-md backdrop-blur-md hover:bg-white">
               <span>🗺️</span> Vệ tinh
             </button>
-            <div className="flex flex-col overflow-hidden rounded-xl bg-white shadow-md border border-slate-100">
+            <div className="flex flex-col overflow-hidden rounded-xl border border-slate-100 bg-white shadow-md">
               <button
                 className="p-1.5 text-xs font-black text-slate-700 hover:bg-slate-100"
                 onClick={() => toast("Phóng to")}
@@ -185,7 +195,7 @@ function DashboardPage() {
               </button>
             </div>
             <button
-              className="flex h-7 w-7 items-center justify-center rounded-xl bg-white text-slate-700 shadow-md hover:bg-slate-100 text-xs"
+              className="flex h-7 w-7 items-center justify-center rounded-xl bg-white text-xs text-slate-700 shadow-md hover:bg-slate-100"
               onClick={() => toast.success("Định vị xe 29C-882.14")}
             >
               📍
@@ -193,7 +203,7 @@ function DashboardPage() {
           </div>
 
           {/* SVG MAP CANVAS */}
-          <div className="relative flex-1 bg-gradient-to-br from-slate-100 via-teal-50/50 to-blue-50/60 overflow-hidden">
+          <div className="relative flex-1 overflow-hidden bg-gradient-to-br from-slate-100 via-teal-50/50 to-blue-50/60">
             <svg
               className="absolute inset-0 h-full w-full"
               viewBox="0 0 800 670"
@@ -210,7 +220,12 @@ function DashboardPage() {
               />
 
               {/* Quốc lộ 1A */}
-              <path d="M 270,0 L 270,670" fill="none" stroke="var(--text-secondary, #e2e8f0)" strokeWidth="5" />
+              <path
+                d="M 270,0 L 270,670"
+                fill="none"
+                stroke="var(--text-secondary, #e2e8f0)"
+                strokeWidth="5"
+              />
 
               {/* Tuyến Cao tốc CT01 */}
               <path
@@ -238,22 +253,54 @@ function DashboardPage() {
               />
 
               {/* Nhãn địa danh */}
-              <text x="170" y="230" fill="var(--text-subtle, #64748b)" fontSize="12" fontWeight="bold">
+              <text
+                x="170"
+                y="230"
+                fill="var(--text-subtle, #64748b)"
+                fontSize="12"
+                fontWeight="bold"
+              >
                 Đại Học Công Nghiệp Hà Nam
               </text>
-              <text x="210" y="300" fill="var(--status-safe, #0f766e)" fontSize="13" fontWeight="black">
+              <text
+                x="210"
+                y="300"
+                fill="var(--status-safe, #0f766e)"
+                fontSize="13"
+                fontWeight="black"
+              >
                 Phủ Lý
               </text>
-              <text x="180" y="440" fill="var(--text-subtle, #64748b)" fontSize="11">
+              <text
+                x="180"
+                y="440"
+                fill="var(--text-subtle, #64748b)"
+                fontSize="11"
+              >
                 Chùa Phật Quang
               </text>
-              <text x="210" y="540" fill="var(--text-subtle, #64748b)" fontSize="11">
+              <text
+                x="210"
+                y="540"
+                fill="var(--text-subtle, #64748b)"
+                fontSize="11"
+              >
                 Tân Thanh
               </text>
-              <text x="490" y="240" fill="var(--text-subtle, #64748b)" fontSize="11">
+              <text
+                x="490"
+                y="240"
+                fill="var(--text-subtle, #64748b)"
+                fontSize="11"
+              >
                 Liêm Tuyền
               </text>
-              <text x="560" y="100" fill="var(--text-subtle, #64748b)" fontSize="11">
+              <text
+                x="560"
+                y="100"
+                fill="var(--text-subtle, #64748b)"
+                fontSize="11"
+              >
                 Duy Tiên
               </text>
             </svg>
@@ -264,7 +311,7 @@ function DashboardPage() {
                 <span className="text-sm">⛽</span>
                 <span>Trạm Dừng Nghỉ Vực Vòng</span>
               </div>
-              <div className="h-2 w-2 rotate-45 bg-blue-600 -mt-1"></div>
+              <div className="-mt-1 h-2 w-2 rotate-45 bg-blue-600"></div>
             </div>
 
             {/* XE MỆT MỎI (AMBER MOON ICON) */}
@@ -276,33 +323,37 @@ function DashboardPage() {
 
             {/* XE 29C-882.14 BÁO ĐỘNG NGỦ GẬT VỚI TOOLTIP NỔI TRÊN NÓC XE */}
             <div className="absolute top-[240px] left-[420px] z-30">
-              <span className="absolute -top-3 -left-3 h-14 w-14 rounded-full bg-rose-500 opacity-40 animate-ping"></span>
+              <span className="absolute -top-3 -left-3 h-14 w-14 animate-ping rounded-full bg-rose-500 opacity-40"></span>
               <div className="relative flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-rose-600 text-white shadow-2xl">
                 <span className="text-base">🚨</span>
               </div>
 
               {/* CALLOUT POPUP NỔI ĐÚNG Y NHƯ HÌNH MẪU! */}
-              <div className="absolute -top-[190px] -left-[140px] w-72 rounded-2xl bg-slate-900/95 p-3.5 text-white shadow-2xl backdrop-blur-md border border-slate-700/70">
+              <div className="absolute -top-[190px] -left-[140px] w-72 rounded-2xl border border-slate-700/70 bg-slate-900/95 p-3.5 text-white shadow-2xl backdrop-blur-md">
                 <div className="flex items-center justify-between text-[11px]">
-                  <span className="font-bold text-rose-400 flex items-center gap-1">
-                    <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse"></span>
+                  <span className="flex items-center gap-1 font-bold text-rose-400">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-rose-500"></span>
                     NGỦ GẬT (MICROSLEEP 1.8S)
                   </span>
                   <span className="text-slate-400">2 phút trước</span>
                 </div>
 
                 <div className="mt-1 flex items-baseline justify-between">
-                  <h3 className="font-mono text-xl font-black tracking-tight text-white">
+                  <h3 className="font-sans text-xl font-black tracking-tight text-white">
                     29C-882.14
                   </h3>
                 </div>
 
-                <p className="text-xs text-slate-300">Tài xế: Nguyễn Văn Hùng</p>
+                <p className="text-xs text-slate-300">
+                  Tài xế: Nguyễn Văn Hùng
+                </p>
 
-                <div className="mt-2 space-y-1 text-xs border-t border-slate-800 pt-2">
+                <div className="mt-2 space-y-1 border-t border-slate-800 pt-2 text-xs">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Còi xe Edge IoT:</span>
-                    <span className="font-bold text-rose-400">ĐÃ KÍCH HOẠT (85dB)</span>
+                    <span className="font-bold text-rose-400">
+                      ĐÃ KÍCH HOẠT (85dB)
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Vận tốc:</span>
@@ -310,7 +361,9 @@ function DashboardPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Nồng độ CO2:</span>
-                    <span className="font-bold text-amber-400">1,120 ppm (Cao)</span>
+                    <span className="font-bold text-amber-400">
+                      1,120 ppm (Cao)
+                    </span>
                   </div>
                 </div>
 
@@ -338,7 +391,7 @@ function DashboardPage() {
                 An toàn
               </span>
             </div>
-            <div className="font-mono text-[11px] text-slate-400">
+            <div className="font-sans text-[11px] text-slate-400">
               Định vị Km 222 + 800 | Phủ Lý - Hà Nam
             </div>
           </div>
@@ -352,14 +405,14 @@ function DashboardPage() {
           <div className="flex items-start justify-between border-b border-slate-100 pb-3">
             <div>
               <div className="flex items-center gap-2">
-                <span className="rounded-md bg-rose-500 px-2 py-0.5 text-[10px] font-black tracking-wider text-white uppercase animate-pulse">
+                <span className="animate-pulse rounded-md bg-rose-500 px-2 py-0.5 text-[10px] font-black tracking-wider text-white uppercase">
                   Can thiệp gấp
                 </span>
                 <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
                   {selectedVehicle.route}
                 </span>
               </div>
-              <h2 className="mt-1 font-mono text-3xl font-black text-slate-900 tracking-tight">
+              <h2 className="mt-1 font-sans text-3xl font-black tracking-tight text-slate-900">
                 {selectedVehicle.plate}
               </h2>
               <p className="text-xs text-slate-400">{selectedVehicle.model}</p>
@@ -367,33 +420,36 @@ function DashboardPage() {
 
             <button
               onClick={() => toast.error("Đã kích hoạt còi khẩn cấp cabin!")}
-              className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors shadow-xs"
+              className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 shadow-xs transition-colors hover:bg-rose-100"
             >
               <span className="text-lg">🚨</span>
             </button>
           </div>
 
           {/* TÀI XẾ & ĐIỂM UY TÍN */}
-          <div className="flex items-center justify-between rounded-2xl bg-slate-50 p-3 border border-slate-100">
+          <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 p-3">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-white shadow-xs">
                 {selectedVehicle.driverName.charAt(0)}
               </div>
               <div>
-                <p className="font-bold text-slate-900 text-xs">
+                <p className="text-xs font-bold text-slate-900">
                   {selectedVehicle.driverName}
                 </p>
                 <p className="text-[11px] text-slate-400">
-                  Mã: {selectedVehicle.driverCode} • Thâm niên: {selectedVehicle.experience}
+                  Mã: {selectedVehicle.driverCode} • Thâm niên:{" "}
+                  {selectedVehicle.experience}
                 </p>
               </div>
             </div>
 
             <div className="text-right">
-              <p className="text-[10px] text-slate-400 font-medium">Điểm uy tín</p>
+              <p className="text-[10px] font-medium text-slate-400">
+                Điểm uy tín
+              </p>
               <p className="text-base font-black text-blue-600">
                 {selectedVehicle.score}
-                <span className="text-xs text-slate-400 font-normal">/100</span>
+                <span className="text-xs font-normal text-slate-400">/100</span>
               </p>
             </div>
           </div>
@@ -401,26 +457,32 @@ function DashboardPage() {
           {/* TELEMETRY */}
           <div className="grid grid-cols-2 gap-2.5">
             <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-2.5">
-              <span className="text-[10px] text-slate-400 font-medium">Tốc độ xe</span>
+              <span className="text-[10px] font-medium text-slate-400">
+                Tốc độ xe
+              </span>
               <p className="mt-0.5 text-base font-black text-slate-800">
                 {selectedVehicle.speed}{" "}
-                <span className="text-xs font-semibold text-slate-400">km/h</span>
+                <span className="text-xs font-semibold text-slate-400">
+                  km/h
+                </span>
               </p>
             </div>
             <div className="rounded-2xl border border-rose-100 bg-rose-50/40 p-2.5">
-              <span className="text-[10px] text-rose-600 font-medium">
+              <span className="text-[10px] font-medium text-rose-600">
                 Nồng độ CO2 cabin
               </span>
               <p className="mt-0.5 text-base font-black text-rose-600">
                 1,120{" "}
-                <span className="text-xs font-bold text-rose-500">ppm (Cao)</span>
+                <span className="text-xs font-bold text-rose-500">
+                  ppm (Cao)
+                </span>
               </p>
             </div>
           </div>
 
           {/* CẢNH BÁO EDGE AI CAMERA */}
-          <div className="flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/90 p-3 text-xs text-rose-900 leading-relaxed shadow-xs">
-            <span className="text-base text-rose-600 mt-0.5">🛡️</span>
+          <div className="flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/90 p-3 text-xs leading-relaxed text-rose-900 shadow-xs">
+            <span className="mt-0.5 text-base text-rose-600">🛡️</span>
             <div>
               <span className="font-bold text-rose-700">Edge AI Camera:</span>{" "}
               {selectedVehicle.alertDesc}
@@ -430,10 +492,10 @@ function DashboardPage() {
           {/* ĐỀ XUẤT TRẠM DỪNG ĐÓN ĐẦU */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">
+              <h3 className="text-xs font-black tracking-wider text-slate-800 uppercase">
                 Đề xuất Trạm dừng đón đầu
               </h3>
-              <span className="text-[11px] font-bold text-blue-600 flex items-center gap-1 cursor-pointer hover:underline">
+              <span className="flex cursor-pointer items-center gap-1 text-[11px] font-bold text-blue-600 hover:underline">
                 <span>⚡</span> AI Route Optimizer
               </span>
             </div>
@@ -441,7 +503,7 @@ function DashboardPage() {
             {/* Ưu tiên 1 */}
             <div
               onClick={() => setSelectedRestStopOpt(1)}
-              className={`cursor-pointer rounded-2xl p-3.5 transition-all border-2 ${
+              className={`cursor-pointer rounded-2xl border-2 p-3.5 transition-all ${
                 selectedRestStopOpt === 1
                   ? "border-blue-600 bg-blue-50/40 shadow-xs"
                   : "border-slate-200 bg-white hover:border-slate-300"
@@ -456,27 +518,27 @@ function DashboardPage() {
                 </span>
               </div>
 
-              <h4 className="mt-1 font-bold text-slate-900 text-xs">
+              <h4 className="mt-1 text-xs font-bold text-slate-900">
                 {selectedVehicle.nearestRestStop.name}
               </h4>
 
               <div className="mt-1.5 flex items-center gap-4 text-xs">
                 <div>
-                  <span className="text-slate-400 text-[10px]">Cự ly</span>
-                  <p className="font-black text-slate-800 text-xs">
+                  <span className="text-[10px] text-slate-400">Cự ly</span>
+                  <p className="text-xs font-black text-slate-800">
                     {selectedVehicle.nearestRestStop.distance}
                   </p>
                 </div>
                 <div className="h-5 w-px bg-slate-200"></div>
                 <div>
-                  <span className="text-slate-400 text-[10px]">ETA</span>
-                  <p className="font-black text-blue-600 text-xs">
+                  <span className="text-[10px] text-slate-400">ETA</span>
+                  <p className="text-xs font-black text-blue-600">
                     {selectedVehicle.nearestRestStop.eta}
                   </p>
                 </div>
               </div>
 
-              <div className="mt-2 flex items-center gap-3 text-[10px] text-slate-500 border-t border-slate-200/60 pt-1.5">
+              <div className="mt-2 flex items-center gap-3 border-t border-slate-200/60 pt-1.5 text-[10px] text-slate-500">
                 <span>☕ Cà phê</span>
                 <span>•</span>
                 <span>🚿 Tắm nghỉ ngơi</span>
@@ -488,14 +550,14 @@ function DashboardPage() {
             {/* Phương án 2 */}
             <div
               onClick={() => setSelectedRestStopOpt(2)}
-              className={`cursor-pointer rounded-2xl p-2.5 transition-all border ${
+              className={`cursor-pointer rounded-2xl border p-2.5 transition-all ${
                 selectedRestStopOpt === 2
                   ? "border-blue-600 bg-blue-50/40"
                   : "border-slate-200 bg-slate-50/50 hover:bg-slate-50"
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="rounded-md bg-slate-200 px-1.5 py-0.2 text-[9px] font-bold text-slate-600 uppercase">
+                <span className="py-0.2 rounded-md bg-slate-200 px-1.5 text-[9px] font-bold text-slate-600 uppercase">
                   Phương án 2
                 </span>
                 <span className="text-[10px] font-semibold text-slate-500">
@@ -504,7 +566,7 @@ function DashboardPage() {
               </div>
               <div className="mt-1 flex items-center justify-between">
                 <div>
-                  <h4 className="font-bold text-slate-800 text-[11px]">
+                  <h4 className="text-[11px] font-bold text-slate-800">
                     {selectedVehicle.altRestStop.name}
                   </h4>
                   <p className="text-[10px] text-slate-500">
@@ -532,7 +594,7 @@ function DashboardPage() {
                 </p>
               </div>
             </div>
-            <div className="font-mono text-lg font-black text-rose-600">
+            <div className="font-sans text-lg font-black text-rose-600">
               {formatCountdown(countdownSeconds)}
             </div>
           </div>
@@ -541,7 +603,7 @@ function DashboardPage() {
           <div className="space-y-2 pt-0.5">
             <button
               onClick={() => handleDispatchNav()}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 py-3 text-xs font-black text-white shadow-md shadow-blue-600/30 hover:bg-blue-700 active:scale-98 transition-all"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 py-3 text-xs font-black text-white shadow-md shadow-blue-600/30 transition-all hover:bg-blue-700 active:scale-98"
             >
               <span>🚀</span>
               <span>GỬI LỆNH DẪN ĐƯỜNG VÀO TRẠM VỰC VÒNG</span>
@@ -550,17 +612,17 @@ function DashboardPage() {
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => setShowCallModal(true)}
-                className="flex items-center justify-center gap-1.5 rounded-xl bg-amber-500 py-2 text-xs font-bold text-white shadow-xs hover:bg-amber-600 transition-all"
+                className="flex items-center justify-center gap-1.5 rounded-xl bg-amber-500 py-2 text-xs font-bold text-white shadow-xs transition-all hover:bg-amber-600"
               >
                 <span>📞</span> Gọi Trực Tiếp Tài Xế
               </button>
 
               <button
                 onClick={() => setShowVideoModal(true)}
-                className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 py-2 text-xs font-bold text-slate-800 hover:bg-slate-200 transition-all"
+                className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 py-2 text-xs font-bold text-slate-800 transition-all hover:bg-slate-200"
               >
                 <span>📹</span> Clip AI 10s{" "}
-                <span className="rounded bg-emerald-500 px-1 py-0.2 text-[9px] text-white">
+                <span className="py-0.2 rounded bg-emerald-500 px-1 text-[9px] text-white">
                   92%
                 </span>
               </button>
@@ -580,7 +642,7 @@ function DashboardPage() {
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs">
         {/* TIÊU ĐỀ BẢNG ƯU TIÊN */}
         <div className="mb-4 flex items-center gap-3 border-b border-slate-100 pb-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 text-lg font-black border border-rose-100 shadow-xs">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-rose-100 bg-rose-50 text-lg font-black text-rose-600 shadow-xs">
             !
           </div>
           <div>
@@ -588,8 +650,8 @@ function DashboardPage() {
               Bảng ưu tiên Can thiệp & Điều phối Đội xe
             </h3>
             <p className="text-xs text-slate-400">
-              Giám sát thời gian thực danh sách phương tiện theo mức độ rủi ro sinh
-              học & vị trí trạm dừng đón đầu
+              Giám sát thời gian thực danh sách phương tiện theo mức độ rủi ro
+              sinh học & vị trí trạm dừng đón đầu
             </p>
           </div>
         </div>
@@ -605,13 +667,17 @@ function DashboardPage() {
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/80 text-[10px] font-black uppercase tracking-wider text-slate-400">
-                <th className="rounded-tl-xl px-4 py-3">Mức ưu tiên & Trạng thái</th>
+              <tr className="border-b border-slate-100 bg-slate-50/80 text-[10px] font-black tracking-wider text-slate-400 uppercase">
+                <th className="rounded-tl-xl px-4 py-3">
+                  Mức ưu tiên & Trạng thái
+                </th>
                 <th className="px-4 py-3">Phương tiện & Tài xế</th>
                 <th className="px-4 py-3">Tuyến & Định vị</th>
                 <th className="px-4 py-3">Chỉ số Telemetry</th>
                 <th className="px-4 py-3">Trạm dừng đón đầu</th>
-                <th className="rounded-tr-xl px-4 py-3 text-center">Hành động điều phối</th>
+                <th className="rounded-tr-xl px-4 py-3 text-center">
+                  Hành động điều phối
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
@@ -642,7 +708,7 @@ function DashboardPage() {
                         </span>
                       )}
                       {item.priorityLevel === "SAFE" && (
-                        <span className="inline-flex w-fit items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+                        <span className="inline-flex w-fit items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">
                           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                           {item.priorityBadge}
                         </span>
@@ -663,20 +729,22 @@ function DashboardPage() {
 
                   {/* Cột 2: Phương tiện & Tài xế */}
                   <td className="px-4 py-3.5">
-                    <p className="font-mono text-sm font-black text-slate-900">
+                    <p className="font-sans text-sm font-black text-slate-900">
                       {item.plate}
                     </p>
-                    <p className="text-[11px] text-slate-500 font-medium">
+                    <p className="text-[11px] font-medium text-slate-500">
                       {item.driver} ({item.driverCode})
                     </p>
                   </td>
 
                   {/* Cột 3: Tuyến & Định vị */}
                   <td className="px-4 py-3.5">
-                    <p className="font-bold text-slate-800 text-xs">
+                    <p className="text-xs font-bold text-slate-800">
                       {item.route}
                     </p>
-                    <p className="text-[11px] text-slate-400">{item.location}</p>
+                    <p className="text-[11px] text-slate-400">
+                      {item.location}
+                    </p>
                   </td>
 
                   {/* Cột 4: Chỉ số Telemetry */}
@@ -704,7 +772,7 @@ function DashboardPage() {
 
                   {/* Cột 5: Trạm dừng đón đầu */}
                   <td className="px-4 py-3.5">
-                    <p className="font-bold text-blue-600 cursor-pointer hover:underline text-xs flex items-center gap-1">
+                    <p className="flex cursor-pointer items-center gap-1 text-xs font-bold text-blue-600 hover:underline">
                       <span>⛽</span> {item.restStop}
                     </p>
                     <p
@@ -724,13 +792,13 @@ function DashboardPage() {
                       <div className="flex items-center justify-center gap-1.5">
                         <button
                           onClick={() => handleDispatchNav(item.restStop)}
-                          className="flex items-center gap-1 rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-all"
+                          className="flex items-center gap-1 rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs transition-all hover:bg-blue-700"
                         >
                           <span>🚀</span> Điều phối trạm
                         </button>
                         <button
                           onClick={() => setShowCallModal(true)}
-                          className="flex items-center gap-1 rounded-xl bg-rose-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-rose-700 transition-all"
+                          className="flex items-center gap-1 rounded-xl bg-rose-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs transition-all hover:bg-rose-700"
                         >
                           <span>📞</span> Gọi khẩn
                         </button>
@@ -741,10 +809,10 @@ function DashboardPage() {
                       <button
                         onClick={() =>
                           toast.success(
-                            `Đã phát loa nhắc tài xế ${item.driver} chuẩn bị phương án đỗ nghỉ!`
+                            `Đã phát loa nhắc tài xế ${item.driver} chuẩn bị phương án đỗ nghỉ!`,
                           )
                         }
-                        className="flex items-center gap-1.5 rounded-xl bg-amber-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-amber-600 transition-all mx-auto"
+                        className="mx-auto flex items-center gap-1.5 rounded-xl bg-amber-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-all hover:bg-amber-600"
                       >
                         <span>🌙</span> Nhắc nghỉ ngơi
                       </button>
@@ -753,9 +821,11 @@ function DashboardPage() {
                     {item.actionType === "CHECK_VEHICLE" && (
                       <button
                         onClick={() =>
-                          toast(`Đang yêu cầu camera cabin kiểm tra hành vi ${item.plate}`)
+                          toast(
+                            `Đang yêu cầu camera cabin kiểm tra hành vi ${item.plate}`,
+                          )
                         }
-                        className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-200 transition-all mx-auto"
+                        className="mx-auto flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 px-3.5 py-1.5 text-xs font-bold text-slate-700 transition-all hover:bg-slate-200"
                       >
                         <span>👁️</span> Kiểm tra
                       </button>
@@ -765,17 +835,17 @@ function DashboardPage() {
                       <button
                         onClick={() =>
                           toast.success(
-                            `Đã kích hoạt loa cabin xe ${item.plate}: Yêu cầu hạ kính thông gió lấy oxy ngoài!`
+                            `Đã kích hoạt loa cabin xe ${item.plate}: Yêu cầu hạ kính thông gió lấy oxy ngoài!`,
                           )
                         }
-                        className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all mx-auto"
+                        className="mx-auto flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition-all hover:bg-slate-100"
                       >
                         <span>💨</span> Nhắc hạ kính
                       </button>
                     )}
 
                     {item.actionType === "STABLE" && (
-                      <span className="inline-flex items-center gap-1 rounded-xl bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-100">
+                      <span className="inline-flex items-center gap-1 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
                         <span>✔️</span> Ổn định
                       </span>
                     )}
@@ -792,14 +862,17 @@ function DashboardPage() {
       {/* ========================================================================= */}
       {showVideoModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-xl overflow-hidden rounded-3xl bg-white shadow-2xl animate-fade-in-up">
+          <div className="animate-fade-in-up w-full max-w-xl overflow-hidden rounded-3xl bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4">
               <div>
                 <h3 className="text-base font-bold text-slate-900">
-                  Clip Bằng Chứng Edge AI ({mockLiveMonitoring?.evidenceClip?.durationSeconds || 10} Giây)
+                  Clip Bằng Chứng Edge AI (
+                  {mockLiveMonitoring?.evidenceClip?.durationSeconds || 10}{" "}
+                  Giây)
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Xe: {selectedVehicle.plate} • Tài xế: {selectedVehicle.driverName || selectedVehicle.driver}
+                  Xe: {selectedVehicle.plate} • Tài xế:{" "}
+                  {selectedVehicle.driverName || selectedVehicle.driver}
                 </p>
               </div>
               <button
@@ -810,19 +883,22 @@ function DashboardPage() {
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="space-y-4 p-6">
               <div className="overflow-hidden rounded-2xl bg-black">
                 <video
-                  src={mockLiveMonitoring?.evidenceClip?.videoUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"}
+                  src={
+                    mockLiveMonitoring?.evidenceClip?.videoUrl ||
+                    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+                  }
                   controls
                   autoPlay
                   className="max-h-64 w-full object-contain"
                 />
               </div>
 
-              <div className="flex items-center justify-between rounded-xl bg-rose-50 p-3 text-xs text-rose-800 border border-rose-100">
+              <div className="flex items-center justify-between rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs text-rose-800">
                 <span>🎯 Độ tin cậy AI xác thực:</span>
-                <span className="font-bold text-rose-600 text-sm">
+                <span className="text-sm font-bold text-rose-600">
                   {mockLiveMonitoring?.evidenceClip?.aiConfidence || 92}%
                 </span>
               </div>
@@ -845,17 +921,18 @@ function DashboardPage() {
       {/* ========================================================================= */}
       {showCallModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl animate-fade-in-up">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-2xl text-amber-600 animate-bounce">
+          <div className="animate-fade-in-up w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl">
+            <div className="mx-auto flex h-16 w-16 animate-bounce items-center justify-center rounded-full bg-amber-100 text-2xl text-amber-600">
               📞
             </div>
             <h3 className="mt-3 text-lg font-black text-slate-900">
               Đang kết nối Cabin xe...
             </h3>
             <p className="text-xs text-slate-500">
-              Tài xế: {selectedVehicle.driverName || selectedVehicle.driver} ({selectedVehicle.plate})
+              Tài xế: {selectedVehicle.driverName || selectedVehicle.driver} (
+              {selectedVehicle.plate})
             </p>
-            <p className="mt-2 text-xs font-mono text-emerald-600">
+            <p className="mt-2 font-sans text-xs text-emerald-600">
               Kênh đàm thoại hai chiều IoT ESP32 đã sẵn sàng
             </p>
             <button

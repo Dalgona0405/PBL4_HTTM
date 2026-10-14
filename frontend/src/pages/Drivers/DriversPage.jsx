@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 import { getDrivers, updateDriverStatus } from "../../mock";
 
 function DriversPage() {
@@ -8,19 +9,19 @@ function DriversPage() {
   const getScoreBadge = (score) => {
     if (score > 80) {
       return (
-        <span className="text-alert-safe font-mono text-lg font-bold">
+        <span className="text-alert-safe font-sans text-lg font-bold">
           {score}
         </span>
       );
     } else if (score >= 65) {
       return (
-        <span className="text-alert-warning font-mono text-lg font-bold">
+        <span className="text-alert-warning font-sans text-lg font-bold">
           {score}
         </span>
       );
     } else {
       return (
-        <span className="text-alert-danger font-mono text-lg font-bold">
+        <span className="text-alert-danger font-sans text-lg font-bold">
           {score}
         </span>
       );
@@ -125,7 +126,7 @@ function DriversPage() {
                         <div className="text-brand-text-primary font-bold">
                           {driver.ho_ten}
                         </div>
-                        <div className="text-brand-text-subtle font-mono text-xs">
+                        <div className="text-brand-text-subtle font-sans text-xs">
                           {driver.sdt}
                         </div>
                       </div>
@@ -133,7 +134,7 @@ function DriversPage() {
                   </td>
 
                   {/* Cột 2: Bằng lái */}
-                  <td className="text-brand-text-secondary px-4 py-4 font-mono font-bold">
+                  <td className="text-brand-text-secondary px-4 py-4 font-sans font-bold">
                     Hạng {driver.bang_lai}
                   </td>
 
@@ -142,7 +143,7 @@ function DriversPage() {
                     {driver.xe_hien_tai ? (
                       <div className="flex items-center gap-2">
                         <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400"></span>
-                        <span className="border-brand-border bg-brand-dark text-brand-text-primary rounded-lg border px-2.5 py-1 font-mono text-xs font-bold shadow-xs">
+                        <span className="border-brand-border bg-brand-dark text-brand-text-primary rounded-lg border px-2.5 py-1 font-sans text-xs font-bold shadow-xs">
                           {driver.xe_hien_tai}
                         </span>
                       </div>

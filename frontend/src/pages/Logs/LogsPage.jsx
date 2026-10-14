@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import mockViolations from "../../mock/mockViolations.json";
+import { getViolations, reviewViolation } from "../../mock";
 
 function LogsPage() {
-  const [violations, setViolations] = useState(mockViolations);
+  const [violations, setViolations] = useState(() => getViolations());
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedViolation, setSelectedViolation] = useState(null);
@@ -45,44 +45,79 @@ function LogsPage() {
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case "PENDING_MANUAL_REVIEW":
-        return (
-          <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
-            <span className="h-2 w-2 animate-ping rounded-full bg-amber-500"></span>
-            Chờ duyệt
-          </span>
-        );
       case "CONFIRMED":
         return (
           <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
-            <span>✔️</span> Đã xác nhận
+            Đã xác nhận
+          </span>
+        );
+      case "MANUALLY_CONFIRMED":
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+            Đã xác nhận thủ công
           </span>
         );
       case "REJECTED":
         return (
           <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-xs font-bold text-gray-500">
-            <span>❌</span> Đã từ chối
+            Đã từ chối
           </span>
         );
+      case "MANUALLY_REJECTED":
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-xs font-bold text-gray-500">
+            Đã từ chối thủ công
+          </span>
+        );
+      case "PENDING_VERIFICATION":
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+            <span className="h-2 w-2 animate-ping rounded-full bg-blue-500"></span>
+            Chờ hệ thống xác minh tự động
+          </span>
+        );
+      case "PENDING_MANUAL_REVIEW":
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
+            <span className="h-2 w-2 animate-ping rounded-full bg-amber-500"></span>
+            Chờ duyệt thủ công
+          </span>
+        );
+      case "PENDING_UPLOAD":
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-xs font-bold text-green-700">
+            <span className="h-2 w-2 animate-ping rounded-full bg-green-500"></span>
+            Chờ tải lên
+          </span>
+        );
+
       default:
         return <span>{status}</span>;
     }
   };
 
-  const handleUpdateStatus = (id, newStatus) => {
-    setViolations((prev) =>
-      prev.map((v) =>
-        v.id === id ? { ...v, status: newStatus, trang_thai: newStatus } : v,
-      ),
-    );
-    if (selectedViolation && selectedViolation.id === id) {
-      setSelectedViolation((prev) => ({ ...prev, trang_thai: newStatus }));
+  const handleUpdateStatus = (id, decision) => {
+    try {
+      const updatedViolation = reviewViolation({
+        violationId: id,
+        decision: decision,
+        notes:
+          decision === "CONFIRMED"
+            ? "Điều phối viên xác nhận vi phạm qua video bằng chứng"
+            : "Bác bỏ cảnh báo giả (False Alarm)",
+      });
+
+      setViolations(getViolations());
+      setSelectedViolation(updatedViolation);
+
+      toast.success(
+        decision === "CONFIRMED"
+          ? `Đã xác nhận vi phạm #${id} & tự động trừ điểm uy tín!`
+          : `Đã bác bỏ vi phạm #${id}!`,
+      );
+    } catch (err) {
+      console.error(err.message || "Có lỗi xảy ra khi duyệt!");
     }
-    const message =
-      newStatus === "CONFIRMED"
-        ? `Đã xác nhận sự kiện vi phạm #${id}!`
-        : `Đã bác bỏ sự kiện vi phạm #${id}!`;
-    toast.success(message);
   };
 
   const filteredViolations = violations.filter((v) => {
@@ -105,6 +140,15 @@ function LogsPage() {
   ).length;
   const rejectedCount = violations.filter(
     (v) => v.trang_thai === "REJECTED",
+  ).length;
+  const manuallyRejectedCount = violations.filter(
+    (v) => v.trang_thai === "MANUALLY_REJECTED",
+  ).length;
+  const pendingVerificationCount = violations.filter(
+    (v) => v.trang_thai === "PENDING_VERIFICATION",
+  ).length;
+  const pendingUploadCount = violations.filter(
+    (v) => v.trang_thai === "PENDING_UPLOAD",
   ).length;
 
   return (
@@ -236,7 +280,7 @@ function LogsPage() {
                     className="transition-colors hover:bg-slate-50/60"
                   >
                     {/* ID */}
-                    <td className="px-4 py-4 font-mono font-bold text-slate-700">
+                    <td className="px-4 py-4 font-sans font-bold text-slate-700">
                       #{v.id}
                     </td>
 
@@ -247,7 +291,7 @@ function LogsPage() {
                           "vi-VN",
                         )}
                       </div>
-                      <div className="font-mono text-slate-400">
+                      <div className="font-sans text-slate-400">
                         {new Date(v.thoi_gian_vi_pham).toLocaleTimeString(
                           "vi-VN",
                         )}
@@ -259,7 +303,7 @@ function LogsPage() {
                       <p className="font-bold text-slate-800">
                         {v.driver_name}
                       </p>
-                      <p className="font-mono text-xs text-slate-500">
+                      <p className="font-sans text-xs text-slate-500">
                         {v.vehicle_plate} • Ca #{v.trip_id}
                       </p>
                     </td>
@@ -271,7 +315,7 @@ function LogsPage() {
 
                     {/* Confidence */}
                     <td className="px-4 py-4 text-center">
-                      <div className="inline-block font-mono text-xs font-bold text-slate-700">
+                      <div className="inline-block font-sans text-xs font-bold text-slate-700">
                         {(v.ai_confidence_score * 100).toFixed(0)}%
                       </div>
                       <div className="mx-auto mt-1 h-1.5 w-16 overflow-hidden rounded-full bg-slate-100">

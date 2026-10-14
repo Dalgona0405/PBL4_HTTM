@@ -122,7 +122,7 @@ function TripsPage() {
                   className="transition-colors hover:bg-slate-50/60"
                 >
                   {/* Mã ca */}
-                  <td className="px-4 py-4 font-mono font-bold text-slate-700">
+                  <td className="px-4 py-4 font-sans font-bold text-slate-700">
                     #{shift.id}
                   </td>
 
@@ -131,7 +131,7 @@ function TripsPage() {
                     <p className="font-bold text-slate-800">
                       {shift.driver.ho_ten}
                     </p>
-                    <p className="font-mono text-xs text-slate-500">
+                    <p className="font-sans text-xs text-slate-500">
                       Xe:{" "}
                       <span className="font-semibold text-slate-700">
                         {shift.vehicle.bien_so}
