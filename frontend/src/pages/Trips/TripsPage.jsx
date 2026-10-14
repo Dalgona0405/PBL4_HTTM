@@ -1,21 +1,11 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import mockShifts from "../../mock/mockShifts.json";
+import { getShitfs } from "../../mock";
+import formatDateTime from "../../utils/formatDateTime";
 
 function TripsPage() {
-  const [shifts, setShifts] = useState(mockShifts);
+  const [shifts, setShifts] = useState(() => getShitfs());
   const [filterStatus, setFilterStatus] = useState("ALL");
-
-  const formatDateTime = (isoString) => {
-    if (!isoString) return "--:--";
-    const date = new Date(isoString);
-    return date.toLocaleString("vi-VN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      day: "2-digit",
-      month: "2-digit",
-    });
-  };
 
   // Hàm tạo nhãn trạng thái ca làm việc
   const getStatusBadge = (status) => {
