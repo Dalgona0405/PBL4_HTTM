@@ -1,28 +1,30 @@
 import React, { useState } from "react";
-import mockVehicles from "../../mock/mockVehicles.json";
+import Button from "../../components/common/Button";
+import { getFleetStatus } from "../../mock";
+import toast from "react-hot-toast";
 
 function VehiclesPage() {
-  const [vehicles, setVehicles] = useState(mockVehicles);
+  const [vehicles, setVehicles] = useState(() => getFleetStatus());
 
   const getVehicleStatusBadge = (status) => {
     switch (status) {
       case "DANG_CHAY":
         return (
-          <span className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+          <span className="flex w-max items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
             <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span>
             Đang vận hành
           </span>
         );
       case "SAN_SANG":
         return (
-          <span className="text-brand-blue rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold">
+          <span className="flex w-max items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
             Sẵn sàng nhận ca
           </span>
         );
       case "BAO_DUONG":
         return (
-          <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
-            Đang bảo dưỡng 🔧
+          <span className="flex w-max items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
+            Đang bảo dưỡng
           </span>
         );
       default:
@@ -35,25 +37,30 @@ function VehiclesPage() {
       {/* HEADER */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">
+          <h2 className="text-brand-text-secondary text-2xl font-bold tracking-tight">
             Quản lý Đội xe & Thiết bị IoT
           </h2>
-          <p className="mt-1 text-sm text-slate-700">
+          <p className="text-brand-text-muted mt-1 text-sm">
             Kiểm soát tình trạng phương tiện và kết nối của các hộp đen AI trên
             xe
           </p>
         </div>
-        <button className="bg-brand-blue flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-blue-800 hover:shadow-lg">
-          <span>🚚</span> + Thêm phương tiện mới
+        <button
+          onClick={() => {
+            toast.error("Chức năng chưa được triển khai");
+          }}
+          className="bg-brand-primary hover:bg-brand-primary-hover flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:-translate-y-0.5"
+        >
+          + Thêm phương tiện mới
         </button>
       </div>
 
       {/* DANH SÁCH XE */}
-      <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+      <div className="card-glass border-brand-border rounded-3xl border p-6 shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/80 text-xs font-semibold tracking-wider text-slate-500 uppercase">
+              <tr className="border-brand-border-dark bg-brand-dark/70 text-brand-text-muted border-b text-xs font-bold tracking-wider uppercase">
                 <th className="rounded-tl-xl px-4 py-4">Biển số & Loại xe</th>
                 <th className="px-4 py-4">Tải trọng</th>
                 <th className="px-4 py-4">Thiết bị IoT (Edge AI)</th>
@@ -62,22 +69,24 @@ function VehiclesPage() {
                 <th className="rounded-tr-xl px-4 py-4 text-right">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-brand-border-dark/60 divide-y">
               {vehicles.map((v) => (
                 <tr
                   key={v.id}
-                  className="transition-colors hover:bg-slate-50/60"
+                  className="hover:bg-brand-surface/80 transition-colors"
                 >
                   {/* Biển số & Loại xe */}
                   <td className="px-4 py-4">
-                    <div className="font-mono text-base font-bold text-slate-800">
+                    <div className="flex items-center gap-3 font-sans font-semibold">
                       {v.bien_so}
                     </div>
-                    <div className="text-xs text-slate-500">{v.loai_xe}</div>
+                    <div className="text-brand-text-muted font-sans text-xs font-semibold">
+                      {v.loai_xe}
+                    </div>
                   </td>
 
                   {/* Tải trọng */}
-                  <td className="px-4 py-4 font-medium text-slate-700">
+                  <td className="text-brand-text-secondary px-4 py-4 font-medium">
                     {v.tai_trong}
                   </td>
 
@@ -91,11 +100,11 @@ function VehiclesPage() {
                             : "bg-slate-300"
                         }`}
                       ></span>
-                      <span className="font-mono text-xs font-semibold text-slate-700">
+                      <span className="text-brand-text-primary font-sans text-xs font-semibold">
                         {v.iot_device.mac_address}
                       </span>
                     </div>
-                    <div className="mt-0.5 text-[11px] text-slate-400">
+                    <div className="text-brand-text-muted mt-0.5 font-sans text-[11px] font-semibold">
                       {v.iot_device.phien_ban}
                     </div>
                   </td>
@@ -103,11 +112,11 @@ function VehiclesPage() {
                   {/* Tài xế phụ trách */}
                   <td className="px-4 py-4">
                     {v.tai_xe_hien_tai ? (
-                      <span className="font-semibold text-slate-800">
+                      <span className="text-brand-text-primary font-semibold">
                         {v.tai_xe_hien_tai}
                       </span>
                     ) : (
-                      <span className="text-xs text-slate-400 italic">
+                      <span className="text-brand-text-muted font-sans text-xs font-semibold italic">
                         Trống tài xế
                       </span>
                     )}
@@ -120,10 +129,10 @@ function VehiclesPage() {
 
                   {/* Thao tác */}
                   <td className="px-4 py-4 text-right">
-                    <button className="text-brand-blue mr-3 text-xs font-bold hover:underline">
+                    <button className="text-brand-blue-light mr-3 text-xs font-bold hover:underline">
                       Lịch sử chạy
                     </button>
-                    <button className="text-xs font-bold text-slate-500 hover:text-slate-800">
+                    <button className="text-brand-text-secondary hover:text-alert-warning text-xs font-bold">
                       Sửa
                     </button>
                   </td>

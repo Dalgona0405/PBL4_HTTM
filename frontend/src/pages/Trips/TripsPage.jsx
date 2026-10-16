@@ -1,48 +1,53 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import mockShifts from "../../mock/mockShifts.json";
+//import { dataService } from "../../services/dataService";
+import formatDateTime from "../../utils/formatDateTime";
+import { CalendarClock, AlertTriangle, CheckCircle2, Plus } from "lucide-react";
 
 function TripsPage() {
-  const [shifts, setShifts] = useState(mockShifts);
+  const [shifts, setShifts] = useState(getMockShifts());
   const [filterStatus, setFilterStatus] = useState("ALL");
+  const [loading, setLoading] = useState(true);
 
-  const formatDateTime = (isoString) => {
-    if (!isoString) return "--:--";
-    const date = new Date(isoString);
-    return date.toLocaleString("vi-VN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      day: "2-digit",
-      month: "2-digit",
-    });
-  };
+  useEffect(() => {
+    const fetchShifts = async () => {
+      try {
+        const data = await dataService.getShifts();
+        setShifts(data);
+      } catch (err) {
+        toast.error(err.message || "Lỗi khi tải dữ liệu ca làm việc");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchShifts();
+  }, []);
 
-  // Hàm tạo nhãn trạng thái ca làm việc
   const getStatusBadge = (status) => {
     switch (status) {
       case "IN_PROGRESS":
         return (
-          <span className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
             <span className="h-2 w-2 animate-ping rounded-full bg-emerald-500"></span>
             Đang chạy
           </span>
         );
       case "SCHEDULED":
         return (
-          <span className="text-brand-blue rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
             Đã xếp ca
           </span>
         );
       case "COMPLETED":
         return (
-          <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-bold text-gray-600">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-bold text-gray-600">
             Hoàn thành
           </span>
         );
       case "CANCELLED":
       case "DECLINED":
         return (
-          <span className="text-alert-danger rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-bold">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-bold text-red-700">
             Đã hủy
           </span>
         );
@@ -122,7 +127,7 @@ function TripsPage() {
                   className="transition-colors hover:bg-slate-50/60"
                 >
                   {/* Mã ca */}
-                  <td className="px-4 py-4 font-mono font-bold text-slate-700">
+                  <td className="px-4 py-4 font-sans font-bold text-slate-700">
                     #{shift.id}
                   </td>
 
@@ -131,7 +136,7 @@ function TripsPage() {
                     <p className="font-bold text-slate-800">
                       {shift.driver.ho_ten}
                     </p>
-                    <p className="font-mono text-xs text-slate-500">
+                    <p className="font-sans text-xs text-slate-500">
                       Xe:{" "}
                       <span className="font-semibold text-slate-700">
                         {shift.vehicle.bien_so}
