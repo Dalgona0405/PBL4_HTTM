@@ -132,7 +132,7 @@ const swaggerDefinition = {
                 required: ['username', 'password'],
                 properties: {
                   username: { type: 'string', example: 'admin' },
-                  password: { type: 'string', example: 'admin123' },
+                  password: { type: 'string', example: 'password123' },
                 },
               },
             },
