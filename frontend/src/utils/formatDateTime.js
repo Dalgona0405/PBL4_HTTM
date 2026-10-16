@@ -8,3 +8,5 @@ const formatDateTime = (isoString) => {
     month: "2-digit",
   });
 };
+
+export default formatDateTime;
