@@ -152,9 +152,6 @@ const MainLayout = () => {
             );
           })}
           <div className="bg-brand-border-dark my-1 h-px w-8" />
-          {user?.role === "admin" && (
-            <div className="bg-brand-border-dark my-1 h-px w-8" />
-          )}
           {user?.role?.toLowerCase() === "admin" &&
             adminNavItems.map((item) => {
               const active = isActive(item.path);
