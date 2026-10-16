@@ -57,8 +57,8 @@ function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-transparent font-sans text-brand-text-secondary">
-      <header className="flex h-20 shrink-0 items-center justify-between border-b border-brand-border-dark/60 bg-brand-dark/85 px-8 shadow-md backdrop-blur-md">
+    <div className="text-brand-text-secondary flex min-h-screen flex-col bg-transparent font-sans">
+      <header className="border-brand-border-dark/60 bg-brand-dark/85 flex h-20 shrink-0 items-center justify-between border-b px-8 shadow-md backdrop-blur-md">
         <div
           className="flex cursor-pointer items-center gap-3"
           onClick={() => navigate("/")}
@@ -117,7 +117,7 @@ function LoginPage() {
               required
               disabled={isLoading}
             />
-            <Button type="submit" isLoading={isLoading}>
+            <Button type="submit" isLoading={isLoading} fullWidth>
               Đăng nhập
             </Button>
           </form>

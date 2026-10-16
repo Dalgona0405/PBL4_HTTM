@@ -9,6 +9,7 @@ import DashboardPage from "./pages/Dashboard/DashboardPage";
 import DriversPage from "./pages/Drivers/DriversPage";
 import TripsPage from "./pages/Trips/TripsPage";
 import VehiclesPage from "./pages/Vehicles/VehiclesPage";
+import MapPage from "./pages/Map/MapPage";
 import { getAiConfig, getAuditLogs } from "./mock";
 
 // Component tạm để test giao diện
@@ -126,7 +127,7 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route element={<MainLayout />}>
         <Route path="/" element={<DashboardPage />} />
-        <Route path="/map" element={<DashboardPage />} />
+        <Route path="/map" element={<MapPage />} />
         <Route path="/drivers" element={<DriversPage />} />
         <Route path="/trips" element={<TripsPage />} />
         <Route path="/vehicles" element={<VehiclesPage />} />
