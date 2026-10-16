@@ -1,21 +1,11 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import mockShifts from "../../mock/mockShifts.json";
+import { getShitfs } from "../../mock";
+import formatDateTime from "../../utils/formatDateTime";
 
 function TripsPage() {
-  const [shifts, setShifts] = useState(mockShifts);
+  const [shifts, setShifts] = useState(() => getShitfs());
   const [filterStatus, setFilterStatus] = useState("ALL");
-
-  const formatDateTime = (isoString) => {
-    if (!isoString) return "--:--";
-    const date = new Date(isoString);
-    return date.toLocaleString("vi-VN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      day: "2-digit",
-      month: "2-digit",
-    });
-  };
 
   // Hàm tạo nhãn trạng thái ca làm việc
   const getStatusBadge = (status) => {
@@ -65,7 +55,7 @@ function TripsPage() {
           <h2 className="text-2xl font-bold text-slate-800">
             Quản lý Ca làm việc
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-700">
             Lập lịch, điều phối và kiểm soát các chuyến xe vận hành
           </p>
         </div>
@@ -122,7 +112,7 @@ function TripsPage() {
                   className="transition-colors hover:bg-slate-50/60"
                 >
                   {/* Mã ca */}
-                  <td className="px-4 py-4 font-mono font-bold text-slate-700">
+                  <td className="px-4 py-4 font-sans font-bold text-slate-700">
                     #{shift.id}
                   </td>
 
@@ -131,7 +121,7 @@ function TripsPage() {
                     <p className="font-bold text-slate-800">
                       {shift.driver.ho_ten}
                     </p>
-                    <p className="font-mono text-xs text-slate-500">
+                    <p className="font-sans text-xs text-slate-500">
                       Xe:{" "}
                       <span className="font-semibold text-slate-700">
                         {shift.vehicle.bien_so}
@@ -194,7 +184,12 @@ function TripsPage() {
                   {/* Hành động */}
                   <td className="px-4 py-4 text-right">
                     <button
-                      onClick={() => toast(`Chi tiết ca #${shift.id}: Tuyến ${shift.route.ten_tuyen}`, { icon: 'ℹ️' })}
+                      onClick={() =>
+                        toast(
+                          `Chi tiết ca #${shift.id}: Tuyến ${shift.route.ten_tuyen}`,
+                          { icon: "ℹ️" },
+                        )
+                      }
                       className="text-brand-blue text-xs font-bold hover:underline"
                     >
                       Chi tiết

@@ -1,12 +1,132 @@
 @import "tailwindcss";
 
 @theme {
-  /* Tùy chỉnh màu sắc nhận diện hệ thống Dashboard IoT */
-  --color-brand-blue: #1e40af; /* Xanh dương đậm: Màu chủ đạo của Header/Nút bấm */
-  --color-brand-dark: #0f172a; /* Xanh đen (Slate 900): Màu của Sidebar */
-  --color-brand-light: #f8fafc; /* Xám nhạt (Slate 50): Màu nền của trang */
+  /* 1. HỆ MÀU NỀN (DARK SURFACES) */
+  --color-brand-deep: #090d16;
+  --color-brand-dark: #0f172a;
+  --color-brand-surface: #1e293b;
+  --color-brand-surface-elevated: #334155;
 
-  --color-alert-danger: #ef4444; /* Đỏ: Ngủ gật / CO2 > 1500ppm / Báo động đỏ */
-  --color-alert-warning: #f59e0b; /* Vàng: Ngáp nhiều / CO2 1000-1500ppm / Cảnh cáo */
-  --color-alert-safe: #10b981; /* Xanh lá: Bình thường / Ca chạy an toàn */
+  /* 2. HỆ MÀU CHỦ ĐẠO (PRIMARY & BLUES) */
+  --color-brand-primary: #3b82f6;
+  --color-brand-primary-hover: #2563eb;
+  --color-brand-primary-dark: #1d4ed8;
+  --color-brand-blue: #3b82f6;
+  --color-brand-blue-dark: #1d4ed8;
+  --color-brand-blue-night: #1e3a8a;
+  --color-brand-blue-subtle: #1e40af;
+  --color-brand-blue-light: #93c5fd;
+  --color-brand-blue-sky: #60a5fa;
+
+  /* 3. HỆ MÀU VIỀN (BORDERS) */
+  --color-brand-border: #334155;
+  --color-brand-border-dark: #1e293b;
+  --color-brand-border-active: #2563eb;
+
+  /* 4. HỆ MÀU CHỮ (TYPOGRAPHY) */
+  --color-brand-text-primary: #ffffff;
+  --color-brand-text-secondary: #e2e8f0;
+  --color-brand-text-muted: #94a3b8;
+  --color-brand-text-subtle: #64748b;
+
+  /* 5. HỆ MÀU CẢNH BÁO AN TOÀN (SEMANTIC ALERTS) */
+  --color-alert-danger: #ef4444;
+  --color-alert-warning: #f59e0b;
+  --color-alert-safe: #10b981;
+  --color-alert-info: #38bdf8;
+
+  /* 6. FONT CHỮ HỆ THỐNG */
+  --font-sans:
+    "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+
+  /* 7. ANIMATION TÙY CHỈNH */
+  --animate-fade-in-up: fade-in-up 0.35s ease-out forwards;
+
+  @keyframes fade-in-up {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* ==========================================================================
+   BASE STYLES (CẤU HÌNH KHUNG TRANG CHUNG)
+   ========================================================================== */
+html,
+body,
+#root {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--color-brand-deep);
+  background-image: url("./assets/bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: var(--color-brand-text-secondary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   CUSTOM UTILITY CLASSES (CÁC LỚP GIAO DIỆN DÙNG CHUNG)
+   ========================================================================== */
+
+/* Hiệu ứng thẻ kính mờ (Dark Glassmorphism) chuẩn cho mọi Card/Table */
+.card-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 41, 59, 0.82) 0%,
+    rgba(15, 23, 42, 0.92) 100%
+  );
+  border: 1px solid var(--color-brand-border);
+  backdrop-filter: blur(12px);
+}
+
+.card-glass-active {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 41, 59, 0.92) 0%,
+    rgba(15, 23, 42, 0.96) 100%
+  );
+  border: 1.5px solid var(--color-brand-border-active);
+  box-shadow: 0 4px 16px -2px rgba(59, 130, 246, 0.45);
+}
+
+.btn-nav-active {
+  background: linear-gradient(
+    135deg,
+    var(--color-brand-primary) 0%,
+    var(--color-brand-primary-dark) 100%
+  );
+  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.4);
+}
+
+/* Thanh cuộn (Scrollbar) tông tối */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-brand-surface-elevated);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-primary);
 }

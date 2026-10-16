@@ -11,13 +11,13 @@ const router = express.Router();
 router.use(requireAuth);
 
 router.get('/vehicles', getVehicles);
-router.post('/vehicles', requireRole('MANAGER'), createVehicle);
-router.patch('/vehicles/:id/status', requireRole('MANAGER'), updateVehicleStatus);
+router.post('/vehicles', requireRole('MANAGER', 'ADMIN'), createVehicle);
+router.patch('/vehicles/:id/status', requireRole('MANAGER', 'ADMIN'), updateVehicleStatus);
 
 router.get('/devices', getDevices);
-router.post('/devices', requireRole('MANAGER'), createDevice);
+router.post('/devices', requireRole('MANAGER', 'ADMIN'), createDevice);
 
 router.get('/routes', getRoutes);
-router.post('/routes', requireRole('MANAGER'), createRoute);
+router.post('/routes', requireRole('MANAGER', 'ADMIN'), createRoute);
 
 export default router;

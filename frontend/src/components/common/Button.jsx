@@ -1,33 +1,32 @@
 import React from "react";
 
-// Khuôn đúc cho Nút bấm (Có tích hợp sẵn hiệu ứng Loading)
 function Button({
   children, // Chữ hoặc Icon bên trong nút
   onClick, // Hàm chạy khi click
   type = "button", // Loại nút (button, submit)
   isLoading = false, // Trạng thái đang tải
   disabled = false, // Trạng thái khóa nút
-  variant = "primary", // Màu sắc: "primary" hoặc "secondary"
+  variant = "primary", // Màu sắc: "primary" | "secondary" | "danger" | "outline"
+  fullWidth = false, // chỉ true ở Login
 }) {
   const baseStyle =
-    "w-full py-3.5 rounded-xl font-bold text-lg transition-all transform shadow-md flex justify-center items-center gap-2";
-  const colorStyle =
-    variant === "primary"
-      ? "bg-brand-blue text-white hover:bg-blue-800 hover:shadow-lg hover:-translate-y-1"
-      : "bg-gray-200 text-gray-800 hover:bg-gray-300 hover:shadow-lg hover:-translate-y-1";
-
-  // Nếu đang loading hoặc bị disabled thì làm mờ nút đi
-  const disabledStyle =
-    "bg-gray-400 text-white cursor-not-allowed transform-none shadow-none";
+    "px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex justify-center items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ";
+  const variants = {
+    primary:
+      "bg-brand-primary text-white hover:bg-brand-primary-hover shadow-lg shadow-blue-500/25 hover:-translate-y-0.5",
+    secondary:
+      "bg-brand-surface text-brand-text-secondary hover:bg-brand-surface-elevated border border-brand-border",
+    danger: "bg-brand-danger text-white hover:bg-red-600 shadow-md",
+    outline: "border border-gray-200 bg-white text-slate-600 hover:bg-gray-100",
+  };
 
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled || isLoading}
-      className={`${baseStyle} ${disabled || isLoading ? disabledStyle : colorStyle}`}
+      className={`${baseStyle} ${variants[variant]} ${fullWidth ? "w-full py-3.5 text-base" : ""} ${className}`}
     >
-      {/* Nếu đang loading thì hiện chữ Đang xử lý, ngược lại hiện nội dung bình thường */}
       {isLoading ? (
         <>
           <span className="animate-spin text-xl">⏳</span> Đang xử lý...

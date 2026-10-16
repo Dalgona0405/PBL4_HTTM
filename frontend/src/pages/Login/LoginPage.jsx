@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
 import mockUsers from "../../mock/mockUsers.json";
+import logoImg from "../../assets/Logo.png";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -56,23 +57,43 @@ function LoginPage() {
   };
 
   return (
-    <div className="bg-brand-light flex min-h-screen flex-col font-sans">
-      <header className="flex h-20 shrink-0 items-center justify-between bg-white px-8 shadow-sm">
-        <h1
-          className="text-brand-blue cursor-pointer text-2xl font-bold"
+    <div className="flex min-h-screen flex-col bg-transparent font-sans text-brand-text-secondary">
+      <header className="flex h-20 shrink-0 items-center justify-between border-b border-brand-border-dark/60 bg-brand-dark/85 px-8 shadow-md backdrop-blur-md">
+        <div
+          className="flex cursor-pointer items-center gap-3"
           onClick={() => navigate("/")}
         >
-          IoT Driver Safety
-        </h1>
+          <img
+            src={logoImg}
+            alt="FleetGuard Logo"
+            className="h-10 w-10 object-contain drop-shadow"
+          />
+          <div>
+            <h1 className="text-brand-text-primary text-xl font-black tracking-tight">
+              FleetGuard
+            </h1>
+            <p className="text-brand-blue-sky text-[10px] font-bold tracking-widest uppercase">
+              Telematics & Safety
+            </p>
+          </div>
+        </div>
       </header>
 
-      <div className="flex flex-1 items-center justify-center px-4 py-8">
-        <div className="border-brand-blue w-full max-w-md rounded-3xl border-t-8 bg-white p-10 shadow-xl">
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden px-4 py-8">
+        {/* Khối thẻ đăng nhập nổi trên lớp nền ảnh của body */}
+        <div className="card-glass border-brand-border relative z-10 w-full max-w-md rounded-3xl border p-10 shadow-2xl backdrop-blur-md">
           <div className="mb-8 text-center">
-            <h2 className="mb-2 text-3xl font-bold text-gray-800">
-              Chào mừng!
+            <img
+              src={logoImg}
+              alt="FleetGuard Logo"
+              className="mx-auto mb-3 h-14 w-14 object-contain drop-shadow"
+            />
+            <h2 className="text-brand-text-primary mb-1 text-2xl font-black">
+              FleetGuard Telematics
             </h2>
-            <p className="text-gray-500">Đăng nhập hệ thống giám sát an toàn</p>
+            <p className="text-brand-text-muted text-xs">
+              Đăng nhập hệ thống điều phối an toàn xe tải
+            </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">

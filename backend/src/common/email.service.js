@@ -18,10 +18,19 @@ const createTransporter = () => {
   });
 };
 
-export const sendViolationEmailAlert = async ({ driverName, driverEmail, bienSo, loaiViPham, diemTru, uyTinConLai, tocDo, videoUrl }) => {
+export const sendViolationEmailAlert = async ({ driverName, driverEmail, bienSo, loaiViPham, diemTru, uyTinConLai, tocDo, videoUrl, tramDungChanGoiY }) => {
   const transporter = createTransporter();
   const emailFrom = process.env.EMAIL_FROM || '"Hệ Thống Giám Sát PBL4 Fleet" <no-reply@pbl4fleet.vn>';
   const targetEmail = driverEmail || process.env.SMTP_USER;
+
+  let restStopInfo = null;
+  if (tramDungChanGoiY) {
+    try {
+      restStopInfo = typeof tramDungChanGoiY === 'string' ? JSON.parse(tramDungChanGoiY) : tramDungChanGoiY;
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0b1727; color: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #1e293b;">
@@ -39,6 +48,15 @@ export const sendViolationEmailAlert = async ({ driverName, driverEmail, bienSo,
         <p style="margin: 5px 0;">🛡️ <strong>Quỹ điểm uy tín còn lại:</strong> <span style="color: #4ade80; font-weight: bold;">${uyTinConLai} / 100 điểm</span></p>
       </div>
 
+      ${restStopInfo ? `
+        <div style="background-color: #064e3b; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #10b981;">
+          <p style="margin: 0 0 5px 0; font-weight: bold; color: #34d399; font-size: 15px;">⛽ GỢI Ý TRẠM DỪNG CHÂN ĐỔI CA LÁI GẦN NHẤT:</p>
+          <p style="margin: 3px 0; color: #ecfdf5; font-size: 14px;"><strong>${restStopInfo.tenTram || restStopInfo.ten}</strong></p>
+          <p style="margin: 3px 0; color: #a7f3d0; font-size: 13px;">📍 Khoảng cách còn lại: <strong>${restStopInfo.kmConLai || 4.2} km</strong> (khoảng <strong>${restStopInfo.phutConLai || 5} phút</strong> lái xe).</p>
+          <p style="margin: 8px 0 0 0; color: #fef08a; font-size: 12px; italic;">📢 Gợi ý: Vui lòng giảm tốc độ, tắp xe vào trạm nghỉ để hồi phục thể trạng hoặc bàn giao ca lái cho tài phụ!</p>
+        </div>
+      ` : ''}
+
       ${videoUrl ? `
         <div style="margin-top: 15px; text-align: center;">
           <a href="${videoUrl}" target="_blank" style="display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-weight: bold;">
@@ -46,6 +64,7 @@ export const sendViolationEmailAlert = async ({ driverName, driverEmail, bienSo,
           </a>
         </div>
       ` : ''}
+
 
       <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;" />
       <p style="font-size: 12px; color: #64748b; text-align: center;">

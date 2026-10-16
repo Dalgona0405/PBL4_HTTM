@@ -1,7 +1,7 @@
 {
   "auto_confirm_min": 0.85,
-  "manual_review_min": 0.60,
-  "auto_reject_below": 0.60,
+  "manual_review_min": 0.6,
+  "auto_reject_below": 0.6,
   "microsleep_eye_closed_sec": 1.5,
   "yawn_sliding_window_min": 5,
   "yawn_trigger_count": 3,

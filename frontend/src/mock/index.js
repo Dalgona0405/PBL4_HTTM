@@ -16,6 +16,7 @@ import mockRoutes from "./mockRoutes.json";
 import mockViolationTypes from "./mockViolationTypes.json";
 import mockRestStops from "./mockRestStops.json";
 import mockAiConfig from "./mockAiConfig.json";
+import mockLiveMonitoring from "./mockLiveMonitoring.json";
 
 // Khởi tạo LocalStorage để lưu giữ trạng thái khi thao tác trên giao diện
 const STORAGE_KEYS = {
@@ -26,6 +27,7 @@ const STORAGE_KEYS = {
   SCORE_LOGS: "pbl4_mock_score_logs",
   AUDIT_LOGS: "pbl4_mock_audit_logs",
   AI_CONFIG: "pbl4_mock_ai_config",
+  LIVE_MONITORING: "pbl4_mock_live_monitoring",
 };
 
 const getStoredData = (key, defaultData) => {
@@ -74,7 +76,12 @@ export const getDriverScoreLogs = (driverId) => {
   return allLogs.filter((log) => log.driver_id === Number(driverId));
 };
 
-export const updateDriverStatus = (driverId, newStatus, reason = "", adminName = "Trần Quản Trị") => {
+export const updateDriverStatus = (
+  driverId,
+  newStatus,
+  reason = "",
+  adminName = "Trần Quản Trị",
+) => {
   const drivers = getDrivers();
   const driver = drivers.find((d) => d.id === Number(driverId));
   if (!driver) throw new Error("Không tìm thấy tài xế");
@@ -119,7 +126,9 @@ export const validateShiftConstraints = ({ driverId, startTime, endTime }) => {
   }
 
   if (driver.trang_thai_tai_xe === "LOCKED") {
-    errors.push("Tài xế đang bị đình chỉ (LOCKED) do điểm uy tín <= 20. Không được xếp ca!");
+    errors.push(
+      "Tài xế đang bị đình chỉ (LOCKED) do điểm uy tín <= 20. Không được xếp ca!",
+    );
     return { valid: false, warnings, errors };
   }
 
@@ -142,7 +151,8 @@ export const validateShiftConstraints = ({ driverId, startTime, endTime }) => {
   const startHour = start.getHours();
   if (biometric && biometric.khung_gio_yeu_sinh_hoc) {
     const isWeakHour = biometric.khung_gio_yeu_sinh_hoc.some((slot) => {
-      if (slot.includes("13:00") && startHour >= 12 && startHour <= 15) return true;
+      if (slot.includes("13:00") && startHour >= 12 && startHour <= 15)
+        return true;
       if (slot.includes("00:00") || slot.includes("02:00")) {
         if (startHour >= 0 && startHour <= 4) return true;
       }
@@ -159,13 +169,17 @@ export const validateShiftConstraints = ({ driverId, startTime, endTime }) => {
 
   // 3. Kiểm tra khoảng nghỉ giữa 2 ca tối thiểu (10 tiếng theo SRS 422 BUSINESS_RULE_VIOLATION)
   const allShifts = getShifts();
-  const driverShifts = allShifts.filter((s) => s.driver.id === Number(driverId));
+  const driverShifts = allShifts.filter(
+    (s) => s.driver.id === Number(driverId),
+  );
   for (const s of driverShifts) {
     if (s.thoi_gian_ket_thuc_du_kien) {
       const prevEnd = new Date(s.thoi_gian_ket_thuc_du_kien);
       const diffHours = Math.abs((start - prevEnd) / (1000 * 60 * 60));
       if (diffHours < 10 && prevEnd < start) {
-        errors.push(`Vi phạm an toàn: Khoảng nghỉ giữa 2 ca (${diffHours.toFixed(1)}h) chưa bảo đảm tối thiểu 10 giờ.`);
+        errors.push(
+          `Vi phạm an toàn: Khoảng nghỉ giữa 2 ca (${diffHours.toFixed(1)}h) chưa bảo đảm tối thiểu 10 giờ.`,
+        );
       }
     }
   }
@@ -224,7 +238,8 @@ export const reviewViolation = ({
   if (!violation) throw new Error("Không tìm thấy sự kiện vi phạm.");
 
   const oldStatus = violation.trang_thai;
-  const newStatus = decision === "CONFIRMED" ? "MANUALLY_CONFIRMED" : "MANUALLY_REJECTED";
+  const newStatus =
+    decision === "CONFIRMED" ? "MANUALLY_CONFIRMED" : "MANUALLY_REJECTED";
 
   violation.trang_thai = newStatus;
   violation.reviewed_by = reviewerId;
@@ -272,12 +287,17 @@ export const reviewViolation = ({
   // Ghi Audit Log theo FR_3.6
   createAuditLog({
     user_name: reviewerName,
-    hanh_dong: decision === "CONFIRMED" ? "CONFIRM_VIOLATION" : "REJECT_VIOLATION",
+    hanh_dong:
+      decision === "CONFIRMED" ? "CONFIRM_VIOLATION" : "REJECT_VIOLATION",
     doi_tuong_loai: "violation",
     doi_tuong_id: violation.id,
     gia_tri_truoc: { trang_thai: oldStatus },
     gia_tri_sau: { trang_thai: newStatus },
-    ly_do: notes || (decision === "CONFIRMED" ? "Duyệt vi phạm thủ công" : "Bác bỏ do nhận diện nhầm"),
+    ly_do:
+      notes ||
+      (decision === "CONFIRMED"
+        ? "Duyệt vi phạm thủ công"
+        : "Bác bỏ do nhận diện nhầm"),
   });
 
   return violation;
@@ -360,6 +380,58 @@ export const updateAiConfig = (newConfig, adminName = "Trần Quản Trị") => 
   return updated;
 };
 
+// ==============================================================================
+// 6. GIÁM SÁT LIVE & ĐIỀU PHỐI KHẨN CẤP (SRS FR_2.2, FR_3.1)
+// ==============================================================================
+
+export const getLiveMonitoringData = () => {
+  return getStoredData(STORAGE_KEYS.LIVE_MONITORING, mockLiveMonitoring);
+};
+
+export const getPriorityFleet = () => {
+  const liveData = getLiveMonitoringData();
+  return liveData?.priorityFleet || mockLiveMonitoring.priorityFleet;
+};
+
+export const getLiveMonitoringStats = () => {
+  const liveData = getLiveMonitoringData();
+  return liveData?.kpiStats || mockLiveMonitoring.kpiStats;
+};
+
+export const getDefaultSelectedVehicle = () => {
+  const liveData = getLiveMonitoringData();
+  return liveData?.defaultSelectedVehicle || mockLiveMonitoring.defaultSelectedVehicle;
+};
+
+export const dispatchVehicleToRestStop = ({
+  vehiclePlate,
+  restStopName,
+  dispatcherName = "Lê Điều Phối",
+}) => {
+  const liveData = getLiveMonitoringData();
+  const fleet = [...(liveData?.priorityFleet || mockLiveMonitoring.priorityFleet)];
+  const target = fleet.find((v) => v.plate === vehiclePlate);
+  if (target) {
+    target.actionType = "DISPATCHED";
+    target.priorityBadge = "ĐÃ ĐIỀU PHỐI";
+    target.priorityLevel = "SAFE";
+    target.priorityDesc = `Đang di chuyển vào ${restStopName}`;
+    setStoredData(STORAGE_KEYS.LIVE_MONITORING, { ...liveData, priorityFleet: fleet });
+  }
+
+  createAuditLog({
+    user_name: dispatcherName,
+    hanh_dong: "DISPATCH_REST_STOP",
+    doi_tuong_loai: "vehicle",
+    doi_tuong_id: vehiclePlate,
+    gia_tri_truoc: null,
+    gia_tri_sau: { restStop: restStopName, status: "DISPATCHED" },
+    ly_do: `Gửi lệnh khẩn cấp điều hướng vào trạm dừng nghỉ ${restStopName}`,
+  });
+
+  return target;
+};
+
 // Export toàn bộ mock raw nếu UI cần import trực tiếp
 export {
   mockUsers,
@@ -374,4 +446,6 @@ export {
   mockViolationTypes,
   mockRestStops,
   mockAiConfig,
+  mockLiveMonitoring,
 };
+

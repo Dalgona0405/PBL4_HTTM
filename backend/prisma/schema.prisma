@@ -17,40 +17,35 @@ model User {
   passwordHash String   @map("password_hash")
   hoTen        String   @map("ho_ten")
   sdt          String?
-  role         String   @default("DRIVER") // "MANAGER" | "DRIVER"
-  trangThai    String   @default("ACTIVE") @map("trang_thai") // "ACTIVE" | "INACTIVE"
+  role         String   @default("DRIVER") // "ADMIN" | "MANAGER" | "DRIVER"
+  trangThai    String   @default("ACTIVE") @map("trang_thai") // "ACTIVE" | "INACTIVE" | "BANNED"
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  // Quan hệ 1-1 mở rộng
-  driver  Driver?
-  manager Manager?
+  driver                 Driver?
+  createdShifts          Shift[]                   @relation("ShiftCreator")
+  reviewedViolations     Violation[]               @relation("ViolationReviewer")
+  auditLogs              AuditLog[]
 
   @@map("users")
 }
 
 model Driver {
   userId         Int      @id @map("user_id")
-  bangLai        String   @map("bang_lai")
-  uyTin          Int      @default(100) @map("uy_tin") // Quỹ điểm uy tín (Default 100)
-  trangThaiTaiXe String   @default("AVAILABLE") @map("trang_thai_tai_xe") // "AVAILABLE" | "ON_TRIP" | "OFFLINE"
+  bangLai        String   @unique @map("bang_lai")
+  uyTin          Int      @default(100) @map("uy_tin") // Quỹ điểm uy tín (Default 100, max 100, min 0)
+  trangThaiTaiXe String   @default("AVAILABLE") @map("trang_thai_tai_xe") // "AVAILABLE" | "ON_TRIP" | "OFFLINE" | "SUSPENDED"
   createdAt      DateTime @default(now()) @map("created_at")
 
-  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  trips      Trip[]
-  violations Violation[]
+  user              User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shifts            Shift[]
+  trips             Trip[]
+  violations        Violation[]
+  scoreLogs         DriverScoreLog[]
+  biometricProfiles DriverBiometricProfile[]
+  calibrationData   DriverCalibrationData[]
 
   @@map("drivers")
-}
-
-model Manager {
-  userId    Int      @id @map("user_id")
-  vaiTro    String   @default("COORDINATOR") @map("vai_tro") // "ADMIN" | "COORDINATOR"
-  createdAt DateTime @default(now()) @map("created_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("managers")
 }
 
 // ==========================================
@@ -65,6 +60,7 @@ model Vehicle {
   createdAt DateTime @default(now()) @map("created_at")
 
   iotDevice IotDevice?
+  shifts    Shift[]
   trips     Trip[]
 
   @@map("vehicles")
@@ -84,12 +80,14 @@ model IotDevice {
 }
 
 model Route {
-  id           Int      @id @default(autoincrement())
-  tenTuyen     String   @map("ten_tuyen")
-  khoangCachKm Float?   @map("khoang_cach_km")
-  createdAt    DateTime @default(now()) @map("created_at")
+  id                   Int      @id @default(autoincrement())
+  tenTuyen             String   @map("ten_tuyen")
+  khoangCachKm         Float?   @map("khoang_cach_km")
+  danhSachTramDungChan String?  @map("danh_sach_tram_dung_chan") // JSON string e.g. [{"ten": "Trạm Đèo Hải Vân", "kmMarker": 25}, {"ten": "Trạm Hòa Nhơn", "kmMarker": 75}]
+  createdAt            DateTime @default(now()) @map("created_at")
 
-  trips Trip[]
+  shifts Shift[]
+  trips  Trip[]
 
   @@map("routes")
 }
@@ -98,8 +96,33 @@ model Route {
 // NHÓM 3: LUỒNG VẬN HÀNH & GIÁM SÁT IOT
 // ==========================================
 
+model Shift {
+  id                        Int      @id @default(autoincrement())
+  driverId                  Int      @map("driver_id")
+  vehicleId                 Int      @map("vehicle_id")
+  routeId                   Int      @map("route_id")
+  thoiGianBatDauDuKien     DateTime @map("thoi_gian_bat_dau_du_kien")
+  thoiGianKetThucDuKien    DateTime @map("thoi_gian_ket_thuc_du_kien")
+  trangThai                 String   @default("SCHEDULED") @map("trang_thai") // "SCHEDULED" | "ACCEPTED" | "DECLINED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
+  lyDoTuChoi                String?  @map("ly_do_tu_choi")
+  createdBy                 Int      @map("created_by")
+  canhBaoKhiTao             String?  @map("canh_bao_khi_tao") // JSON string warnings (e.g. biological weak window, max drive time)
+  createdAt                 DateTime @default(now()) @map("created_at")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
+
+  driver          Driver                  @relation(fields: [driverId], references: [userId], onDelete: Cascade)
+  vehicle         Vehicle                 @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  route           Route                   @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  creator         User                    @relation("ShiftCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  trip            Trip?
+  calibrationData DriverCalibrationData[]
+
+  @@map("shifts")
+}
+
 model Trip {
   id              Int       @id @default(autoincrement())
+  shiftId         Int?      @unique @map("shift_id")
   driverId        Int       @map("driver_id")
   vehicleId       Int       @map("vehicle_id")
   routeId         Int       @map("route_id")
@@ -108,11 +131,14 @@ model Trip {
   trangThai       String    @default("PLANNED") @map("trang_thai") // "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
   createdAt       DateTime  @default(now()) @map("created_at")
 
-  driver     Driver       @relation(fields: [driverId], references: [userId], onDelete: Cascade)
-  vehicle    Vehicle      @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
-  route      Route        @relation(fields: [routeId], references: [id], onDelete: Cascade)
-  logs       IotDataLog[]
-  violations Violation[]
+  shift           Shift?                  @relation(fields: [shiftId], references: [id], onDelete: SetNull)
+  driver          Driver                  @relation(fields: [driverId], references: [userId], onDelete: Cascade)
+  vehicle         Vehicle                 @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  route           Route                   @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  logs            IotDataLog[]
+  violations      Violation[]
+  scoreLogs       DriverScoreLog[]
+  calibrationData DriverCalibrationData[]
 
   @@map("trips")
 }
@@ -124,7 +150,7 @@ model IotDataLog {
   kinhDo          Float    @map("kinh_do")
   viDo            Float    @map("vi_do")
   tocDo           Float    @map("toc_do")
-  co2Level        Float?   @map("co2_level") // Nồng độ khí CO2 đo từ cảm biến MQ-135 (ppm)
+  co2Level        Float?   @map("co2_level") // Nồng độ CO2 từ MQ-135 (ppm)
   thoiGianGhiNhan DateTime @default(now()) @map("thoi_gian_ghi_nhan")
 
   trip   Trip?     @relation(fields: [tripId], references: [id], onDelete: Cascade)
@@ -134,18 +160,100 @@ model IotDataLog {
 }
 
 model Violation {
-  id             Int      @id @default(autoincrement())
-  driverId       Int      @map("driver_id")
-  tripId         Int      @map("trip_id")
-  loaiViPham     String   @map("loai_vi_pham") // "NGỦ GẬT (AI)", "DÙNG ĐIỆN THOẠI (AI)", "NGÁP DÀI", "NỒNG ĐỘ CO2 CAO", "QUÁ TỐC ĐỘ"
-  diemTru        Int      @map("diem_tru")
-  videoUrl       String?  @map("video_url")
-  videoDuration  Int?     @map("video_duration")
-  thoiGianViPham DateTime @default(now()) @map("thoi_gian_vi_pham")
-  moTa           String?  @map("mo_ta")
+  id                       Int       @id @default(autoincrement())
+  driverId                 Int       @map("driver_id")
+  tripId                   Int       @map("trip_id")
+  loaiViPham               String    @map("loai_vi_pham") // "NGỦ GẬT (AI)", "DÙNG ĐIỆN THOẠI (AI)", "NGÁP DÀI", "NỒNG ĐỘ CO2 CAO", "QUÁ TỐC ĐỘ"
+  diemTru                  Int       @map("diem_tru")
+  videoUrl                 String?   @map("video_url")
+  videoDuration            Int?      @map("video_duration")
+  trangThai                String    @default("PENDING_VERIFICATION") @map("trang_thai") // "PENDING_UPLOAD" | "PENDING_VERIFICATION" | "CONFIRMED" | "REJECTED" | "PENDING_MANUAL_REVIEW" | "MANUALLY_CONFIRMED" | "MANUALLY_REJECTED"
+  aiConfidenceScore        Float     @default(0.90) @map("ai_confidence_score")
+  tramDungChanGoiY         String?   @map("tram_dung_chan_goi_y") // JSON string e.g. {"tenTram": "Trạm Đèo Hải Vân", "kmConLai": 4.2, "phutConLai": 5}
+  reviewedBy               Int?      @map("reviewed_by")
+  reviewedAt               DateTime? @map("reviewed_at")
+  thoiGianBatDauTheoDoi   DateTime  @default(now()) @map("thoi_gian_bat_dau_theo_doi")
+  thoiGianChotViPham       DateTime  @default(now()) @map("thoi_gian_chot_vi_pham")
+  thoiGianViPham           DateTime  @default(now()) @map("thoi_gian_vi_pham")
+  moTa                     String?   @map("mo_ta")
 
-  driver Driver @relation(fields: [driverId], references: [userId], onDelete: Cascade)
-  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  driver    Driver           @relation(fields: [driverId], references: [userId], onDelete: Cascade)
+  trip      Trip             @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  reviewer  User?            @relation("ViolationReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  scoreLogs DriverScoreLog[]
 
   @@map("violations")
+}
+
+// ==========================================
+// NHÓM 4: BỔ SUNG NGHIỆP VỤ THEO SRS
+// ==========================================
+
+model DriverScoreLog {
+  id              Int      @id @default(autoincrement())
+  driverId        Int      @map("driver_id")
+  loaiThayDoi     String   @map("loai_thay_doi") // "TRU_DIEM" | "CONG_DIEM"
+  soDiemThayDoi   Int      @map("so_diem_thay_doi")
+  diemTruoc       Int      @map("diem_truoc")
+  diemSau         Int      @map("diem_sau")
+  lyDo            String   @map("ly_do")
+  violationId     Int?     @map("violation_id")
+  tripId          Int?     @map("trip_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  driver    Driver     @relation(fields: [driverId], references: [userId], onDelete: Cascade)
+  violation Violation? @relation(fields: [violationId], references: [id], onDelete: SetNull)
+  trip      Trip?      @relation(fields: [tripId], references: [id], onDelete: SetNull)
+
+  @@map("driver_score_logs")
+}
+
+model DriverBiometricProfile {
+  id                                  Int      @id @default(autoincrement())
+  driverId                            Int      @map("driver_id")
+  khungGioYeuSinhHoc                 String   @map("khung_gio_yeu_sinh_hoc") // JSON string e.g. ["13:00-15:00", "01:00-04:00"]
+  thoiGianLaiToiDaKhuyenNghi          Int      @map("thoi_gian_lai_toi_da_khuyen_nghi") // Minutes e.g. 240 (4 hours)
+  thoiGianLaiTrungBinhTruocMetMoi    Int      @map("thoi_gian_lai_trung_binh_truoc_met_moi") // Minutes e.g. 180 (3 hours)
+  tanSuatViPham30Ngay                 String   @map("tan_suat_vi_pham_30_ngay") // JSON string e.g. {"EYES_CLOSED": 2, "PHONE": 1}
+  isDefaultProfile                    Boolean  @default(true) @map("is_default_profile")
+  kyTinhToanTu                        DateTime @map("ky_tinh_toan_tu")
+  kyTinhToanDen                       DateTime @map("ky_tinh_toan_den")
+  createdAt                           DateTime @default(now()) @map("created_at")
+
+  driver Driver @relation(fields: [driverId], references: [userId], onDelete: Cascade)
+
+  @@map("driver_biometric_profiles")
+}
+
+model DriverCalibrationData {
+  id                 Int      @id @default(autoincrement())
+  driverId           Int      @map("driver_id")
+  tripId             Int?     @map("trip_id")
+  shiftId            Int?     @map("shift_id")
+  vectorDacTrung     String   @map("vector_dac_trung") // JSON string representation of face calibration vector
+  thoiGianHieuChuan DateTime @default(now()) @map("thoi_gian_hieu_chuan")
+  ketQua             String   @default("SUCCESS") @map("ket_qua") // "SUCCESS" | "FAILED"
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  driver Driver @relation(fields: [driverId], references: [userId], onDelete: Cascade)
+  trip   Trip?  @relation(fields: [tripId], references: [id], onDelete: SetNull)
+  shift  Shift? @relation(fields: [shiftId], references: [id], onDelete: SetNull)
+
+  @@map("driver_calibration_data")
+}
+
+model AuditLog {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
+  hanhDong     String   @map("hanh_dong") // e.g. "BAN_DRIVER", "MANUAL_VERIFY_VIOLATION", "CREATE_SHIFT", "OVERRIDE_SCORE"
+  doiTuongLoai String   @map("doi_tuong_loai") // e.g. "USER", "VIOLATION", "SHIFT", "DRIVER"
+  doiTuongId   Int      @map("doi_tuong_id")
+  giaTriTruoc  String?  @map("gia_tri_truoc") // JSON string
+  giaTriSau    String?  @map("gia_tri_sau") // JSON string
+  lyDo         String?  @map("ly_do")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("audit_logs")
 }

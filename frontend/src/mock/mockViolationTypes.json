@@ -38,5 +38,15 @@
     "dieu_kien_kich_hoat": "Tay cầm điện thoại áp tai HOẶC nhìn xuống > 3 giây",
     "xu_ly_offline": "Phát loa: 'Yêu cầu tập trung lái xe', cắt video 10s",
     "xu_ly_online": "Server AI tái thẩm định video -> Trừ 5 điểm"
+  },
+  {
+    "id": 5,
+    "ma_loai": "QUA_TOC_DO",
+    "ten_loai": "Vận hành quá tốc độ quy định (> 80 km/h)",
+    "diem_tru_mac_dinh": 5,
+    "icon": "⚡",
+    "dieu_kien_kich_hoat": "Định vị GPS ghi nhận vận tốc xe chạy vượt quá 80 km/h",
+    "xu_ly_offline": "Phát loa cảnh báo vượt tốc độ quy định",
+    "xu_ly_online": "Hệ thống ghi nhận vi phạm tốc độ -> Trừ 5 điểm uy tín"
   }
 ]
