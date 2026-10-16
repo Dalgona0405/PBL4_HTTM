@@ -1,3 +1,6 @@
+// ==========================================
+// File: src/pages/Dashboard/DashboardPage.jsx
+// ==========================================
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import {
@@ -5,28 +8,33 @@ import {
   getLiveMonitoringStats,
   getDefaultSelectedVehicle,
   dispatchVehicleToRestStop,
-  mockLiveMonitoring,
 } from "../../mock";
+import {
+  Truck,
+  AlertTriangle,
+  ShieldCheck,
+  Flame,
+  Radio,
+  Navigation,
+  PhoneCall,
+  Video,
+  X,
+  Gauge,
+  Wind,
+} from "lucide-react";
 
 function DashboardPage() {
-  // Trạng thái xe đang chọn xem trên bản đồ & bảng điều phối (lấy từ tầng mock repository)
   const [selectedVehicle, setSelectedVehicle] = useState(() =>
     getDefaultSelectedVehicle(),
   );
   const [fleetList, setFleetList] = useState(() => getPriorityFleet());
   const [stats, setStats] = useState(() => getLiveMonitoringStats());
-
-  // Đồng hồ đếm ngược tuân thủ an toàn (T + 15p) theo SRS 3.1 & 3.3
   const [countdownSeconds, setCountdownSeconds] = useState(
     () => selectedVehicle?.countdownSeconds || 12 * 60 + 49,
   );
 
-  const handleSelectVehicle = (vehicle) => {
-    setSelectedVehicle(vehicle);
-    if (vehicle?.countdownSeconds !== undefined) {
-      setCountdownSeconds(vehicle.countdownSeconds);
-    }
-  };
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [showCallModal, setShowCallModal] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -41,909 +49,420 @@ function DashboardPage() {
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  const [selectedRestStopOpt, setSelectedRestStopOpt] = useState(1);
-  const [showVideoModal, setShowVideoModal] = useState(false);
-  const [showCallModal, setShowCallModal] = useState(false);
+  const handleSelectVehicle = (vehicle) => {
+    setSelectedVehicle(vehicle);
+    if (vehicle?.countdownSeconds !== undefined) {
+      setCountdownSeconds(vehicle.countdownSeconds);
+    }
+  };
 
-  // Gửi lệnh dẫn đường vào trạm dừng
   const handleDispatchNav = (stopName) => {
     const targetStop =
-      stopName ||
-      (selectedRestStopOpt === 1
-        ? selectedVehicle?.nearestRestStop?.name
-        : selectedVehicle?.altRestStop?.name) ||
-      "Trạm Dừng Nghỉ Vực Vòng";
+      stopName || selectedVehicle?.nearestRestStop?.name || "Trạm Nghỉ Cao Tốc";
 
     dispatchVehicleToRestStop({
       vehiclePlate: selectedVehicle.plate,
       restStopName: targetStop,
     });
+
     setFleetList(getPriorityFleet());
     setStats(getLiveMonitoringStats());
-
     toast.success(
-      `🚀 Đã gửi lệnh điều hướng rẽ vào [${targetStop}] tới màn hình Cabin xe ${selectedVehicle.plate} & App Driver!`,
-      { duration: 5000, icon: "📡" },
+      `Đã phát lệnh điều hướng vào [${targetStop}] tới xe ${selectedVehicle.plate}!`,
+      { duration: 4000, icon: "📍" },
     );
   };
 
   return (
-    <div className="animate-fade-in-up space-y-5">
-      {/* ========================================================================= */}
-      {/* 1. HEADER: BREADCRUMB & TIÊU ĐỀ TRUNG TÂM GIÁM SÁT */}
-      {/* ========================================================================= */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">
-          Bản đồ Giám sát GPS & Điều phối Trạm dừng khẩn cấp
-        </h1>
+    <div className="animate-fade-in-up space-y-6">
+      {/* 1. TIÊU ĐỀ TRANG */}
+      <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
+        <div>
+          <h1 className="text-brand-text-primary text-2xl font-black tracking-tight">
+            Bản đồ GPS & Điều phối Trực tuyến
+          </h1>
+          <p className="text-brand-text-muted text-xs">
+            Giám sát vi phạm AI thời gian thực, nồng độ CO2 và điều hướng khẩn
+            cấp
+          </p>
+        </div>
+        <div className="card-glass flex items-center gap-2 rounded-xl px-3.5 py-1.5 text-xs">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+          </span>
+          <span className="text-brand-text-secondary font-mono font-bold">
+            MQTT Telemetry: ONLINE
+          </span>
+        </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 2. STATS SUMMARY ROW (4 THẺ KPI LẤY TỪ MOCK DATA LAYER) */}
-      {/* ========================================================================= */}
-      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Card 1: Đang hoạt động */}
-        <div className="flex items-center gap-3.5 rounded-2xl border border-blue-100 bg-white p-3.5 shadow-xs">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-            <span className="text-lg">📡</span>
+      {/* 2. CÁC THẺ KPI STATS (CHUẨN THEO BẢNG MÀU PALETTE) */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="card-glass border-brand-border flex items-center gap-4 rounded-2xl border p-4 shadow-lg">
+          <div className="bg-brand-blue-night/60 text-brand-blue-light border-brand-primary/30 flex h-12 w-12 items-center justify-center rounded-xl border">
+            <Truck className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-[11px] font-medium text-slate-400">
-              Đang hoạt động
+            <p className="text-brand-text-muted text-xs font-semibold">
+              Xe đang chạy
             </p>
-            <p className="text-lg font-black text-slate-900">
+            <p className="text-brand-text-primary text-xl font-black">
               {stats.activeVehicles}{" "}
-              <span className="text-xs font-semibold text-slate-400">
+              <span className="text-brand-text-subtle text-xs font-normal">
                 xe IoT
               </span>
             </p>
           </div>
         </div>
 
-        {/* Card 2: Ngủ gật (Microsleep) */}
-        <div className="flex items-center gap-3.5 rounded-2xl border border-rose-200 bg-rose-50/70 p-3.5 shadow-xs">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500 text-white shadow-xs">
-            <span className="text-lg font-black">!</span>
+        <div className="card-glass border-alert-danger/30 flex items-center gap-4 rounded-2xl border bg-rose-950/20 p-4 shadow-lg">
+          <div className="bg-alert-danger/20 text-alert-danger border-alert-danger/40 flex h-12 w-12 items-center justify-center rounded-xl border">
+            <Flame className="h-6 w-6 animate-pulse" />
           </div>
           <div>
-            <p className="text-[11px] font-bold tracking-tight text-rose-700 uppercase">
+            <p className="text-alert-danger text-xs font-bold tracking-wider uppercase">
               Ngủ gật (Microsleep)
             </p>
-            <p className="text-lg font-black text-rose-600">
+            <p className="text-brand-text-primary text-xl font-black">
               {String(stats.microsleepAlerts).padStart(2, "0")}{" "}
-              <span className="text-xs font-bold text-rose-500">
-                Cần can thiệp gấp
+              <span className="text-alert-danger text-xs font-semibold">
+                Can thiệp gấp
               </span>
             </p>
           </div>
         </div>
 
-        {/* Card 3: Cảnh báo Mệt mỏi */}
-        <div className="flex items-center gap-3.5 rounded-2xl border border-amber-200 bg-amber-50/70 p-3.5 shadow-xs">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500 text-white shadow-xs">
-            <span className="text-lg">🌙</span>
+        <div className="card-glass border-alert-warning/30 flex items-center gap-4 rounded-2xl border bg-amber-950/20 p-4 shadow-lg">
+          <div className="bg-alert-warning/20 text-alert-warning border-alert-warning/40 flex h-12 w-12 items-center justify-center rounded-xl border">
+            <AlertTriangle className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-[11px] font-bold tracking-tight text-amber-800">
-              Cảnh báo Mệt mỏi
+            <p className="text-alert-warning text-xs font-bold">
+              Cảnh báo mệt mỏi
             </p>
-            <p className="text-lg font-black text-amber-700">
+            <p className="text-brand-text-primary text-xl font-black">
               {String(stats.fatigueWarnings).padStart(2, "0")}{" "}
-              <span className="text-xs font-semibold text-amber-600">xe</span>
+              <span className="text-brand-text-subtle text-xs font-normal">
+                xe ngáp/CO2
+              </span>
             </p>
           </div>
         </div>
 
-        {/* Card 4: Bình thường */}
-        <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-xs">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
-            <span className="text-lg">✔️</span>
+        <div className="card-glass border-brand-border flex items-center gap-4 rounded-2xl border p-4 shadow-lg">
+          <div className="text-alert-safe flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-950/40">
+            <ShieldCheck className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-[11px] font-medium text-slate-400">
-              Trạng thái Bình thường
+            <p className="text-brand-text-muted text-xs font-semibold">
+              Trạng thái an toàn
             </p>
-            <p className="text-lg font-black text-slate-900">
+            <p className="text-brand-text-primary text-xl font-black">
               {stats.normalVehicles}{" "}
-              <span className="text-xs font-semibold text-slate-400">xe</span>
+              <span className="text-brand-text-subtle text-xs font-normal">
+                xe bình thường
+              </span>
             </p>
           </div>
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 3. CENTER SPLIT: BẢN ĐỒ LIVE (LEFT 60%) & BẢNG ĐIỀU PHỐI KHẨN CẤP (RIGHT 40%) */}
-      {/* ========================================================================= */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
-        {/* --------------------------------------------------------------------- */}
-        {/* CỘT TRÁI: BẢN ĐỒ LIVE (7/12 COLS) */}
-        {/* --------------------------------------------------------------------- */}
-        <div className="relative flex h-[670px] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-slate-900 shadow-xs lg:col-span-7">
-          {/* BANNER CAO TỐC TRÊN ĐẦU BẢN ĐỒ */}
-          <div className="absolute top-4 left-4 z-10 flex items-center gap-2 rounded-2xl border border-slate-100 bg-white/95 px-3 py-1.5 text-xs shadow-md backdrop-blur-md">
-            <span className="rounded bg-blue-600 px-1.5 py-0.5 font-sans text-[10px] font-black text-white">
+      {/* 3. KHU VỰC BẢN ĐỒ VÀ BẢNG ĐIỀU PHỐI CHI TIẾT */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* KHUNG BẢN ĐỒ MÔ PHỎNG GPS */}
+        <div className="card-glass border-brand-border relative flex h-[620px] flex-col overflow-hidden rounded-3xl border shadow-2xl lg:col-span-7">
+          <div className="border-brand-border-dark bg-brand-dark/85 absolute top-4 left-4 z-10 flex items-center gap-2.5 rounded-2xl border px-3.5 py-2 text-xs shadow-xl backdrop-blur-md">
+            <span className="bg-brand-primary rounded px-2 py-0.5 font-mono text-[11px] font-black text-white">
               CT01
             </span>
-            <span className="text-[11px] font-bold text-slate-800">
-              Cao tốc Bắc - Nam (Pháp Vân - Cầu Giẽ - Ninh Bình)
+            <span className="text-brand-text-primary font-bold">
+              Cao tốc Bắc - Nam (Hà Nội - Ninh Bình)
             </span>
-            <span className="text-slate-300">|</span>
-            <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-              Mật độ: Thông
+            <span className="text-brand-text-subtle">|</span>
+            <span className="text-alert-safe flex items-center gap-1.5 text-[11px] font-semibold">
+              <span className="h-2 w-2 rounded-full bg-emerald-400"></span>
+              Thông suốt
             </span>
           </div>
 
-          {/* CONTROLS BÊN PHẢI BẢN ĐỒ */}
-          <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-            <button className="flex items-center gap-1.5 rounded-xl bg-white/90 px-2.5 py-1 text-[11px] font-bold text-slate-700 shadow-md backdrop-blur-md hover:bg-white">
-              <span>🗺️</span> Vệ tinh
-            </button>
-            <div className="flex flex-col overflow-hidden rounded-xl border border-slate-100 bg-white shadow-md">
-              <button
-                className="p-1.5 text-xs font-black text-slate-700 hover:bg-slate-100"
-                onClick={() => toast("Phóng to")}
-              >
-                +
-              </button>
-              <div className="h-px bg-slate-100"></div>
-              <button
-                className="p-1.5 text-xs font-black text-slate-700 hover:bg-slate-100"
-                onClick={() => toast("Thu nhỏ")}
-              >
-                -
-              </button>
-            </div>
-            <button
-              className="flex h-7 w-7 items-center justify-center rounded-xl bg-white text-xs text-slate-700 shadow-md hover:bg-slate-100"
-              onClick={() => toast.success("Định vị xe 29C-882.14")}
-            >
-              📍
-            </button>
-          </div>
-
-          {/* SVG MAP CANVAS */}
-          <div className="relative flex-1 overflow-hidden bg-gradient-to-br from-slate-100 via-teal-50/50 to-blue-50/60">
+          {/* Sơ đồ vector đường kính mô phỏng */}
+          <div className="relative flex-1 bg-gradient-to-br from-slate-950 via-[#0a101f] to-[#0f172a]">
             <svg
-              className="absolute inset-0 h-full w-full"
-              viewBox="0 0 800 670"
+              className="absolute inset-0 h-full w-full opacity-60"
+              viewBox="0 0 800 620"
               preserveAspectRatio="xMidYMid slice"
             >
-              {/* Sông Đáy */}
               <path
                 d="M 60,-30 C 160,140 180,280 230,420 C 290,560 320,700 350,800"
                 fill="none"
-                stroke="var(--color-blue-light, #bae6fd)"
-                strokeWidth="20"
+                stroke="#1e3a8a"
+                strokeWidth="24"
                 strokeLinecap="round"
-                opacity="0.75"
-              />
-
-              {/* Quốc lộ 1A */}
-              <path
-                d="M 270,0 L 270,670"
-                fill="none"
-                stroke="var(--text-secondary, #e2e8f0)"
-                strokeWidth="5"
-              />
-
-              {/* Tuyến Cao tốc CT01 */}
-              <path
-                d="M 440,0 Q 420,180 450,330 T 510,670"
-                fill="none"
-                stroke="var(--text-muted, #cbd5e1)"
-                strokeWidth="12"
               />
               <path
-                d="M 440,0 Q 420,180 450,330 T 510,670"
+                d="M 270,0 L 270,620"
                 fill="none"
-                stroke="var(--color-primary, #3b82f6)"
-                strokeWidth="7"
-                strokeDasharray="14, 5"
+                stroke="#1e293b"
+                strokeWidth="6"
               />
-
-              {/* DÒNG CHỈ DẪN DẪN ĐƯỜNG MÀU CAM DẤU CHẤM TỚI TRẠM DỪNG NGHỈ */}
               <path
-                d="M 440,260 C 480,310 520,330 600,340"
+                d="M 440,0 Q 420,180 450,330 T 510,620"
                 fill="none"
-                stroke="var(--status-warning, #f97316)"
-                strokeWidth="5"
-                strokeDasharray="6, 5"
-                className="animate-pulse"
+                stroke="#3b82f6"
+                strokeWidth="4"
+                strokeDasharray="12, 6"
               />
-
-              {/* Nhãn địa danh */}
-              <text
-                x="170"
-                y="230"
-                fill="var(--text-subtle, #64748b)"
-                fontSize="12"
-                fontWeight="bold"
-              >
-                Đại Học Công Nghiệp Hà Nam
-              </text>
-              <text
-                x="210"
-                y="300"
-                fill="var(--status-safe, #0f766e)"
-                fontSize="13"
-                fontWeight="black"
-              >
-                Phủ Lý
-              </text>
-              <text
-                x="180"
-                y="440"
-                fill="var(--text-subtle, #64748b)"
-                fontSize="11"
-              >
-                Chùa Phật Quang
-              </text>
-              <text
-                x="210"
-                y="540"
-                fill="var(--text-subtle, #64748b)"
-                fontSize="11"
-              >
-                Tân Thanh
-              </text>
-              <text
-                x="490"
-                y="240"
-                fill="var(--text-subtle, #64748b)"
-                fontSize="11"
-              >
-                Liêm Tuyền
-              </text>
-              <text
-                x="560"
-                y="100"
-                fill="var(--text-subtle, #64748b)"
-                fontSize="11"
-              >
-                Duy Tiên
-              </text>
             </svg>
 
-            {/* TRẠM DỪNG NGHỈ VỰC VÒNG (BLUE ICON TRÊN MAP) */}
-            <div className="absolute top-[315px] left-[595px] z-20 flex flex-col items-center">
-              <div className="flex items-center gap-1.5 rounded-2xl bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-lg">
-                <span className="text-sm">⛽</span>
-                <span>Trạm Dừng Nghỉ Vực Vòng</span>
+            {/* Điểm xe cảnh báo đỏ trên bản đồ */}
+            <div className="absolute top-[230px] left-[420px] z-30 cursor-pointer">
+              <span className="bg-alert-danger absolute -top-3 -left-3 h-14 w-14 animate-ping rounded-full opacity-40"></span>
+              <div className="bg-alert-danger relative flex h-10 w-10 items-center justify-center rounded-full border-2 border-white text-white shadow-2xl">
+                <span className="text-lg">🚨</span>
               </div>
-              <div className="-mt-1 h-2 w-2 rotate-45 bg-blue-600"></div>
-            </div>
-
-            {/* XE MỆT MỎI (AMBER MOON ICON) */}
-            <div className="absolute top-[440px] left-[415px] z-20 flex flex-col items-center">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-amber-500 text-white shadow-lg">
-                🌙
-              </div>
-            </div>
-
-            {/* XE 29C-882.14 BÁO ĐỘNG NGỦ GẬT VỚI TOOLTIP NỔI TRÊN NÓC XE */}
-            <div className="absolute top-[240px] left-[420px] z-30">
-              <span className="absolute -top-3 -left-3 h-14 w-14 animate-ping rounded-full bg-rose-500 opacity-40"></span>
-              <div className="relative flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-rose-600 text-white shadow-2xl">
-                <span className="text-base">🚨</span>
-              </div>
-
-              {/* CALLOUT POPUP NỔI ĐÚNG Y NHƯ HÌNH MẪU! */}
-              <div className="absolute -top-[190px] -left-[140px] w-72 rounded-2xl border border-slate-700/70 bg-slate-900/95 p-3.5 text-white shadow-2xl backdrop-blur-md">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="flex items-center gap-1 font-bold text-rose-400">
-                    <span className="h-2 w-2 animate-pulse rounded-full bg-rose-500"></span>
-                    NGỦ GẬT (MICROSLEEP 1.8S)
-                  </span>
-                  <span className="text-slate-400">2 phút trước</span>
-                </div>
-
-                <div className="mt-1 flex items-baseline justify-between">
-                  <h3 className="font-sans text-xl font-black tracking-tight text-white">
-                    29C-882.14
-                  </h3>
-                </div>
-
-                <p className="text-xs text-slate-300">
-                  Tài xế: Nguyễn Văn Hùng
+              <div className="card-glass border-alert-danger/50 mt-2 -ml-8 rounded-lg border px-2 py-1 text-center shadow-md">
+                <p className="text-brand-text-primary font-mono text-[10px] font-bold">
+                  {selectedVehicle.plate}
                 </p>
-
-                <div className="mt-2 space-y-1 border-t border-slate-800 pt-2 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Còi xe Edge IoT:</span>
-                    <span className="font-bold text-rose-400">
-                      ĐÃ KÍCH HOẠT (85dB)
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Vận tốc:</span>
-                    <span className="font-bold text-white">58 km/h</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Nồng độ CO2:</span>
-                    <span className="font-bold text-amber-400">
-                      1,120 ppm (Cao)
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-2.5 rounded-lg bg-amber-400/20 px-2 py-1 text-[11px] font-bold text-amber-300">
-                  📍 Đang chỉ dẫn tới trạm Vực Vòng:{" "}
-                  <span className="text-white">4.2 km (6 ph)</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* CHÚ THÍCH DƯỚI ĐÁY BẢN ĐỒ */}
-          <div className="flex flex-wrap items-center justify-between border-t border-slate-800 bg-slate-950/90 px-4 py-2.5 text-xs text-slate-300">
-            <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-rose-500"></span>
-                Khẩn cấp: Ngủ gật (1)
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-amber-400"></span>
-                Cảnh báo Mệt mỏi (3)
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
-                An toàn
-              </span>
-            </div>
-            <div className="font-sans text-[11px] text-slate-400">
-              Định vị Km 222 + 800 | Phủ Lý - Hà Nam
-            </div>
-          </div>
-        </div>
-
-        {/* --------------------------------------------------------------------- */}
-        {/* CỘT PHẢI: BẢNG ĐIỀU PHỐI KHẨN CẤP (5/12 COLS) */}
-        {/* --------------------------------------------------------------------- */}
-        <div className="flex flex-col gap-3.5 rounded-3xl border border-slate-200 bg-white p-5 shadow-xs lg:col-span-5">
-          {/* HEADER XE */}
-          <div className="flex items-start justify-between border-b border-slate-100 pb-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="animate-pulse rounded-md bg-rose-500 px-2 py-0.5 text-[10px] font-black tracking-wider text-white uppercase">
-                  Can thiệp gấp
-                </span>
-                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
-                  {selectedVehicle.route}
-                </span>
-              </div>
-              <h2 className="mt-1 font-sans text-3xl font-black tracking-tight text-slate-900">
-                {selectedVehicle.plate}
-              </h2>
-              <p className="text-xs text-slate-400">{selectedVehicle.model}</p>
-            </div>
-
-            <button
-              onClick={() => toast.error("Đã kích hoạt còi khẩn cấp cabin!")}
-              className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 shadow-xs transition-colors hover:bg-rose-100"
-            >
-              <span className="text-lg">🚨</span>
-            </button>
-          </div>
-
-          {/* TÀI XẾ & ĐIỂM UY TÍN */}
-          <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 p-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-white shadow-xs">
-                {selectedVehicle.driverName.charAt(0)}
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-900">
-                  {selectedVehicle.driverName}
-                </p>
-                <p className="text-[11px] text-slate-400">
-                  Mã: {selectedVehicle.driverCode} • Thâm niên:{" "}
-                  {selectedVehicle.experience}
+                <p className="text-alert-danger text-[9px] font-bold">
+                  Microsleep
                 </p>
               </div>
             </div>
 
-            <div className="text-right">
-              <p className="text-[10px] font-medium text-slate-400">
-                Điểm uy tín
-              </p>
-              <p className="text-base font-black text-blue-600">
-                {selectedVehicle.score}
-                <span className="text-xs font-normal text-slate-400">/100</span>
-              </p>
-            </div>
-          </div>
-
-          {/* TELEMETRY */}
-          <div className="grid grid-cols-2 gap-2.5">
-            <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-2.5">
-              <span className="text-[10px] font-medium text-slate-400">
-                Tốc độ xe
-              </span>
-              <p className="mt-0.5 text-base font-black text-slate-800">
-                {selectedVehicle.speed}{" "}
-                <span className="text-xs font-semibold text-slate-400">
-                  km/h
-                </span>
-              </p>
-            </div>
-            <div className="rounded-2xl border border-rose-100 bg-rose-50/40 p-2.5">
-              <span className="text-[10px] font-medium text-rose-600">
-                Nồng độ CO2 cabin
-              </span>
-              <p className="mt-0.5 text-base font-black text-rose-600">
-                1,120{" "}
-                <span className="text-xs font-bold text-rose-500">
-                  ppm (Cao)
-                </span>
-              </p>
-            </div>
-          </div>
-
-          {/* CẢNH BÁO EDGE AI CAMERA */}
-          <div className="flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/90 p-3 text-xs leading-relaxed text-rose-900 shadow-xs">
-            <span className="mt-0.5 text-base text-rose-600">🛡️</span>
-            <div>
-              <span className="font-bold text-rose-700">Edge AI Camera:</span>{" "}
-              {selectedVehicle.alertDesc}
-            </div>
-          </div>
-
-          {/* ĐỀ XUẤT TRẠM DỪNG ĐÓN ĐẦU */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-black tracking-wider text-slate-800 uppercase">
-                Đề xuất Trạm dừng đón đầu
-              </h3>
-              <span className="flex cursor-pointer items-center gap-1 text-[11px] font-bold text-blue-600 hover:underline">
-                <span>⚡</span> AI Route Optimizer
-              </span>
-            </div>
-
-            {/* Ưu tiên 1 */}
-            <div
-              onClick={() => setSelectedRestStopOpt(1)}
-              className={`cursor-pointer rounded-2xl border-2 p-3.5 transition-all ${
-                selectedRestStopOpt === 1
-                  ? "border-blue-600 bg-blue-50/40 shadow-xs"
-                  : "border-slate-200 bg-white hover:border-slate-300"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="rounded-md bg-blue-600 px-2 py-0.5 text-[10px] font-bold text-white uppercase">
-                  Ưu tiên 1
-                </span>
-                <span className="text-xs font-bold text-emerald-600">
-                  {selectedVehicle.nearestRestStop.emptySlots} chỗ trống
-                </span>
-              </div>
-
-              <h4 className="mt-1 text-xs font-bold text-slate-900">
-                {selectedVehicle.nearestRestStop.name}
-              </h4>
-
-              <div className="mt-1.5 flex items-center gap-4 text-xs">
-                <div>
-                  <span className="text-[10px] text-slate-400">Cự ly</span>
-                  <p className="text-xs font-black text-slate-800">
-                    {selectedVehicle.nearestRestStop.distance}
-                  </p>
-                </div>
-                <div className="h-5 w-px bg-slate-200"></div>
-                <div>
-                  <span className="text-[10px] text-slate-400">ETA</span>
-                  <p className="text-xs font-black text-blue-600">
-                    {selectedVehicle.nearestRestStop.eta}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-2 flex items-center gap-3 border-t border-slate-200/60 pt-1.5 text-[10px] text-slate-500">
-                <span>☕ Cà phê</span>
-                <span>•</span>
-                <span>🚿 Tắm nghỉ ngơi</span>
-                <span>•</span>
-                <span>🛟 Cứu hộ SOS</span>
-              </div>
-            </div>
-
-            {/* Phương án 2 */}
-            <div
-              onClick={() => setSelectedRestStopOpt(2)}
-              className={`cursor-pointer rounded-2xl border p-2.5 transition-all ${
-                selectedRestStopOpt === 2
-                  ? "border-blue-600 bg-blue-50/40"
-                  : "border-slate-200 bg-slate-50/50 hover:bg-slate-50"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="py-0.2 rounded-md bg-slate-200 px-1.5 text-[9px] font-bold text-slate-600 uppercase">
-                  Phương án 2
-                </span>
-                <span className="text-[10px] font-semibold text-slate-500">
-                  {selectedVehicle.altRestStop.emptySlots} chỗ
-                </span>
-              </div>
-              <div className="mt-1 flex items-center justify-between">
-                <div>
-                  <h4 className="text-[11px] font-bold text-slate-800">
-                    {selectedVehicle.altRestStop.name}
-                  </h4>
-                  <p className="text-[10px] text-slate-500">
-                    Cách {selectedVehicle.altRestStop.distance} • ETA{" "}
-                    {selectedVehicle.altRestStop.eta}
-                  </p>
-                </div>
-                <button className="rounded-lg border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-bold text-slate-700 hover:bg-slate-100">
-                  Chọn
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* ĐỒNG HỒ ĐẾM NGƯỢC TUÂN THỦ T + 15P */}
-          <div className="flex items-center justify-between rounded-2xl border border-amber-200 bg-amber-50/70 p-3">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-amber-600">⏰</span>
-              <div className="leading-tight">
-                <p className="text-[11px] font-bold text-slate-800">
-                  Hạn mức tuân thủ bắt buộc (T + 15p)
+            {/* Danh sách các xe ưu tiên theo dõi (Mini Fleet Bar) */}
+            <div className="absolute right-4 bottom-4 left-4 z-20">
+              <div className="card-glass border-brand-border rounded-2xl border p-3">
+                <p className="text-brand-text-muted mb-2 text-[11px] font-bold tracking-wider uppercase">
+                  Đội xe cần chú ý theo dõi ({fleetList.length})
                 </p>
-                <p className="text-[10px] text-amber-700">
-                  Tránh phạt trừ 5 điểm an toàn
-                </p>
-              </div>
-            </div>
-            <div className="font-sans text-lg font-black text-rose-600">
-              {formatCountdown(countdownSeconds)}
-            </div>
-          </div>
-
-          {/* HÀNH ĐỘNG ĐIỀU PHỐI */}
-          <div className="space-y-2 pt-0.5">
-            <button
-              onClick={() => handleDispatchNav()}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 py-3 text-xs font-black text-white shadow-md shadow-blue-600/30 transition-all hover:bg-blue-700 active:scale-98"
-            >
-              <span>🚀</span>
-              <span>GỬI LỆNH DẪN ĐƯỜNG VÀO TRẠM VỰC VÒNG</span>
-            </button>
-
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setShowCallModal(true)}
-                className="flex items-center justify-center gap-1.5 rounded-xl bg-amber-500 py-2 text-xs font-bold text-white shadow-xs transition-all hover:bg-amber-600"
-              >
-                <span>📞</span> Gọi Trực Tiếp Tài Xế
-              </button>
-
-              <button
-                onClick={() => setShowVideoModal(true)}
-                className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 py-2 text-xs font-bold text-slate-800 transition-all hover:bg-slate-200"
-              >
-                <span>📹</span> Clip AI 10s{" "}
-                <span className="py-0.2 rounded bg-emerald-500 px-1 text-[9px] text-white">
-                  92%
-                </span>
-              </button>
-            </div>
-
-            <p className="text-center text-[10px] text-slate-400">
-              Lệnh gửi sẽ phát âm thanh cảnh báo điều phối qua màn hình Cabin &
-              App Driver FleetGuard.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 4. BẢNG ƯU TIÊN CAN THIỆP & ĐIỀU PHỐI ĐỘI XE (ĐÚNG THEO HÌNH MẪU 100%) */}
-      {/* ========================================================================= */}
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs">
-        {/* TIÊU ĐỀ BẢNG ƯU TIÊN */}
-        <div className="mb-4 flex items-center gap-3 border-b border-slate-100 pb-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-rose-100 bg-rose-50 text-lg font-black text-rose-600 shadow-xs">
-            !
-          </div>
-          <div>
-            <h3 className="text-base font-black text-slate-900">
-              Bảng ưu tiên Can thiệp & Điều phối Đội xe
-            </h3>
-            <p className="text-xs text-slate-400">
-              Giám sát thời gian thực danh sách phương tiện theo mức độ rủi ro
-              sinh học & vị trí trạm dừng đón đầu
-            </p>
-          </div>
-        </div>
-
-        {/* PILL TỔNG SỐ XE ĐANG THEO DÕI */}
-        <div className="mb-3">
-          <span className="rounded-lg bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-700">
-            Tổng: {fleetList.length} xe đang theo dõi trọng điểm
-          </span>
-        </div>
-
-        {/* BẢNG DỮ LIỆU */}
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-xs">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/80 text-[10px] font-black tracking-wider text-slate-400 uppercase">
-                <th className="rounded-tl-xl px-4 py-3">
-                  Mức ưu tiên & Trạng thái
-                </th>
-                <th className="px-4 py-3">Phương tiện & Tài xế</th>
-                <th className="px-4 py-3">Tuyến & Định vị</th>
-                <th className="px-4 py-3">Chỉ số Telemetry</th>
-                <th className="px-4 py-3">Trạm dừng đón đầu</th>
-                <th className="rounded-tr-xl px-4 py-3 text-center">
-                  Hành động điều phối
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 font-medium">
-              {fleetList.map((item) => (
-                <tr
-                  key={item.id}
-                  onClick={() => handleSelectVehicle(item)}
-                  className={`cursor-pointer transition-colors hover:bg-slate-50/80 ${
-                    selectedVehicle.plate === item.plate ? "bg-rose-50/30" : ""
-                  }`}
-                >
-                  {/* Cột 1: Mức ưu tiên & Trạng thái */}
-                  <td className="px-4 py-3.5">
-                    <div className="flex flex-col gap-1">
-                      {item.priorityLevel === "DANGER" && (
-                        <span className="inline-flex w-fit items-center rounded-full bg-rose-600 px-2.5 py-0.5 text-[10px] font-black text-white shadow-xs">
-                          {item.priorityBadge}
-                        </span>
-                      )}
-                      {item.priorityLevel === "WARNING" && (
-                        <span className="inline-flex w-fit items-center rounded-full bg-amber-500 px-2.5 py-0.5 text-[10px] font-black text-white shadow-xs">
-                          {item.priorityBadge}
-                        </span>
-                      )}
-                      {item.priorityLevel === "CO2_HIGH" && (
-                        <span className="inline-flex w-fit items-center rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-[10px] font-black text-amber-800">
-                          {item.priorityBadge}
-                        </span>
-                      )}
-                      {item.priorityLevel === "SAFE" && (
-                        <span className="inline-flex w-fit items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                          {item.priorityBadge}
-                        </span>
-                      )}
-                      <p
-                        className={`text-[11px] ${
-                          item.priorityLevel === "DANGER"
-                            ? "font-bold text-rose-600"
-                            : item.priorityLevel === "WARNING"
-                              ? "text-amber-700"
-                              : "text-slate-400"
-                        }`}
-                      >
-                        {item.priorityDesc}
-                      </p>
-                    </div>
-                  </td>
-
-                  {/* Cột 2: Phương tiện & Tài xế */}
-                  <td className="px-4 py-3.5">
-                    <p className="font-sans text-sm font-black text-slate-900">
-                      {item.plate}
-                    </p>
-                    <p className="text-[11px] font-medium text-slate-500">
-                      {item.driver} ({item.driverCode})
-                    </p>
-                  </td>
-
-                  {/* Cột 3: Tuyến & Định vị */}
-                  <td className="px-4 py-3.5">
-                    <p className="text-xs font-bold text-slate-800">
-                      {item.route}
-                    </p>
-                    <p className="text-[11px] text-slate-400">
-                      {item.location}
-                    </p>
-                  </td>
-
-                  {/* Cột 4: Chỉ số Telemetry */}
-                  <td className="px-4 py-3.5">
-                    <div className="flex flex-col text-xs leading-tight">
-                      <span className="font-black text-slate-800">
-                        {item.speed}
-                      </span>
-                      <span
-                        className={`text-[11px] font-bold ${
-                          item.co2Status === "danger"
-                            ? "text-rose-600"
-                            : item.co2Status === "warning"
-                              ? "text-amber-600"
-                              : "text-emerald-600"
-                        }`}
-                      >
-                        • CO2: {item.co2}
-                      </span>
-                      <span className="text-[10px] font-semibold text-blue-600">
-                        Uy tín: {item.score}
-                      </span>
-                    </div>
-                  </td>
-
-                  {/* Cột 5: Trạm dừng đón đầu */}
-                  <td className="px-4 py-3.5">
-                    <p className="flex cursor-pointer items-center gap-1 text-xs font-bold text-blue-600 hover:underline">
-                      <span>⛽</span> {item.restStop}
-                    </p>
-                    <p
-                      className={`text-[11px] ${
-                        item.priorityLevel === "DANGER"
-                          ? "font-bold text-rose-600"
-                          : "text-slate-400"
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {fleetList.map((v) => (
+                    <button
+                      key={v.id}
+                      onClick={() => handleSelectVehicle(v)}
+                      className={`flex shrink-0 items-center gap-2 rounded-xl border px-3 py-2 text-left transition-all ${
+                        selectedVehicle.plate === v.plate
+                          ? "border-brand-primary bg-brand-primary/20 text-white"
+                          : "border-brand-border-dark bg-brand-dark/60 text-brand-text-muted hover:border-brand-border"
                       }`}
                     >
-                      {item.restStopDistance}
-                    </p>
-                  </td>
-
-                  {/* Cột 6: Hành động điều phối */}
-                  <td className="px-4 py-3.5 text-center">
-                    {item.actionType === "EMERGENCY_DISPATCH" && (
-                      <div className="flex items-center justify-center gap-1.5">
-                        <button
-                          onClick={() => handleDispatchNav(item.restStop)}
-                          className="flex items-center gap-1 rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs transition-all hover:bg-blue-700"
-                        >
-                          <span>🚀</span> Điều phối trạm
-                        </button>
-                        <button
-                          onClick={() => setShowCallModal(true)}
-                          className="flex items-center gap-1 rounded-xl bg-rose-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs transition-all hover:bg-rose-700"
-                        >
-                          <span>📞</span> Gọi khẩn
-                        </button>
-                      </div>
-                    )}
-
-                    {item.actionType === "REMIND_REST" && (
-                      <button
-                        onClick={() =>
-                          toast.success(
-                            `Đã phát loa nhắc tài xế ${item.driver} chuẩn bị phương án đỗ nghỉ!`,
-                          )
-                        }
-                        className="mx-auto flex items-center gap-1.5 rounded-xl bg-amber-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-all hover:bg-amber-600"
-                      >
-                        <span>🌙</span> Nhắc nghỉ ngơi
-                      </button>
-                    )}
-
-                    {item.actionType === "CHECK_VEHICLE" && (
-                      <button
-                        onClick={() =>
-                          toast(
-                            `Đang yêu cầu camera cabin kiểm tra hành vi ${item.plate}`,
-                          )
-                        }
-                        className="mx-auto flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 px-3.5 py-1.5 text-xs font-bold text-slate-700 transition-all hover:bg-slate-200"
-                      >
-                        <span>👁️</span> Kiểm tra
-                      </button>
-                    )}
-
-                    {item.actionType === "VENTILATE_CABIN" && (
-                      <button
-                        onClick={() =>
-                          toast.success(
-                            `Đã kích hoạt loa cabin xe ${item.plate}: Yêu cầu hạ kính thông gió lấy oxy ngoài!`,
-                          )
-                        }
-                        className="mx-auto flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition-all hover:bg-slate-100"
-                      >
-                        <span>💨</span> Nhắc hạ kính
-                      </button>
-                    )}
-
-                    {item.actionType === "STABLE" && (
-                      <span className="inline-flex items-center gap-1 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
-                        <span>✔️</span> Ổn định
+                      <span className="text-xs">
+                        {v.priorityLevel === "DANGER"
+                          ? "🔴"
+                          : v.priorityLevel === "WARNING"
+                            ? "🟡"
+                            : "🟢"}
                       </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      <div>
+                        <p className="font-mono text-xs font-bold text-white">
+                          {v.plate}
+                        </p>
+                        <p className="text-brand-text-subtle text-[10px]">
+                          {v.driver}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* THẺ BẢNG ĐIỀU PHỐI CAN THIỆP (ACTION PANEL) */}
+        <div className="card-glass border-brand-border flex flex-col justify-between rounded-3xl border p-6 shadow-2xl lg:col-span-5">
+          <div className="space-y-4">
+            {/* Header thông tin xe */}
+            <div className="border-brand-border-dark flex items-start justify-between border-b pb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-alert-danger animate-pulse rounded-md px-2 py-0.5 text-[10px] font-black tracking-wider text-white uppercase">
+                    Cần can thiệp
+                  </span>
+                  <span className="bg-brand-surface border-brand-border text-brand-text-muted rounded-md border px-2 py-0.5 text-[10px] font-bold">
+                    {selectedVehicle.route}
+                  </span>
+                </div>
+                <h2 className="text-brand-text-primary mt-1.5 font-mono text-3xl font-black tracking-tight">
+                  {selectedVehicle.plate}
+                </h2>
+                <p className="text-brand-text-muted text-xs">
+                  {selectedVehicle.model}
+                </p>
+              </div>
+
+              {/* Đồng hồ đếm ngược tuân thủ T+15p theo SRS 3.1 */}
+              <div className="rounded-xl border border-amber-500/30 bg-amber-950/40 p-2.5 text-right">
+                <p className="text-[10px] font-bold tracking-wider text-amber-400 uppercase">
+                  Thời hạn dừng xe
+                </p>
+                <p className="font-mono text-lg font-black text-amber-300">
+                  {formatCountdown(countdownSeconds)}
+                </p>
+              </div>
+            </div>
+
+            {/* Thông tin tài xế */}
+            <div className="border-brand-border-dark bg-brand-dark/70 flex items-center justify-between rounded-2xl border p-3.5">
+              <div className="flex items-center gap-3">
+                <div className="from-brand-primary to-brand-primary-dark flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br font-bold text-white shadow-md">
+                  {selectedVehicle.driverName?.charAt(0) || "T"}
+                </div>
+                <div>
+                  <p className="text-brand-text-primary text-xs font-bold">
+                    {selectedVehicle.driverName}
+                  </p>
+                  <p className="text-brand-text-subtle text-[11px]">
+                    Mã: {selectedVehicle.driverCode} • Kn:{" "}
+                    {selectedVehicle.experience}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-brand-text-subtle text-[10px] font-semibold">
+                  Điểm uy tín
+                </p>
+                <p className="text-brand-blue-sky text-base font-black">
+                  {selectedVehicle.score}
+                  <span className="text-brand-text-subtle text-xs font-normal">
+                    /100
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            {/* Các thông số Telemetry thời gian thực */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="border-brand-border-dark bg-brand-surface/50 rounded-2xl border p-3">
+                <div className="text-brand-text-muted flex items-center gap-1.5 text-[11px]">
+                  <Gauge className="h-3.5 w-3.5 text-blue-400" /> Vận tốc xe
+                </div>
+                <p className="text-brand-text-primary mt-1 font-mono text-lg font-black">
+                  {selectedVehicle.speed}{" "}
+                  <span className="text-brand-text-muted text-xs font-normal">
+                    km/h
+                  </span>
+                </p>
+              </div>
+
+              <div className="border-alert-danger/30 rounded-2xl border bg-rose-950/20 p-3">
+                <div className="text-alert-danger flex items-center gap-1.5 text-[11px] font-semibold">
+                  <Wind className="h-3.5 w-3.5" /> CO2 Trong Cabin
+                </div>
+                <p className="text-alert-danger mt-1 font-mono text-lg font-black">
+                  {selectedVehicle.co2}{" "}
+                  <span className="text-xs font-normal">ppm (Cao)</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Chi tiết cảnh báo vi phạm */}
+            <div className="border-brand-border-dark bg-brand-dark/50 rounded-2xl border p-3.5 text-xs">
+              <p className="text-brand-text-primary font-bold">
+                ⚠️ Sự kiện phát hiện: {selectedVehicle.alertType}
+              </p>
+              <p className="text-brand-text-muted mt-1 leading-relaxed">
+                {selectedVehicle.alertDesc}
+              </p>
+            </div>
+          </div>
+
+          {/* Các nút hành động nghiệp vụ (Action Buttons) */}
+          <div className="mt-5 space-y-2.5">
+            <button
+              onClick={() => handleDispatchNav()}
+              className="btn-nav-active flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl py-3.5 text-xs font-black tracking-wider text-white uppercase transition-all hover:brightness-110 active:scale-[0.98]"
+            >
+              <Navigation className="h-4 w-4" />
+              Gửi Điều Hướng Trạm Nghỉ (
+              {selectedVehicle.nearestRestStop?.name || "Km 227"})
+            </button>
+
+            <div className="grid grid-cols-2 gap-2.5">
+              <button
+                onClick={() => setShowCallModal(true)}
+                className="bg-alert-warning flex cursor-pointer items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold text-white shadow-md transition-all hover:bg-amber-600"
+              >
+                <PhoneCall className="h-3.5 w-3.5" /> Gọi Trực Tiếp
+              </button>
+              <button
+                onClick={() => setShowVideoModal(true)}
+                className="card-glass border-brand-border text-brand-text-primary hover:border-brand-border-active flex cursor-pointer items-center justify-center gap-2 rounded-xl border py-2.5 text-xs font-bold transition-all"
+              >
+                <Video className="text-brand-blue-sky h-3.5 w-3.5" /> Xem Clip
+                AI 10s
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 5. MODAL XEM CLIP AI BẰNG CHỨNG 10S */}
-      {/* ========================================================================= */}
+      {/* MODAL XEM CLIP AI BẰNG CHỨNG 10S */}
       {showVideoModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-          <div className="animate-fade-in-up w-full max-w-xl overflow-hidden rounded-3xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4">
-              <div>
-                <h3 className="text-base font-bold text-slate-900">
-                  Clip Bằng Chứng Edge AI (
-                  {mockLiveMonitoring?.evidenceClip?.durationSeconds || 10}{" "}
-                  Giây)
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <div className="card-glass border-brand-border w-full max-w-2xl overflow-hidden rounded-3xl border shadow-2xl">
+            <div className="border-brand-border-dark flex items-center justify-between border-b p-4">
+              <div className="flex items-center gap-2">
+                <span className="text-alert-danger text-lg">📹</span>
+                <h3 className="text-brand-text-primary text-sm font-bold">
+                  Bằng chứng Edge AI (10 giây) • {selectedVehicle.plate}
                 </h3>
-                <p className="text-xs text-slate-500">
-                  Xe: {selectedVehicle.plate} • Tài xế:{" "}
-                  {selectedVehicle.driverName || selectedVehicle.driver}
-                </p>
               </div>
               <button
                 onClick={() => setShowVideoModal(false)}
-                className="rounded-full p-2 text-slate-400 hover:bg-slate-200"
+                className="text-brand-text-muted hover:text-white"
               >
-                ✕
+                <X className="h-5 w-5" />
               </button>
             </div>
-
-            <div className="space-y-4 p-6">
-              <div className="overflow-hidden rounded-2xl bg-black">
+            <div className="bg-black p-4">
+              <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-slate-900">
                 <video
-                  src={
-                    mockLiveMonitoring?.evidenceClip?.videoUrl ||
-                    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
-                  }
+                  src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
                   controls
                   autoPlay
-                  className="max-h-64 w-full object-contain"
+                  className="h-full w-full object-cover"
                 />
               </div>
-
-              <div className="flex items-center justify-between rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs text-rose-800">
-                <span>🎯 Độ tin cậy AI xác thực:</span>
-                <span className="text-sm font-bold text-rose-600">
-                  {mockLiveMonitoring?.evidenceClip?.aiConfidence || 92}%
+              <div className="mt-3 flex items-center justify-between text-xs">
+                <span className="text-alert-danger font-semibold">
+                  🔴 Nhận diện: Mắt nhắm 1.8s & gục đầu
+                </span>
+                <span className="text-alert-safe font-mono font-bold">
+                  Độ tin cậy AI: 92%
                 </span>
               </div>
-            </div>
-
-            <div className="flex justify-end gap-2 border-t border-slate-100 bg-slate-50 px-6 py-4">
-              <button
-                onClick={() => setShowVideoModal(false)}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100"
-              >
-                Đóng
-              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* 6. MODAL GỌI TRỰC TIẾP TÀI XẾ (VOIP CABIN SIMULATOR) */}
-      {/* ========================================================================= */}
+      {/* MODAL GỌI ĐIỆN CHO TÀI XẾ */}
       {showCallModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-          <div className="animate-fade-in-up w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl">
-            <div className="mx-auto flex h-16 w-16 animate-bounce items-center justify-center rounded-full bg-amber-100 text-2xl text-amber-600">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <div className="card-glass border-brand-border w-full max-w-sm rounded-3xl border p-6 text-center shadow-2xl">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-amber-500/30 bg-amber-500/20 text-3xl text-amber-400">
               📞
             </div>
-            <h3 className="mt-3 text-lg font-black text-slate-900">
-              Đang kết nối Cabin xe...
+            <h3 className="text-brand-text-primary mt-4 text-base font-bold">
+              Đang kết nối buồng lái...
             </h3>
-            <p className="text-xs text-slate-500">
-              Tài xế: {selectedVehicle.driverName || selectedVehicle.driver} (
-              {selectedVehicle.plate})
+            <p className="text-brand-text-muted mt-1 text-xs">
+              Tài xế: {selectedVehicle.driverName} (Xe {selectedVehicle.plate})
             </p>
-            <p className="mt-2 font-sans text-xs text-emerald-600">
-              Kênh đàm thoại hai chiều IoT ESP32 đã sẵn sàng
-            </p>
-            <button
-              onClick={() => {
-                setShowCallModal(false);
-                toast("Đã ngắt cuộc gọi đàm thoại cabin.");
-              }}
-              className="mt-6 w-full rounded-2xl bg-rose-600 py-3 text-xs font-bold text-white shadow-md hover:bg-rose-700"
-            >
-              Kết thúc cuộc gọi
-            </button>
+            <div className="mt-6 flex justify-center gap-3">
+              <button
+                onClick={() => {
+                  setShowCallModal(false);
+                  toast.success("Đã kết thúc cuộc gọi khẩn cấp!");
+                }}
+                className="bg-alert-danger cursor-pointer rounded-xl px-5 py-2 text-xs font-bold text-white shadow-md"
+              >
+                Ngắt kết nối
+              </button>
+            </div>
           </div>
         </div>
       )}
