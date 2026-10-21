@@ -1,6 +1,3 @@
-// ==========================================
-// File: src/pages/Dashboard/DashboardPage.jsx
-// ==========================================
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import {
