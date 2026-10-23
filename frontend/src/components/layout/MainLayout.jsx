@@ -1,21 +1,21 @@
-import React, { useState } from "react";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard,
-  Map,
-  Truck,
-  ShieldAlert,
-  Users,
-  CalendarClock,
   BarChart3,
-  Sliders,
+  CalendarClock,
+  LayoutDashboard,
   LogOut,
+  Map,
   PhoneCall,
   Search,
+  ShieldAlert,
+  Sliders,
+  Truck,
+  Users,
 } from "lucide-react";
+import { useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import logoImg from "../../assets/Logo.png";
 import { useAuth } from "../../context/AuthContext";
 import NotificationBell from "../notification/NotificationBell";
-import logoImg from "../../assets/Logo.png";
 
 const MainLayout = () => {
   const navigate = useNavigate();
@@ -219,7 +219,7 @@ const MainLayout = () => {
         </div>
       </aside>
       <div className="flex flex-1 flex-col overflow-hidden bg-transparent">
-        <header className="bg-brand-dark/90 border-brand-border-dark flex h-18 shrink-0 items-center justify-between border-b px-8 shadow-md backdrop-blur-md">
+        <header className="bg-brand-dark/90 border-brand-border-dark relative z-40 flex h-18 shrink-0 items-center justify-between border-b px-8 shadow-md backdrop-blur-md">
           <div className="mr-4 max-w-xl flex-1">
             <div className="relative">
               <Search className="text-brand-text-subtle pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />

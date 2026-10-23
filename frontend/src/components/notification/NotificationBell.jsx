@@ -1,37 +1,32 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-// Tạm thời comment axiosClient lại khi chưa có BE, dùng Mock Data
-// import axiosClient from '../../api/axiosClient';
-// import { API_URLS } from '../../api/api';
+import { useNavigate } from "react-router-dom";
 
 function NotificationBell() {
-  const [unreadCount, setUnreadCount] = useState(2); // Giả lập có 2 thông báo chưa đọc
+  const [unreadCount, setUnreadCount] = useState(2);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
-  // Mock data thông báo của hệ thống IoT
   const [notifications, setNotifications] = useState([
     {
       id: 1,
       type: "DANGER",
-      message: "🚨 Tài xế Nguyễn Văn Hùng vừa có dấu hiệu ngủ gật!",
-      createdAt: "2026-09-24T13:30:00Z",
+      message: "Tài xế Phạm Hoàng Nam (43H-567.89) có dấu hiệu ngủ gật!",
+      createdAt: "2026-10-22T03:55:12Z",
       isRead: false,
       link: "/logs",
     },
     {
       id: 2,
       type: "WARNING",
-      message: "⚠️ Xe 43C-128.45 có nồng độ CO2 vượt mức 1000ppm.",
-      createdAt: "2026-09-24T13:15:00Z",
+      message: "Xe 43H-567.89 nồng độ CO2 buồng lái đạt 1,340 ppm.",
+      createdAt: "2026-10-22T04:02:00Z",
       isRead: false,
       link: "/logs",
     },
   ]);
 
-  // Đóng dropdown khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -65,63 +60,70 @@ function NotificationBell() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* NÚT QUẢ CHUÔNG */}
       <button
         onClick={handleToggleBell}
-        className="relative rounded-xl p-2 text-brand-text-muted transition-colors hover:bg-brand-surface hover:text-brand-text-primary"
+        className="text-brand-text-muted hover:bg-brand-surface hover:text-brand-text-primary relative cursor-pointer rounded-xl p-2.5 transition-colors"
       >
         <span className="text-xl">🔔</span>
         {unreadCount > 0 && (
-          <span className="bg-alert-danger absolute top-1 right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full border border-brand-dark text-[10px] font-bold text-white shadow-sm">
+          <span className="bg-alert-danger border-brand-dark absolute top-1.5 right-1.5 flex h-4.5 w-4.5 items-center justify-center rounded-full border text-[10px] font-bold text-white shadow-sm">
             {unreadCount}
           </span>
         )}
       </button>
 
-      {/* HỘP THOẠI DROPDOWN */}
+      {/* POPUP THÔNG BÁO */}
       {isOpen && (
-        <div className="absolute right-0 z-50 mt-3 w-80 overflow-hidden rounded-2xl border border-brand-border bg-brand-dark shadow-2xl md:w-96">
-          <div className="flex items-center justify-between border-b border-brand-border-dark bg-brand-surface/70 px-5 py-3.5">
-            <h3 className="text-sm font-bold text-brand-text-primary">Thông báo</h3>
+        <div className="border-brand-border bg-brand-dark/95 absolute right-0 z-50 mt-3 w-80 overflow-hidden rounded-3xl border shadow-2xl backdrop-blur-xl md:w-96">
+          <div className="border-brand-border-dark bg-brand-surface/80 flex items-center justify-between border-b px-5 py-3.5">
+            <h3 className="text-brand-text-primary text-sm font-bold">
+              Thông báo Hệ thống
+            </h3>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
-                className="text-xs font-bold text-brand-blue-sky hover:underline"
+                className="text-brand-blue-sky cursor-pointer text-xs font-bold hover:text-white hover:underline"
               >
-                Đánh dấu đọc hết ✔️
+                Đánh dấu đã đọc
               </button>
             )}
           </div>
 
-          <div className="max-h-100 overflow-y-auto">
+          <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="p-8 text-center text-brand-text-subtle text-xs">
-                Không có thông báo nào.
+              <div className="text-brand-text-subtle p-8 text-center text-xs">
+                Không có thông báo mới nào
               </div>
             ) : (
-              <div className="flex flex-col">
+              <div className="divide-brand-border-dark/60 divide-y">
                 {notifications.map((notif) => (
                   <div
                     key={notif.id}
                     onClick={() => handleNotificationClick(notif)}
-                    className={`flex cursor-pointer gap-3.5 border-b border-brand-border-dark/60 p-3.5 transition-colors hover:bg-brand-surface/60 ${
-                      notif.isRead ? "bg-transparent opacity-60" : "bg-brand-blue-night/20"
+                    className={`hover:bg-brand-surface/70 flex cursor-pointer gap-3.5 p-4 transition-colors ${
+                      notif.isRead
+                        ? "bg-transparent opacity-60"
+                        : "bg-brand-blue-night/25"
                     }`}
                   >
-                    <div className="text-xl">
+                    <div className="shrink-0 text-xl">
                       {notif.type === "DANGER"
                         ? "🚨"
                         : notif.type === "WARNING"
                           ? "⚠️"
-                          : "💬"}
+                          : "ℹ️"}
                     </div>
                     <div>
                       <p
-                        className={`text-xs ${notif.isRead ? "text-brand-text-muted" : "font-bold text-brand-text-primary"}`}
+                        className={`text-xs leading-relaxed ${
+                          notif.isRead
+                            ? "text-brand-text-muted"
+                            : "text-brand-text-primary font-bold"
+                        }`}
                       >
                         {notif.message}
                       </p>
-                      <p className="mt-1 text-[11px] text-brand-text-subtle">
+                      <p className="text-brand-text-subtle mt-1.5 font-mono text-[10px]">
                         {new Date(notif.createdAt).toLocaleString("vi-VN")}
                       </p>
                     </div>
