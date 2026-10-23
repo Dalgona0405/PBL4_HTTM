@@ -1,198 +1,123 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
-import { getDrivers, updateDriverStatus } from "../../mock";
+import { mockDrivers } from "../../mock/mockData";
+import AddDriverModal from "./components/AddDriverModal";
+import DriverProfileModal from "./components/DriverProfileModal";
+import DriversFilterBar from "./components/DriversFilterBar";
+import DriversKpiCards from "./components/DriversKpiCards";
+import DriversTable from "./components/DriversTable";
 
-function DriversPage() {
-  const [drivers, setDrivers] = useState(() => getDrivers());
+export default function DriversPage() {
+  const [drivers, setDrivers] = useState(() => mockDrivers);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
 
-  // Hàm tô màu Điểm uy tín (UI/UX: Giúp người dùng nhìn màu là biết tài xế tốt hay xấu)
-  const getScoreBadge = (score) => {
-    if (score > 80) {
-      return (
-        <span className="text-alert-safe font-sans text-lg font-bold">
-          {score}
-        </span>
-      );
-    } else if (score >= 65) {
-      return (
-        <span className="text-alert-warning font-sans text-lg font-bold">
-          {score}
-        </span>
-      );
+  // Modals state
+  const [selectedDriverForProfile, setSelectedDriverForProfile] =
+    useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  // 1. Thao tác Đình chỉ hoặc Mở khóa tài xế
+  const handleToggleDriverStatus = (driver) => {
+    const score =
+      driver.diem_uy_tin !== undefined
+        ? driver.diem_uy_tin
+        : driver.uy_tin || 100;
+    const isSuspended = score <= 20 || driver.cap_canh_bao === "SUSPENDED_RED";
+    const driverName = driver.user?.ho_ten || driver.ho_ten;
+
+    setDrivers((prev) =>
+      prev.map((d) => {
+        if (d.id === driver.id) {
+          return {
+            ...d,
+            diem_uy_tin: isSuspended ? 85 : 15, // Mở khóa phục hồi 85đ, Đình chỉ hạ 15đ
+            cap_canh_bao: isSuspended ? "NORMAL" : "SUSPENDED_RED",
+          };
+        }
+        return d;
+      }),
+    );
+
+    if (isSuspended) {
+      toast.success(`Đã mở khóa nhận ca cho tài xế ${driverName}!`, {
+        icon: "✅",
+      });
     } else {
-      return (
-        <span className="text-alert-danger font-sans text-lg font-bold">
-          {score}
-        </span>
-      );
-    }
-  };
-
-  // Hàm tạo nhãn Trạng thái hoạt động
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case "ACTIVE":
-        return (
-          <span className="rounded-e-2xl bg-green-100 px-3 py-1 text-xs font-bold text-green-700">
-            Đang hoạt động
-          </span>
-        );
-      case "RESTRICTED":
-        return (
-          <span className="rounded-e-2xl bg-yellow-100 px-3 py-1 text-xs font-bold text-yellow-700">
-            Hạn chế chạy đêm
-          </span>
-        );
-      case "LOCKED":
-        return (
-          <span className="rounded-e-2xl bg-red-100 px-3 py-1 text-xs font-bold text-red-700">
-            Đình chỉ
-          </span>
-        );
-      default:
-        return (
-          <span className="rounded-e-2xl bg-gray-100 px-3 py-1 text-xs font-bold text-gray-700">
-            {status}
-          </span>
-        );
-    }
-  };
-
-  const handleLockDriver = (driver) => {
-    try {
-      updateDriverStatus(driver.id, "LOCKED", "Khóa thủ công");
-      setDrivers(getDrivers());
-      toast.success(`Đã đình chỉ tài xế ${driver.ho_ten}`);
-    } catch (error) {
       toast.error(
-        "Không thể cập nhật trạng thái tài xế. Vui lòng thử lại sau.",
+        `Đã đình chỉ công tác tài xế ${driverName} (Khóa cứng xếp ca theo SRS 4.1)!`,
+        { icon: "🚫" },
       );
     }
   };
+
+  // 2. Thêm tài xế mới vào danh sách
+  const handleAddDriver = (newDriver) => {
+    setDrivers((prev) => [newDriver, ...prev]);
+  };
+
+  // 3. Lọc danh sách theo Tab và Từ khóa tìm kiếm
+  const filteredDrivers = drivers.filter((d) => {
+    const name = (d.user?.ho_ten || d.ho_ten || "").toLowerCase();
+    const phone = (d.user?.so_dien_thoai || d.sdt || "").toLowerCase();
+    const license = (d.so_bang_lai || "").toLowerCase();
+    const query = searchTerm.toLowerCase();
+    const matchSearch =
+      name.includes(query) || phone.includes(query) || license.includes(query);
+
+    const score = d.diem_uy_tin !== undefined ? d.diem_uy_tin : d.uy_tin || 100;
+    if (statusFilter === "ALL") return matchSearch;
+    if (statusFilter === "NORMAL") return matchSearch && score > 65;
+    if (statusFilter === "WARNING_YELLOW")
+      return matchSearch && score <= 65 && score > 20;
+    if (statusFilter === "SUSPENDED_RED") return matchSearch && score <= 20;
+    return matchSearch;
+  });
 
   return (
-    <div className="animate-fade-in-up space-y-6">
-      {/* HEADER CỦA TRANG */}
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h2 className="text-brand-text-secondary text-2xl font-bold tracking-tight">
-            Quản lý Tài xế & Điểm uy tín
-          </h2>
-          <p className="text-brand-text-muted mt-1 text-sm">
-            Theo dõi điểm uy tín và trạng thái hoạt động của đội ngũ tài xế
-          </p>
-        </div>
-        <button
-          onClick={() =>
-            toast("Tính năng thêm tài xế sẽ có trong Phase tới!", {
-              icon: "👨‍✈️",
-            })
-          }
-          className="bg-brand-primary hover:bg-brand-primary-hover flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:-translate-y-0.5"
-        >
-          <span>+ Thêm tài xế mới</span>
-        </button>
+    <div className="animate-fade-in-up space-y-6 font-sans">
+      {/* 1. Header Trang */}
+      <div>
+        <h1 className="text-brand-text-primary text-2xl font-black tracking-tight">
+          Quản trị Tài xế &amp; Điểm Uy tín Sổ cái
+        </h1>
+        <p className="text-brand-text-muted text-xs">
+          Kiểm soát thể trạng sinh học 30 ngày, đối soát sổ cái bất biến và áp
+          dụng chế tài tự động
+        </p>
       </div>
 
-      {/* BẢNG DANH SÁCH TÀI XẾ */}
-      <div className="card-glass border-brand-border rounded-3xl border p-6 shadow-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left">
-            <thead>
-              <tr className="border-brand-border-dark bg-brand-dark/70 text-brand-text-muted border-b text-xs font-bold tracking-wider uppercase">
-                <th className="rounded-tl-2xl px-4 py-4">Tài xế</th>
-                <th className="px-4 py-4">Bằng lái</th>
-                <th className="px-4 py-4">Xe ca hiện tại</th>
-                <th className="px-4 py-4 text-center">Điểm uy tín</th>
-                <th className="px-4 py-4">Trạng thái</th>
-                <th className="rounded-tr-2xl px-4 py-4 text-right">
-                  Thao tác
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-brand-border-dark/60 divide-y text-sm">
-              {drivers.map((driver) => (
-                <tr
-                  key={driver.id}
-                  className="hover:bg-brand-surface/80 transition-colors"
-                >
-                  {/* Cột 1: Thông tin tài xế */}
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="border-brand-border-active/40 bg-brand-blue-night text-brand-blue-light flex h-10 w-10 items-center justify-center rounded-2xl border font-bold shadow-sm">
-                        {driver.ho_ten.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="text-brand-text-primary font-bold">
-                          {driver.ho_ten}
-                        </div>
-                        <div className="text-brand-text-subtle font-sans text-xs">
-                          {driver.sdt}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
+      {/* 2. Cụm 4 Thẻ KPI */}
+      <DriversKpiCards drivers={drivers} />
 
-                  {/* Cột 2: Bằng lái */}
-                  <td className="text-brand-text-secondary px-4 py-4 font-sans font-bold">
-                    Hạng {driver.bang_lai}
-                  </td>
+      {/* 3. Thanh tìm kiếm & Bộ lọc */}
+      <DriversFilterBar
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        onOpenAddModal={() => setShowAddModal(true)}
+      />
 
-                  {/* Cột 3: Xe ca hiện tại */}
-                  <td className="px-4 py-4">
-                    {driver.xe_hien_tai ? (
-                      <div className="flex items-center gap-2">
-                        <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400"></span>
-                        <span className="border-brand-border bg-brand-dark text-brand-text-primary rounded-lg border px-2.5 py-1 font-sans text-xs font-bold shadow-xs">
-                          {driver.xe_hien_tai}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="border-brand-border-dark bg-brand-surface/40 text-brand-text-subtle rounded-lg border px-2.5 py-1 text-xs italic">
-                        Đang nghỉ ca
-                      </span>
-                    )}
-                  </td>
+      {/* 4. Bảng Danh sách Tài xế */}
+      <DriversTable
+        drivers={filteredDrivers}
+        onOpenProfileModal={(d) => setSelectedDriverForProfile(d)}
+        onToggleDriverStatus={handleToggleDriverStatus}
+      />
 
-                  {/* Cột 4: Điểm uy tín */}
-                  <td className="px-4 py-4 text-center">
-                    {getScoreBadge(driver.uy_tin)}
-                  </td>
+      {/* 5. Các Modals */}
+      <DriverProfileModal
+        isOpen={Boolean(selectedDriverForProfile)}
+        onClose={() => setSelectedDriverForProfile(null)}
+        driver={selectedDriverForProfile}
+      />
 
-                  {/* Cột 5: Trạng thái */}
-                  <td className="px-4 py-4">
-                    {getStatusBadge(driver.trang_thai_tai_xe)}
-                  </td>
-
-                  {/* Cột 6: Thao tác */}
-                  <td className="px-4 py-4 text-right">
-                    <button
-                      onClick={() =>
-                        toast(`Hồ sơ sinh học của ${driver.ho_ten}`, {
-                          icon: "📊",
-                        })
-                      }
-                      className="text-brand-blue-sky mr-3 text-xs font-bold hover:underline"
-                    >
-                      Hồ sơ
-                    </button>
-                    {driver.trang_thai_tai_xe !== "LOCKED" && (
-                      <button
-                        onClick={() => handleLockDriver(driver)}
-                        className="text-alert-danger text-xs font-bold hover:underline"
-                      >
-                        Đình chỉ
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <AddDriverModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAddDriver={handleAddDriver}
+      />
     </div>
   );
 }
-
-export default DriversPage;
