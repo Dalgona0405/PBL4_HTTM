@@ -5,15 +5,15 @@ const axiosClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  timeout: 15000,
 });
 
 // KHI GỬI YÊU CẦU ĐI (REQUEST INTERCEPTOR)
 // Trước khi gửi bất kỳ request nào xuống Backend, sẽ chặn lại để nhét Token.
 axiosClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token"); // Lấy Token từ localStorage
+    const token = localStorage.getItem("token");
     if (token) {
-      // Dán Token vào Headers Authorization theo chuẩn Bearer
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -27,18 +27,23 @@ axiosClient.interceptors.request.use(
 // Kiểm tra xem response từ Backend trả về có bị lỗi không
 axiosClient.interceptors.response.use(
   (response) => {
-    // Nếu thành công (mã 200), trả về dữ liệu (data) luôn cho nhẹ, không cần lấy cả gói TO
+    if (response.data && response.data.success != undefined) {
+      return response.data.data;
+    }
     return response.data;
   },
   (error) => {
     // Nếu Backend báo lỗi 401 (Hết hạn Token / Chưa đăng nhập)
     if (error.response && error.response.status === 401) {
-      console.log("Token hết hạn hoặc không hợp lệ!");
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      window.location.href = "/login"; // Tự động đá ra Login
+      window.location.href = "/login";
     }
-    return Promise.reject(error);
+    const errorMessage =
+      error.response?.data?.error?.messange ||
+      error.messange ||
+      "Đã có lỗi kết nối xảy ra";
+    return Promise.reject(new Error(errorMessage));
   },
 );
 

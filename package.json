@@ -10,6 +10,9 @@
     "lint": "npm run lint --workspace=frontend"
   },
   "dependencies": {
-    "lucide-react": "^1.55.0"
+    "leaflet": "^1.9.4",
+    "lucide-react": "^1.55.0",
+    "socket.io-client": "^4.8.4",
+    "zustand": "^5.0.15"
   }
 }
