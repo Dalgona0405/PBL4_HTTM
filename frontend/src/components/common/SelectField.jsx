@@ -1,35 +1,40 @@
-import React from "react";
-
-// Khuôn đúc cho Ô xổ xuống (Dropdown)
-function SelectField({
+export default function SelectField({
   label,
   name,
   value,
   onChange,
-  options = [], // Danh sách các lựa chọn (Mảng)
-  required,
-  disabled,
+  options = [],
+  placeholder = "",
+  required = false,
+  disabled = false,
+  className = "",
 }) {
   return (
-    <div className="w-full">
+    <div className={`w-full ${className}`}>
       {label && (
-        <label className="mb-2 block text-sm font-bold text-gray-700">
-          {label} {required && <span className="text-red-500">*</span>}
+        <label className="text-brand-text-primary mb-1.5 block text-xs font-bold">
+          {label} {required && <span className="text-alert-danger">*</span>}
         </label>
       )}
-
       <select
         name={name}
         value={value}
         onChange={onChange}
         required={required}
         disabled={disabled}
-        className="focus:border-brand-primary focus:ring-brand-primary focus:ring-opacity-20 w-full cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 transition-all outline-none focus:bg-white focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-100"
+        className="border-brand-border bg-brand-dark/90 text-brand-text-primary focus:border-brand-primary focus:bg-brand-surface focus:ring-brand-primary/30 w-full cursor-pointer rounded-xl border px-3.5 py-2.5 text-xs font-medium transition-all outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <option value="">-- Vui lòng chọn --</option>
-        {/* Duyệt qua mảng options để in ra các thẻ <option> */}
+        {placeholder && (
+          <option value="" className="bg-brand-dark text-brand-text-muted">
+            {placeholder}
+          </option>
+        )}
         {options.map((opt, index) => (
-          <option key={index} value={opt.value}>
+          <option
+            key={opt.value ?? index}
+            value={opt.value}
+            className="bg-brand-dark text-brand-text-primary"
+          >
             {opt.label}
           </option>
         ))}
@@ -37,5 +42,3 @@ function SelectField({
     </div>
   );
 }
-
-export default SelectField;

@@ -85,7 +85,7 @@ export default function VehicleDispatchPanel({
               Điểm uy tín
             </p>
             <p className="text-brand-blue-sky font-mono text-base font-black">
-              {vehicle?.score || vehicle?.diem_uy_tin || "88"}
+              {vehicle?.score || vehicle?.diem_uy_tin || "88"}/100
               {/* <span className="text-brand-text-subtle text-xs font-normal">
                 /100
               </span> */}

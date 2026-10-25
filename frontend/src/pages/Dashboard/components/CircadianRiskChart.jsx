@@ -118,9 +118,6 @@ export default function CircadianRiskChart() {
             xếp ca đêm liên tục cho tài xế có điểm cảnh cáo vàng.
           </span>
         </div>
-        <span className="bg-brand-surface border-brand-border text-brand-text-muted self-start rounded-lg border px-2.5 py-1 text-[11px] sm:self-auto">
-          SRS 4.1 § 6.4
-        </span>
       </div>
     </div>
   );

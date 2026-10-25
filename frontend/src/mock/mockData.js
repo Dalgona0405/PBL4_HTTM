@@ -45,7 +45,7 @@ export const safeParseJSON = (data, fallback = null) => {
 };
 
 // ==============================================================================
-// 1. USERS & DRIVERS (Đủ 3 cấp: Xanh - Vàng - Đỏ theo SRS 4.1)
+// 1. USERS & DRIVERS (Đủ 3 cấp: Xanh - Vàng - Đỏ)
 // ==============================================================================
 export const mockUsers = [
   {
@@ -412,7 +412,7 @@ export const mockTrips = [
 ];
 
 // ==============================================================================
-// 4. VIOLATIONS (Khớp 100% 5 mã chuẩn và vòng đời xác thực của SRS 4.1)
+// 4. VIOLATIONS
 // ==============================================================================
 export const mockViolations = [
   {
@@ -599,7 +599,7 @@ export const mockAuditLogs = [
     doi_tuong_id: "3",
     gia_tri_truoc: { cap_canh_bao: "WARNING_YELLOW", diem_uy_tin: 30 },
     gia_tri_sau: { cap_canh_bao: "SUSPENDED_RED", diem_uy_tin: 15 },
-    ly_do: "Điểm rơi xuống 15 (<= 20). Đình chỉ nhận ca theo quy định SRS 4.1.",
+    ly_do: "Điểm rơi xuống 15 (<= 20). Đình chỉ nhận ca theo quy định.",
     created_at: "2026-10-21T09:30:05.000Z",
     user_name: "Nguyễn Quản Trị",
   },
@@ -646,7 +646,7 @@ export const startMockSocketSimulation = (
 };
 
 // ==============================================================================
-// 8. HỒ SƠ SINH HỌC TÀI XẾ 30 NGÀY (SRS 4.1 § 6.4)
+// 8. HỒ SƠ SINH HỌC TÀI XẾ 30 NGÀY
 // ==============================================================================
 export const mockDriverBiometricProfiles = [
   {
@@ -679,7 +679,7 @@ export const mockDriverBiometricProfiles = [
       DEVICE_TAMPERING: 0,
     },
     danh_gia_chung:
-      "Điểm uy tín 58 (Cảnh cáo vàng). Nhịp sinh học giảm rõ rệt đầu giờ chiều. Đang bị giảm 30% tần suất ca đêm theo SRS 4.1.",
+      "Điểm uy tín 58 (Cảnh cáo vàng). Nhịp sinh học giảm rõ rệt đầu giờ chiều. Đang bị giảm 30% tần suất ca đêm.",
   },
   {
     id: 803,
@@ -712,5 +712,59 @@ export const mockDriverBiometricProfiles = [
     },
     danh_gia_chung:
       "Thể lực tốt, chấp hành nghiêm quy tắc buồng lái. Sẵn sàng nhận ca tại bãi.",
+  },
+];
+
+// 9. DANH SÁCH KHIẾU NẠI VI PHẠM TỪ APP TÀI XẾ
+export const mockDisputes = [
+  {
+    id: 901,
+    violation_id: 602, // Lỗi dùng điện thoại (-5đ) của Phạm Hoàng Nam
+    driver_id: 2,
+    ma_ly_do: "FALSE_DETECTION",
+    ten_ly_do: "AI nhận diện nhầm hành vi",
+    noi_dung_giai_trinh:
+      "Lúc 03:30 xe đi qua trạm thu phí, tôi đưa tay lên gãi tai và chỉnh lại tai nghe đàm thoại bộ đàm đội xe chứ không hề cầm điện thoại cá nhân. Mong điều phối viên xem kỹ lại video giúp tôi.",
+    trang_thai: "OPEN", // Đang chờ giải quyết
+    khieu_nai_luc: "2026-10-22T04:10:00.000Z",
+    resolved_by: null,
+    resolved_at: null,
+    phan_hoi: null,
+    driver: mockDrivers[1],
+    violation: mockViolations[1],
+  },
+  {
+    id: 902,
+    violation_id: 604, // Lỗi CO2 cao (-2đ) của Phạm Hoàng Nam
+    driver_id: 2,
+    ma_ly_do: "SENSOR_ERROR",
+    ten_ly_do: "Nhiễu cảm biến môi trường",
+    noi_dung_giai_trinh:
+      "Thời điểm đó xe đang dừng chờ xếp hàng sau một xe đầu kéo xả khói đen ở trạm cân nên khói lọt vào cabin làm cảm biến MQ-135 nhảy vọt, sau đó tôi đã bật quạt hút gió ngay.",
+    trang_thai: "OPEN",
+    khieu_nai_luc: "2026-10-22T04:15:00.000Z",
+    resolved_by: null,
+    resolved_at: null,
+    phan_hoi: null,
+    driver: mockDrivers[1],
+    violation: mockViolations[3],
+  },
+  {
+    id: 903,
+    violation_id: 605, // Lỗi che camera (-15đ) của Đặng Văn Hùng (reviewed_by = 2)
+    driver_id: 3,
+    ma_ly_do: "OTHER",
+    ten_ly_do: "Sự cố phần cứng ngoài ý muốn",
+    noi_dung_giai_trinh:
+      "Do đi qua đoạn đường xóc làm giá đỡ camera bị cụp xuống chứ tôi không cố ý lấy khăn che.",
+    trang_thai: "REJECTED", // Đã bị bác bỏ khiếu nại
+    khieu_nai_luc: "2026-10-21T11:00:00.000Z",
+    resolved_by: 1,
+    resolved_by_name: "Nguyễn Quản Trị",
+    resolved_at: "2026-10-21T14:20:00.000Z",
+    phan_hoi:
+      "Hình ảnh trước khi tối đen cho thấy rõ bàn tay kéo vật cản che kín ống kính IR. Giữ nguyên mức phạt đình chỉ.",
+    driver: mockDrivers[2],
+    violation: mockViolations[4],
   },
 ];

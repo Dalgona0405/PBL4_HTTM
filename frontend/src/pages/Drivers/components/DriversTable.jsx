@@ -5,39 +5,44 @@ import {
   Lock,
   Unlock,
 } from "lucide-react";
-import { mockShifts } from "../../../mock/mockData";
+import { useEffect, useState } from "react";
+import dataService from "../../../services/dataService";
 
 export default function DriversTable({
   drivers = [],
   onOpenProfileModal,
   onToggleDriverStatus,
 }) {
-  // Tìm xe tài xế này đang cầm lái
+  const [shifts, setShifts] = useState([]);
+
+  useEffect(() => {
+    dataService.getShifts().then((data) => setShifts(data || []));
+  }, [drivers]);
+
   const getActiveVehiclePlate = (driver) => {
-    const activeShift = mockShifts?.find(
+    const activeShift = shifts.find(
       (s) =>
         (s.driver_id === driver.id ||
           s.driver?.id === driver.id ||
           s.driver?.user_id === driver.user_id) &&
-        s.trang_thai === "IN_PROGRESS",
+        (s.trang_thai === "IN_PROGRESS" || s.trang_thai === "SCHEDULED"),
     );
     return activeShift?.vehicle?.bien_so_xe || driver.xe_hien_tai || null;
   };
 
-  // Render Badge 3 cấp cảnh báo
   const renderAlertBadge = (score, alertLevel) => {
     if (score <= 20 || alertLevel === "SUSPENDED_RED") {
       return (
         <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/40 bg-rose-950/60 px-3 py-1 text-xs font-bold text-rose-300">
           <span className="h-2 w-2 animate-ping rounded-full bg-rose-500"></span>
-          Đình chỉ (Báo động Đỏ)
+          Đình chỉ
         </span>
       );
     }
     if (score <= 65 || alertLevel === "WARNING_YELLOW") {
       return (
         <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-950/60 px-3 py-1 text-xs font-bold text-amber-300">
-          <AlertTriangle className="h-3 w-3" /> Cảnh cáo Vàng
+          <AlertTriangle className="h-3 w-3" /> Cảnh cáo
         </span>
       );
     }
@@ -58,7 +63,7 @@ export default function DriversTable({
               <th className="px-4 py-4">Bằng lái</th>
               <th className="px-4 py-4">Xe ca hiện tại</th>
               <th className="px-4 py-4 text-center">Điểm uy tín (Ledger)</th>
-              <th className="px-4 py-4">Cấp độ an toàn</th>
+              <th className="px-4 py-4">Cấp an toàn</th>
               <th className="rounded-tr-2xl px-4 py-4 text-right">Thao tác</th>
             </tr>
           </thead>
@@ -69,7 +74,7 @@ export default function DriversTable({
                   colSpan={6}
                   className="text-brand-text-subtle py-12 text-center text-xs"
                 >
-                  Không tìm thấy tài xế nào phù hợp với bộ lọc
+                  Không tìm thấy tài xế nào phù hợp
                 </td>
               </tr>
             ) : (
@@ -93,7 +98,6 @@ export default function DriversTable({
                     key={driver.id}
                     className="hover:bg-brand-surface/80 transition-colors"
                   >
-                    {/* Tên & SĐT */}
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
                         <div className="border-brand-primary/40 bg-brand-blue-night text-brand-blue-sky flex h-10 w-10 items-center justify-center rounded-2xl border font-bold shadow-xs">
@@ -109,8 +113,6 @@ export default function DriversTable({
                         </div>
                       </div>
                     </td>
-
-                    {/* Bằng lái */}
                     <td className="px-4 py-4">
                       <p className="text-brand-text-primary text-xs font-bold">
                         Hạng {licenseGrade}
@@ -119,8 +121,6 @@ export default function DriversTable({
                         {licenseNo}
                       </p>
                     </td>
-
-                    {/* Xe đang lái */}
                     <td className="px-4 py-4">
                       {activePlate ? (
                         <div className="flex items-center gap-2">
@@ -131,12 +131,10 @@ export default function DriversTable({
                         </div>
                       ) : (
                         <span className="border-brand-border-dark bg-brand-surface/40 text-brand-text-subtle rounded-lg border px-2.5 py-1 text-xs italic">
-                          Đang nghỉ ca
+                          Đang nghỉ
                         </span>
                       )}
                     </td>
-
-                    {/* Điểm uy tín */}
                     <td className="px-4 py-4 text-center">
                       <span
                         className={`text-base font-black ${
@@ -167,25 +165,20 @@ export default function DriversTable({
                         />
                       </div>
                     </td>
-
-                    {/* Cấp độ an toàn */}
                     <td className="px-4 py-4">
                       {renderAlertBadge(score, alertLevel)}
                     </td>
-
-                    {/* Thao tác */}
                     <td className="px-4 py-4 text-right">
                       <button
                         onClick={() => onOpenProfileModal(driver)}
-                        className="text-brand-blue-sky hover:text-brand-primary mr-3 inline-flex items-center gap-1 text-xs font-bold hover:underline"
+                        className="text-brand-blue-sky hover:text-brand-primary mr-3 inline-flex cursor-pointer items-center gap-1 text-xs font-bold hover:underline"
                       >
                         <FileText className="h-3.5 w-3.5" />
-                        <span>Hồ sơ &amp; Sổ cái</span>
+                        <span>Hồ sơ & Sổ cái</span>
                       </button>
-
                       <button
                         onClick={() => onToggleDriverStatus(driver)}
-                        className={`inline-flex items-center gap-1 text-xs font-bold hover:underline ${
+                        className={`inline-flex cursor-pointer items-center gap-1 text-xs font-bold hover:underline ${
                           isSuspended
                             ? "text-emerald-400 hover:text-emerald-300"
                             : "text-rose-400 hover:text-rose-300"

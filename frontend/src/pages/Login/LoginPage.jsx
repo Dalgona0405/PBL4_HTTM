@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useState } from "react";
 import toast from "react-hot-toast";
-import InputField from "../../components/common/InputField";
-import Button from "../../components/common/Button";
-import mockUsers from "../../mock/mockUsers.json";
+import { useNavigate } from "react-router-dom";
 import logoImg from "../../assets/Logo.png";
+import Button from "../../components/common/Button";
+import InputField from "../../components/common/InputField";
+import { useAuth } from "../../context/AuthContext";
+import dataService from "../../services/dataService";
 
-function LoginPage() {
+export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -26,31 +26,17 @@ function LoginPage() {
     setIsLoading(true);
     const toastId = toast.loading("Đang kiểm tra thông tin...");
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const foundUser = mockUsers.find(
-        (u) =>
-          u.username === credentials.username &&
-          u.password === credentials.password,
+      const result = await dataService.login(
+        credentials.username,
+        credentials.password,
       );
-
-      if (foundUser) {
-        const userData = {
-          id: foundUser.id,
-          name: foundUser.ho_ten,
-          role: foundUser.role,
-        };
-
-        login(userData, foundUser.token);
-        toast.success(`Chào mừng ${foundUser.ho_ten}!`, { id: toastId });
-
-        navigate("/");
-      } else {
-        toast.error("Sai tên đăng nhập hoặc mật khẩu!", { id: toastId });
-      }
-    } catch (error) {
-      console.error("Chi tiết lỗi:", error);
-      toast.error("Lỗi đăng nhập", { id: toastId });
+      login(result.user, result.access_token);
+      toast.success(`Chào mừng ${result.user.name}!`, { id: toastId });
+      navigate("/");
+    } catch (err) {
+      toast.error(err.message || "Sai tên đăng nhập hoặc mật khẩu!", {
+        id: toastId,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -126,4 +112,3 @@ function LoginPage() {
     </div>
   );
 }
-export default LoginPage;

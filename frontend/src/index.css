@@ -1,3 +1,4 @@
+/* FILE PATH: src/index.css */
 @import "tailwindcss";
 
 @theme {
@@ -41,18 +42,22 @@
     sans-serif;
 
   /* 7. ANIMATION TÙY CHỈNH */
-  --animate-fade-in-up: fade-in-up 0.35s ease-out forwards;
+  --animate-fade-in-up: fade-in-up 0.3s ease-out forwards;
 
   @keyframes fade-in-up {
     0% {
       opacity: 0;
-      transform: translateY(10px);
     }
     100% {
       opacity: 1;
-      transform: translateY(0);
     }
   }
+}
+
+.fixed.inset-0 {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  z-index: 9999 !important;
 }
 
 /* ==========================================================================
@@ -81,8 +86,6 @@ body {
 /* ==========================================================================
    CUSTOM UTILITY CLASSES (CÁC LỚP GIAO DIỆN DÙNG CHUNG)
    ========================================================================== */
-
-/* Hiệu ứng thẻ kính mờ (Dark Glassmorphism) chuẩn cho mọi Card/Table */
 .card-glass {
   background: linear-gradient(
     135deg,
@@ -112,7 +115,6 @@ body {
   box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.4);
 }
 
-/* Thanh cuộn (Scrollbar) tông tối */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

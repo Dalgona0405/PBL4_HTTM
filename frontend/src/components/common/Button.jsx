@@ -1,24 +1,24 @@
-import React from "react";
-
-function Button({
-  children, // Chữ hoặc Icon bên trong nút
-  onClick, // Hàm chạy khi click
-  type = "button", // Loại nút (button, submit)
-  isLoading = false, // Trạng thái đang tải
-  disabled = false, // Trạng thái khóa nút
-  variant = "primary", // Màu sắc: "primary" | "secondary" | "danger" | "outline"
-  fullWidth = false, // chỉ true ở Login
+export default function Button({
+  children,
+  onClick,
+  type = "button",
+  isLoading = false,
+  disabled = false,
+  variant = "primary",
+  fullWidth = false,
   className = "",
 }) {
   const baseStyle =
-    "px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex justify-center items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ";
+    "px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex justify-center items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 ";
   const variants = {
     primary:
-      "bg-brand-primary text-white hover:bg-brand-primary-hover shadow-lg shadow-blue-500/25 hover:-translate-y-0.5",
+      "bg-brand-primary text-brand-text-primary hover:bg-brand-primary-hover shadow-lg shadow-brand-primary/25 hover:-translate-y-0.5",
     secondary:
       "bg-brand-surface text-brand-text-secondary hover:bg-brand-surface-elevated border border-brand-border",
-    danger: "bg-alert-danger text-white hover:bg-red-600 shadow-md",
-    outline: "border border-gray-200 bg-white text-slate-600 hover:bg-gray-100",
+    danger:
+      "bg-alert-danger text-brand-text-primary hover:opacity-90 shadow-md shadow-alert-danger/20",
+    outline:
+      "border border-brand-border bg-brand-dark/60 text-brand-text-secondary hover:border-brand-primary hover:text-brand-text-primary",
   };
 
   return (
@@ -38,5 +38,3 @@ function Button({
     </button>
   );
 }
-
-export default Button;

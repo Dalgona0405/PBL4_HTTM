@@ -1,11 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import {
-  dispatchVehicleToRestStop,
-  getDefaultSelectedVehicle,
-  getLiveMonitoringStats,
-  getPriorityFleet,
-} from "../../mock";
+import dataService from "../../services/dataService";
 import EmergencyCallModal from "./components/EmergencyCallModal";
 import EvidenceVideoModal from "./components/EvidenceVideoModal";
 import LeafletMapView from "./components/LeafletMapView";
@@ -13,43 +8,54 @@ import MapKpiStats from "./components/MapKpiStats";
 import VehicleDispatchPanel from "./components/VehicleDispatchPanel";
 
 export default function MapPage() {
-  // 1. DỮ LIỆU ĐỘI XE KÈM TỌA ĐỘ VÀ ĐỒNG HỒ RIÊNG TỪNG XE
-  const [fleet, setFleet] = useState(() => {
-    const defaultList = getPriorityFleet();
-    return defaultList.map((item, index) => ({
-      ...item,
-      lat: 16.0544 + (index === 0 ? 0.015 : index * 0.018 - 0.025),
-      lng: 108.2022 + (index === 0 ? -0.012 : index * 0.015 - 0.02),
-      currentSpeed: parseInt(item.speed) || 60,
-      currentCo2: parseInt(item.co2?.replace(",", "")) || 850,
-      // Mỗi xe có số giây đếm ngược riêng:
-      remainingSeconds:
-        item.countdownSeconds !== undefined ? item.countdownSeconds : 900,
-    }));
+  const [fleet, setFleet] = useState([]);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [stats, setStats] = useState({
+    activeVehicles: 4,
+    microsleepAlerts: 1,
+    fatigueWarnings: 1,
+    normalVehicles: 2,
   });
-
-  const [selectedVehicle, setSelectedVehicle] = useState(
-    () => fleet[0] || getDefaultSelectedVehicle(),
-  );
-  const [stats] = useState(() => getLiveMonitoringStats());
   const [isSimulating, setIsSimulating] = useState(true);
 
-  // Modals
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [showCallModal, setShowCallModal] = useState(false);
 
-  // Ref bản đồ
   const mapInstanceRef = useRef(null);
 
-  // 2. GIẢ LẬP XE CHẠY VÀ GIẢM ĐỒNG HỒ ĐẾM NGƯỢC RIÊNG CHO MỖI XE
   useEffect(() => {
+    const loadMapData = async () => {
+      const [defaultList, monitoringStats] = await Promise.all([
+        dataService.getPriorityFleet(),
+        dataService.getMonitoringStats(),
+      ]);
+      const mappedFleet = (defaultList || []).map((item, index) => ({
+        ...item,
+        lat: 16.0544 + (index === 0 ? 0.015 : index * 0.018 - 0.025),
+        lng: 108.2022 + (index === 0 ? -0.012 : index * 0.015 - 0.02),
+        currentSpeed: parseInt(item.speed) || 60,
+        currentCo2: parseInt(String(item.co2 || "850").replace(",", "")) || 850,
+        remainingSeconds:
+          item.countdownSeconds !== undefined ? item.countdownSeconds : 900,
+      }));
+      setFleet(mappedFleet);
+      setSelectedVehicle(
+        mappedFleet.find((v) => v.priorityLevel === "DANGER") ||
+          mappedFleet[0] ||
+          null,
+      );
+      if (monitoringStats) setStats(monitoringStats);
+    };
+    loadMapData();
+  }, []);
+
+  useEffect(() => {
+    if (!fleet.length) return;
     const timer = setInterval(() => {
       setFleet((prevFleet) =>
         prevFleet.map((v) => {
-          // Chỉ nhích nhẹ tọa độ nếu đang bật mô phỏng
           const deltaLat = isSimulating ? (Math.random() - 0.48) * 0.001 : 0;
           const deltaLng = isSimulating ? (Math.random() - 0.48) * 0.001 : 0;
-
           const updatedVehicle = {
             ...v,
             lat: v.lat + deltaLat,
@@ -57,24 +63,19 @@ export default function MapPage() {
             remainingSeconds:
               v.remainingSeconds > 0 ? v.remainingSeconds - 1 : 0,
           };
-
-          // Nếu chiếc xe này đang được chọn trên màn hình -> cập nhật tức thì
           const selectedPlate =
             selectedVehicle?.plate || selectedVehicle?.bien_so;
           const currentPlate = v.plate || v.bien_so;
           if (currentPlate === selectedPlate) {
             setSelectedVehicle(updatedVehicle);
           }
-
           return updatedVehicle;
         }),
       );
     }, 1000);
-
     return () => clearInterval(timer);
-  }, [isSimulating, selectedVehicle]);
+  }, [isSimulating, selectedVehicle, fleet.length]);
 
-  // 3. ĐỊNH DẠNG ĐỒNG HỒ PHÚT:GIÂY
   const formatCountdown = (totalSec = 0) => {
     if (totalSec <= 0) return "00:00 (Hết hạn)";
     const m = Math.floor(totalSec / 60);
@@ -82,12 +83,9 @@ export default function MapPage() {
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  // 4. KHI NGƯỜI DÙNG CLICK CHỌN XE KHÁC
   const handleSelectVehicle = (vehicle) => {
     setSelectedVehicle(vehicle);
-
-    // Di chuyển tâm bản đồ tới đúng tọa độ xe đó
-    if (mapInstanceRef.current) {
+    if (mapInstanceRef.current && vehicle?.lat && vehicle?.lng) {
       mapInstanceRef.current.flyTo([vehicle.lat, vehicle.lng], 13.5, {
         animate: true,
         duration: 1.0,
@@ -95,31 +93,30 @@ export default function MapPage() {
     }
   };
 
-  const handleDispatchNav = () => {
+  const handleDispatchNav = async () => {
     const plate =
       selectedVehicle?.plate || selectedVehicle?.bien_so || "Xe IoT";
     const targetStop =
       selectedVehicle?.nearestRestStop?.name || "Trạm Tiên Hiệp (Km 185)";
-    dispatchVehicleToRestStop({
+    await dataService.dispatchVehicleToRestStop({
       vehiclePlate: plate,
       restStopName: targetStop,
     });
     toast.success(
-      `Đã gửi điều hướng vào [${targetStop}] tới Cabin xe ${plate}!`,
+      `Đã điều hướng xe vào [${targetStop}] tới Cabin xe ${plate}!`,
       {
         duration: 4500,
-        icon: "📍",
+        icon: "🧭",
       },
     );
   };
 
   return (
     <div className="animate-fade-in-up space-y-5 font-sans">
-      {/* 1. Header */}
       <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
         <div>
           <h1 className="text-brand-text-primary text-2xl font-black tracking-tight">
-            Giám sát Thời gian thực & Điều phối Đội xe
+            Giám sát Thời gian thực & Điều phối xe
           </h1>
           <p className="text-brand-text-muted text-xs">
             Dữ liệu Edge Telemetry trực tiếp qua Leaflet Maps & IoT WebSockets
@@ -127,7 +124,7 @@ export default function MapPage() {
         </div>
         <button
           onClick={() => setIsSimulating(!isSimulating)}
-          className={`flex items-center gap-2 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
+          className={`flex cursor-pointer items-center gap-2 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
             isSimulating
               ? "border border-emerald-500/40 bg-emerald-950/60 text-emerald-400 shadow-sm"
               : "border-brand-border bg-brand-dark/80 text-brand-text-muted border"
@@ -149,10 +146,8 @@ export default function MapPage() {
         </button>
       </div>
 
-      {/* 2. Cụm thẻ KPI */}
       <MapKpiStats stats={stats} />
 
-      {/* 3. Bản đồ (Trái) & Bảng điều phối (Phải) */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
         <LeafletMapView
           vehicles={fleet}
@@ -160,7 +155,6 @@ export default function MapPage() {
           onSelectVehicle={handleSelectVehicle}
           mapInstanceRef={mapInstanceRef}
         />
-
         <VehicleDispatchPanel
           vehicle={selectedVehicle}
           countdownText={formatCountdown(selectedVehicle?.remainingSeconds)}
@@ -170,7 +164,6 @@ export default function MapPage() {
         />
       </div>
 
-      {/* 4. Modals */}
       <EvidenceVideoModal
         isOpen={showVideoModal}
         onClose={() => setShowVideoModal(false)}
