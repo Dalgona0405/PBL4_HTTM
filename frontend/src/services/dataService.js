@@ -1,8 +1,6 @@
 import axiosClient from "../api/axiosClient";
 import * as mockRepo from "../mock";
 
-// - true: Chạy dữ liệu Mock cục bộ (LocalStorage)
-// - false: Tự động bắn API thật lên Express Backend (/api/v1)
 const USE_MOCK = true;
 
 export const dataService = {
@@ -119,6 +117,19 @@ export const dataService = {
     });
   },
 
+  async getDisputes() {
+    if (USE_MOCK) return mockRepo.getDisputes();
+    return await axiosClient.get("/disputes");
+  },
+
+  async resolveDispute(payload) {
+    if (USE_MOCK) return mockRepo.resolveDisputeTransaction(payload);
+    return await axiosClient.patch(`/disputes/${payload.disputeId}/resolve`, {
+      trang_thai: payload.decision,
+      phan_hoi: payload.responseNote,
+    });
+  },
+
   // 6. GIÁM SÁT REALTIME MAP & THỐNG KÊ DASHBOARD
   async getPriorityFleet() {
     if (USE_MOCK) return mockRepo.getPriorityFleet();
@@ -135,6 +146,7 @@ export const dataService = {
     return await axiosClient.post("/trips/dispatch-rest-stop", payload);
   },
 
+  // 7. QUẢN TRỊ HỆ THỐNG (ADMIN: CẤU HÌNH AI & AUDIT LOGS)
   async getAuditLogs() {
     if (USE_MOCK) return mockRepo.getAuditLogs();
     return await axiosClient.get("/audit-logs");
@@ -142,7 +154,18 @@ export const dataService = {
 
   async getAiConfig() {
     if (USE_MOCK) return mockRepo.getAiConfig();
-    return await axiosClient.get("/admin/ai-config");
+    return await axiosClient.get("/configs");
+  },
+
+  async updateAiConfig(newConfig) {
+    if (USE_MOCK) return mockRepo.updateAiConfig(newConfig);
+    return await axiosClient.put("/configs", newConfig);
+  },
+
+  async resetDemoData() {
+    if (USE_MOCK && mockRepo.resetAllMockData) {
+      return mockRepo.resetAllMockData();
+    }
   },
 };
 

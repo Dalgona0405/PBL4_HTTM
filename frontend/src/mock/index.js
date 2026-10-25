@@ -12,6 +12,7 @@ const STORAGE_KEYS = {
   AUDIT_LOGS: "pbl4_audit_logs_v2",
   BIOMETRICS: "pbl4_biometrics_v2",
   AI_CONFIG: "pbl4_ai_config_v2",
+  DISPUTES: "pbl4_disputes_v2",
 };
 
 const getStored = (key, defaultList) => {
@@ -318,16 +319,160 @@ export const dispatchVehicleToRestStop = ({ vehiclePlate, restStopName }) => {
 
 export const getAiConfig = () =>
   getStored(STORAGE_KEYS.AI_CONFIG, {
+    fleet_scope: "GLOBAL",
     microsleep_eye_closed_sec: 1.5,
+    head_down_sec: 1.0,
+    yawn_count_threshold: 3,
+    phone_use_sec: 3.0,
     co2_warning_threshold_ppm: 1200,
+    mq135_warmup_sec: 180,
     auto_confirm_min: 0.85,
+    manual_review_min: 0.6,
+    weight_landmarks: 0.4,
+    weight_cnn: 0.4,
+    weight_edge: 0.2,
     penalty_cap_per_trip: 30,
     penalty_cap_per_day: 50,
+    manual_review_sla_hours: 24,
+    dispute_window_hours: 48,
+    timezone: "Asia/Ho_Chi_Minh",
   });
 
-export const updateAiConfig = (newConfig) => {
-  const current = getAiConfig();
-  const updated = { ...current, ...newConfig };
+export const updateAiConfig = (newConfig, adminName = "Nguyễn Quản Trị") => {
+  const before = getAiConfig();
+  const updated = { ...before, ...newConfig };
   setStored(STORAGE_KEYS.AI_CONFIG, updated);
+  const auditLogs = getAuditLogs();
+  auditLogs.unshift({
+    id: Date.now(),
+    actor_type: "USER",
+    user_id: 1,
+    user_name: adminName,
+    hanh_dong: "UPDATE_SYSTEM_CONFIG",
+    doi_tuong_loai: "system_configs",
+    doi_tuong_id: updated.fleet_scope || "GLOBAL",
+    gia_tri_truoc: {
+      microsleep_eye_closed_sec: before.microsleep_eye_closed_sec,
+      co2_warning_threshold_ppm: before.co2_warning_threshold_ppm,
+      auto_confirm_min: before.auto_confirm_min,
+      penalty_cap_per_day: before.penalty_cap_per_day,
+    },
+    gia_tri_sau: {
+      microsleep_eye_closed_sec: updated.microsleep_eye_closed_sec,
+      co2_warning_threshold_ppm: updated.co2_warning_threshold_ppm,
+      auto_confirm_min: updated.auto_confirm_min,
+      penalty_cap_per_day: updated.penalty_cap_per_day,
+    },
+    ly_do: `Cập nhật tham số ngưỡng AI & vận hành (${updated.fleet_scope})`,
+    ip_address: "192.168.1.100",
+    created_at: new Date().toISOString(),
+  });
+  setStored(STORAGE_KEYS.AUDIT_LOGS, auditLogs);
+
   return updated;
+};
+
+export const getDisputes = () =>
+  getStored("pbl4_disputes_v2", seedData.mockDisputes || []);
+
+export const resolveDisputeTransaction = ({
+  disputeId,
+  decision, // "APPROVED" | "REJECTED"
+  responseNote = "",
+  resolverId = 1,
+  resolverName = "Nguyễn Quản Trị",
+}) => {
+  const disputes = getDisputes();
+  const dispute = disputes.find((d) => d.id === Number(disputeId));
+  if (!dispute) throw new Error("Không tìm thấy đơn khiếu nại!");
+
+  const violations = getViolations();
+  const violation = violations.find(
+    (v) => v.id === Number(dispute.violation_id),
+  );
+
+  // Kiểm tra nguyên tắc phân quyền chéo
+  if (
+    violation &&
+    violation.reviewed_by &&
+    Number(violation.reviewed_by) === Number(resolverId) &&
+    resolverId !== 1
+  ) {
+    throw new Error(
+      "Vi phạm nguyên tắc Four-Eyes: Người đã duyệt phạt ban đầu không được tự giải quyết khiếu nại của chính vi phạm đó!",
+    );
+  }
+
+  const isApproved = decision === "APPROVED";
+  dispute.trang_thai = isApproved ? "APPROVED" : "REJECTED";
+  dispute.resolved_by = resolverId;
+  dispute.resolved_by_name = resolverName;
+  dispute.resolved_at = new Date().toISOString();
+  dispute.phan_hoi = responseNote;
+  setStored("pbl4_disputes_v2", disputes);
+
+  // Nếu CHẤP THUẬN KHIẾU NẠI -> Hoàn điểm tự động vào Sổ cái & cập nhật trạng thái điểm
+  if (isApproved) {
+    const refundPoints =
+      violation?.diem_bi_tru ?? dispute.violation?.diem_bi_tru ?? 5;
+
+    if (violation) {
+      violation.trang_thai_diem = "REFUNDED";
+      setStored(STORAGE_KEYS.VIOLATIONS, violations);
+    }
+
+    const drivers = getDrivers();
+    const driver = drivers.find((d) => d.id === Number(dispute.driver_id));
+    if (driver) {
+      const diemTruoc = driver.diem_uy_tin ?? 80;
+      const diemSau = Math.min(100, diemTruoc + refundPoints);
+      driver.diem_uy_tin = diemSau;
+
+      if (diemSau > 65) {
+        driver.cap_canh_bao = "NORMAL";
+        driver.trang_thai_lai_xe = "AVAILABLE";
+      } else if (diemSau > 20) {
+        driver.cap_canh_bao = "WARNING_YELLOW";
+      }
+      setStored(STORAGE_KEYS.DRIVERS, drivers);
+
+      // Ghi bút toán HOAN_DIEM_KHIEU_NAI vào sổ cái
+      const scoreLogs = getScoreLogs();
+      scoreLogs.unshift({
+        id: Date.now(),
+        driver_id: driver.id,
+        loai_thay_doi: "HOAN_DIEM_KHIEU_NAI",
+        so_diem_thay_doi: refundPoints,
+        diem_truoc: diemTruoc,
+        diem_sau: diemSau,
+        ly_do: `Hoàn điểm khiếu nại #${dispute.id} (Vi phạm #${dispute.violation_id}): ${responseNote}`,
+        violation_id: dispute.violation_id,
+        trip_id: violation?.trip_id || 502,
+        created_at: new Date().toISOString(),
+      });
+      setStored(STORAGE_KEYS.SCORE_LOGS, scoreLogs);
+    }
+  }
+
+  // Lưu vết Audit Log
+  const auditLogs = getAuditLogs();
+  auditLogs.unshift({
+    id: Date.now() + 1,
+    actor_type: "USER",
+    user_id: resolverId,
+    user_name: resolverName,
+    hanh_dong: isApproved ? "APPROVE_DISPUTE_REFUND" : "REJECT_DISPUTE",
+    doi_tuong_loai: "violation_disputes",
+    doi_tuong_id: String(dispute.id),
+    gia_tri_truoc: { trang_thai: "OPEN", trang_thai_diem: "APPLIED" },
+    gia_tri_sau: {
+      trang_thai: dispute.trang_thai,
+      trang_thai_diem: isApproved ? "REFUNDED" : "APPLIED",
+    },
+    ly_do: responseNote,
+    created_at: new Date().toISOString(),
+  });
+  setStored(STORAGE_KEYS.AUDIT_LOGS, auditLogs);
+
+  return dispute;
 };

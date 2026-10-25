@@ -1,13 +1,19 @@
+import { Scale, ShieldAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useAuth } from "../../context/AuthContext";
 import dataService from "../../services/dataService";
+import DisputesSection from "./components/DisputesSection";
 import LogsFilterBar from "./components/LogsFilterBar";
 import LogsKpiStats from "./components/LogsKpiStats";
 import LogsTable from "./components/LogsTable";
 import ViolationReviewModal from "./components/ViolationReviewModal";
 
 export default function LogsPage() {
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("VIOLATIONS"); // "VIOLATIONS" | "DISPUTES"
   const [violations, setViolations] = useState([]);
+  const [disputes, setDisputes] = useState([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [searchTerm, setSearchTerm] = useState("");
@@ -15,10 +21,14 @@ export default function LogsPage() {
 
   const loadData = async () => {
     try {
-      const data = await dataService.getViolations();
-      setViolations([...data]);
-    } catch (err) {
-      toast.error("Không thể tải danh sách vi phạm");
+      const [vData, dData] = await Promise.all([
+        dataService.getViolations(),
+        dataService.getDisputes(),
+      ]);
+      setViolations([...(vData || [])]);
+      setDisputes([...(dData || [])]);
+    } catch {
+      toast.error("Không thể tải dữ liệu vi phạm & khiếu nại");
     }
   };
 
@@ -26,35 +36,65 @@ export default function LogsPage() {
     loadData();
   }, []);
 
-  // Xử lý Điều phối viên bấm Duyệt hoặc Bác bỏ vi phạm
   const handleConfirmReview = async (violationId, decision, notes) => {
     try {
-      const res = await dataService.reviewViolation({
+      await dataService.reviewViolation({
         violationId,
         decision,
         notes,
-        reviewerName: "Trần điều phối",
-        reviewerId: 2,
+        reviewerName: user?.name || "Trần Điều Phối",
+        reviewerId: user?.id || 2,
       });
       await loadData();
-
-      if (decision === "COFIRMED") {
+      if (decision === "CONFIRMED") {
         toast.success(
-          `Đã xác nhận vi phạm #${violationId} & tự động trừ điểm uy tín.`,
+          `Xác nhận vi phạm #${violationId} & tự động trừ điểm uy tín.`,
           { icon: "✅" },
         );
       } else {
-        toast.success(
-          `Đã đánh dấu báo động giả cho cho sự kiện #${violationId}.`,
-          { icon: "🛡️" },
-        );
+        toast.success(`Đã đánh dấu báo động giả cho sự kiện #${violationId}.`, {
+          icon: "🛡️",
+        });
       }
     } catch (err) {
       toast.error(err.message || "Có lỗi xảy ra khi duyệt.");
     }
   };
 
-  // Lọc danh sách theo Tab trạng thái, Loại vi phạm và Từ khóa tìm kiếm
+  const handleResolveDispute = async ({
+    disputeId,
+    decision,
+    responseNote,
+  }) => {
+    try {
+      await dataService.resolveDispute({
+        disputeId,
+        decision,
+        responseNote,
+        resolverId: user?.id || 1,
+        resolverName: user?.name || "Nguyễn Quản Trị",
+      });
+      await loadData();
+      if (decision === "APPROVED") {
+        toast.success(
+          `Đã chấp thuận khiếu nại #KN-${disputeId} & hoàn điểm tự động vào Sổ cái!`,
+          { icon: "🎉", duration: 4000 },
+        );
+      } else {
+        toast.success(
+          `Đã bác bỏ khiếu nại #KN-${disputeId} & giữ nguyên mức phạt.`,
+          { icon: "🔒" },
+        );
+      }
+    } catch (err) {
+      toast.error(err.message || "Không thể xử lý khiếu nại!");
+    }
+  };
+
+  const openDisputesCount = disputes.filter(
+    (d) => d.trang_thai === "OPEN",
+  ).length;
+
   const filteredViolations = violations.filter((v) => {
     const currentStatus = v.trang_thai_xac_thuc || v.trang_thai;
     const currentType = v.ma_loai || v.loai_vi_pham;
@@ -71,7 +111,6 @@ export default function LogsPage() {
     ).toLowerCase();
     const query = searchTerm.toLowerCase();
 
-    // 1. Lọc theo trạng thái
     if (statusFilter !== "ALL") {
       if (
         statusFilter === "CONFIRMED" &&
@@ -93,12 +132,10 @@ export default function LogsPage() {
         return false;
     }
 
-    // 2. Lọc theo loại vi phạm
     if (typeFilter !== "ALL" && !currentType.includes(typeFilter)) {
       return false;
     }
 
-    // 3. Lọc theo từ khóa tìm kiếm
     if (
       searchTerm &&
       !driverName.includes(query) &&
@@ -107,43 +144,80 @@ export default function LogsPage() {
     ) {
       return false;
     }
-
     return true;
   });
 
   return (
     <div className="animate-fade-in-up space-y-6 font-sans">
-      {/* 1. Header Trang */}
-      <div>
-        <h1 className="text-brand-text-primary text-2xl font-black tracking-tight">
-          Xác thực Vi phạm AI &amp; Bằng chứng Telemetry
-        </h1>
-        <p className="text-brand-text-muted text-xs">
-          Quy trình thẩm định 2 pha (Edge AI &rarr; Cloud Hậu kiểm), loại bỏ báo
-          động giả và ghi nhận điểm uy tín
-        </p>
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div>
+          <h1 className="text-brand-text-primary text-2xl font-black tracking-tight">
+            Xác thực Vi phạm AI & Giải quyết Khiếu nại
+          </h1>
+          <p className="text-brand-text-muted text-xs">
+            Quy trình xác thực 2 pha (Edge AI &rarr; Cloud Hậu kiểm), đối soát
+            khiếu nại công bằng theo nguyên tắc Four-Eyes
+          </p>
+        </div>
+
+        {/* THANH CHUYỂN TAB: VI PHẠM AI / KHIẾU NẠI */}
+        <div className="card-glass border-brand-border flex items-center gap-1 self-start rounded-2xl border p-1 shadow-md md:self-auto">
+          <button
+            onClick={() => setActiveTab("VIOLATIONS")}
+            className={`flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
+              activeTab === "VIOLATIONS"
+                ? "bg-brand-primary text-white shadow-md shadow-blue-500/25"
+                : "text-brand-text-muted hover:text-white"
+            }`}
+          >
+            <ShieldAlert className="h-4 w-4" />
+            <span>Thẩm định Vi phạm ({violations.length})</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("DISPUTES")}
+            className={`relative flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
+              activeTab === "DISPUTES"
+                ? "bg-brand-primary text-white shadow-md shadow-blue-500/25"
+                : "text-brand-text-muted hover:text-white"
+            }`}
+          >
+            <Scale className="h-4 w-4" />
+            <span>Giải quyết Khiếu nại ({disputes.length})</span>
+            {openDisputesCount > 0 && (
+              <span className="bg-alert-warning text-brand-deep py-0.2 ml-0.5 rounded-full px-1.5 text-[10px] font-black">
+                {openDisputesCount} mới
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* 2. Cụm 4 Thẻ KPI */}
       <LogsKpiStats violations={violations} />
 
-      {/* 3. Thanh Lọc & Tìm kiếm */}
-      <LogsFilterBar
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        typeFilter={typeFilter}
-        setTypeFilter={setTypeFilter}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-      />
+      {activeTab === "VIOLATIONS" ? (
+        <>
+          <LogsFilterBar
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            typeFilter={typeFilter}
+            setTypeFilter={setTypeFilter}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+          />
 
-      {/* 4. Bảng Dữ liệu Vi phạm */}
-      <LogsTable
-        violations={filteredViolations}
-        onSelectViolation={(v) => setSelectedViolation(v)}
-      />
+          <LogsTable
+            violations={filteredViolations}
+            onSelectViolation={(v) => setSelectedViolation(v)}
+          />
+        </>
+      ) : (
+        <DisputesSection
+          disputes={disputes}
+          currentUser={user}
+          onResolveDispute={handleResolveDispute}
+        />
+      )}
 
-      {/* 5. Modal Xem Clip 10s & Duyệt */}
       <ViolationReviewModal
         isOpen={Boolean(selectedViolation)}
         onClose={() => setSelectedViolation(null)}
