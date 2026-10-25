@@ -1,52 +1,56 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { mockViolations } from "../../mock/mockData";
+import dataService from "../../services/dataService";
 import LogsFilterBar from "./components/LogsFilterBar";
 import LogsKpiStats from "./components/LogsKpiStats";
 import LogsTable from "./components/LogsTable";
 import ViolationReviewModal from "./components/ViolationReviewModal";
 
 export default function LogsPage() {
-  const [violations, setViolations] = useState(() => mockViolations);
+  const [violations, setViolations] = useState([]);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedViolation, setSelectedViolation] = useState(null);
 
+  const loadData = async () => {
+    try {
+      const data = await dataService.getViolations();
+      setViolations([...data]);
+    } catch (err) {
+      toast.error("Không thể tải danh sách vi phạm");
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
   // Xử lý Điều phối viên bấm Duyệt hoặc Bác bỏ vi phạm
-  const handleConfirmReview = (violationId, decision, notes) => {
-    const isConfirm = decision === "CONFIRMED";
-
-    setViolations((prev) =>
-      prev.map((v) => {
-        if (v.id === violationId) {
-          return {
-            ...v,
-            trang_thai_xac_thuc: isConfirm ? "CONFIRMED" : "REJECTED",
-            nguon_quyet_dinh: "DISPATCHER",
-            trang_thai_diem: isConfirm ? "APPLIED" : "NOT_APPLIED",
-            ghi_chu_duyet:
-              notes ||
-              (isConfirm
-                ? "Điều phối viên xác nhận qua video"
-                : "Bác bỏ vi phạm"),
-          };
-        }
-        return v;
-      }),
-    );
-
-    if (isConfirm) {
-      toast.success(
-        `Đã xác nhận vi phạm #${violationId} & tự động trừ điểm uy tín!`,
-        {
-          icon: "✅",
-        },
-      );
-    } else {
-      toast.success(`Đã đánh dấu báo động giả cho sự kiện #${violationId}!`, {
-        icon: "🛡️",
+  const handleConfirmReview = async (violationId, decision, notes) => {
+    try {
+      const res = await dataService.reviewViolation({
+        violationId,
+        decision,
+        notes,
+        reviewerName: "Trần điều phối",
+        reviewerId: 2,
       });
+      await loadData();
+
+      if (decision === "COFIRMED") {
+        toast.success(
+          `Đã xác nhận vi phạm #${violationId} & tự động trừ điểm uy tín.`,
+          { icon: "✅" },
+        );
+      } else {
+        toast.success(
+          `Đã đánh dấu báo động giả cho cho sự kiện #${violationId}.`,
+          { icon: "🛡️" },
+        );
+      }
+    } catch (err) {
+      toast.error(err.message || "Có lỗi xảy ra khi duyệt.");
     }
   };
 

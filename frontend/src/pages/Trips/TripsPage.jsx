@@ -1,24 +1,36 @@
-import { useState } from "react";
-import { mockShifts, mockTrips } from "../../mock/mockData";
+import { useEffect, useState } from "react";
+import dataService from "../../services/dataService";
 import CreateShiftModal from "./components/CreateShiftModal";
 import RealTripsTable from "./components/RealTripsTable";
 import ShiftsTable from "./components/ShiftsTable";
 import TripsHeader from "./components/TripsHeader";
 
 export default function TripsPage() {
-  const [activeTab, setActiveTab] = useState("SHIFTS"); // "SHIFTS" (Kế hoạch) | "TRIPS" (Thực tế)
-  const [shifts, setShifts] = useState(() => mockShifts);
-  const [trips] = useState(() => mockTrips);
+  const [activeTab, setActiveTab] = useState("SHIFTS");
+  const [shifts, setShifts] = useState([]);
+  const [trips, setTrips] = useState([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  // Thêm ca mới vào đầu danh sách
-  const handleAddShift = (newShift) => {
-    setShifts((prev) => [newShift, ...prev]);
+  const loadData = async () => {
+    const [shiftList, tripList] = await Promise.all([
+      dataService.getShifts(),
+      dataService.getTrips(),
+    ]);
+    setShifts([...shiftList]);
+    setTrips([...tripList]);
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const handleAddShift = async (newShift) => {
+    await dataService.createShift(newShift);
+    await loadData();
   };
 
   return (
     <div className="animate-fade-in-up space-y-6 font-sans">
-      {/* 1. Header Trang, Thanh chuyển 2 Tabs & Nút Lập ca */}
       <TripsHeader
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -27,7 +39,6 @@ export default function TripsPage() {
         onOpenCreateModal={() => setShowCreateModal(true)}
       />
 
-      {/* 2. Hiển thị Nội dung theo Tab được chọn */}
       {activeTab === "SHIFTS" ? (
         <ShiftsTable
           shifts={shifts}
@@ -37,7 +48,6 @@ export default function TripsPage() {
         <RealTripsTable trips={trips} />
       )}
 
-      {/* 3. Modal Lập Ca Thông Minh (Smart Scheduling) */}
       <CreateShiftModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}

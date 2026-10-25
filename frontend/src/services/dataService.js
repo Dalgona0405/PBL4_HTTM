@@ -1,136 +1,148 @@
-// Cơ chế chuyển mạch:
-//   - USE_MOCK = true: Chạy dữ liệu Mock cục bộ (LocalStorage)
-//   - USE_MOCK = false: Tự động chuyển qua gọi Backend API thật bằng axiosClient
-
 import axiosClient from "../api/axiosClient";
-import { API_URLS } from "../api/api";
-import * as mockService from "../mock";
+import * as mockRepo from "../mock";
 
+// - true: Chạy dữ liệu Mock cục bộ (LocalStorage)
+// - false: Tự động bắn API thật lên Express Backend (/api/v1)
 const USE_MOCK = true;
+
 export const dataService = {
+  // 1. XÁC THỰC & ĐĂNG NHẬP (AUTH)
+  async login(username, password) {
+    if (USE_MOCK) return mockRepo.mockLogin(username, password);
+    return await axiosClient.post("/auth/login", { username, password });
+  },
+
+  async getCurrentUser() {
+    if (USE_MOCK) return mockRepo.getStoredUser();
+    return await axiosClient.get("/auth/me");
+  },
+
+  // 2. TÀI XẾ, HỒ SƠ SINH HỌC & ĐIỂM UY TÍN
   async getDrivers() {
-    if (USE_MOCK) return mockService.getDrivers();
-    return await axiosClient.get(API_URLS.DRIVERS);
+    if (USE_MOCK) return mockRepo.getDrivers();
+    return await axiosClient.get("/drivers");
   },
-  async getDriverById(id) {
-    if (USE_MOCK) return mockService.getDriverById(id);
-    return await axiosClient.get(`${API_URLS.DRIVERS}/${id}`);
-  },
-  async getDriverBiometric(driverId) {
-    if (USE_MOCK) return mockService.getDriverBiometricProfile(driverId);
-    return await axiosClient.get(API_URLS.DRIVER_BIOMETRIC(driverId));
-  },
-  async getDriverScoreLogs(driverId) {
-    if (USE_MOCK) return mockService.getDriverScoreLogs(driverId);
-    return await axiosClient.get(API_URLS.DRIVER_SCORE_HISTORY(driverId));
-  },
-  async updateDriverStatus(
-    driverId,
-    newStatus,
-    reason = "",
-    adminName = "Trần Quản Trị",
-  ) {
-    if (USE_MOCK) {
-      return mockService.updateDriverStatus(
+
+  async updateDriverStatus(driverId, newStatus, reason, adminName) {
+    if (USE_MOCK)
+      return mockRepo.updateDriverStatus(
         driverId,
         newStatus,
         reason,
         adminName,
       );
-    }
-    return await axiosClient.patch(`${API_URLS.DRIVERS}/${driverId}/status`, {
-      trang_thai: newStatus,
+    return await axiosClient.patch(`/drivers/${driverId}/status`, {
+      cap_canh_bao: newStatus,
       ly_do: reason,
     });
   },
-  async getShifts() {
-    if (USE_MOCK) return mockService.getShifts();
-    return await axiosClient.get(API_URLS.SHIFTS);
+
+  async getDriverScoreLogs(driverId = null) {
+    if (USE_MOCK) return mockRepo.getScoreLogs(driverId);
+    return await axiosClient.get(`/drivers/${driverId}/score-logs`);
   },
+
+  async getDriverBiometrics(driverId = null) {
+    if (USE_MOCK) return mockRepo.getBiometricProfiles(driverId);
+    return await axiosClient.get(`/drivers/${driverId}/biometrics`);
+  },
+
+  async createDriver(driverData) {
+    if (USE_MOCK) return mockRepo.createDriver(driverData);
+    return await axiosClient.post("/drivers", driverData);
+  },
+
+  // 3. ĐỘI XE & THIẾT BỊ IOT EDGE
+  async getVehicles() {
+    if (USE_MOCK) return mockRepo.getVehicles();
+    return await axiosClient.get("/vehicles");
+  },
+
+  async createVehicle(vehicleData) {
+    if (USE_MOCK) return mockRepo.createVehicle(vehicleData);
+    return await axiosClient.post("/vehicles", vehicleData);
+  },
+
+  async updateVehicleStatus(vehicleId, newStatus) {
+    if (USE_MOCK) return mockRepo.updateVehicleStatus(vehicleId, newStatus);
+    return await axiosClient.patch(`/vehicles/${vehicleId}/status`, {
+      trang_thai: newStatus,
+    });
+  },
+
+  // 4. TUYẾN ĐƯỜNG, CA CHẠY & CHUYẾN ĐI
   async getRoutes() {
-    if (USE_MOCK) return mockService.getRoutes();
+    if (USE_MOCK) return mockRepo.getRoutes();
     return await axiosClient.get("/routes");
   },
-  async validateShiftConstraints(payload) {
-    // payload: { driverId, startTime, endTime }
-    if (USE_MOCK) return mockService.validateShiftConstraints(payload);
-    return await axiosClient.post("/shifts/validate", payload);
+
+  async getShifts() {
+    if (USE_MOCK) return mockRepo.getShifts();
+    return await axiosClient.get("/shifts");
   },
-  async createShift(shiftData, dispatcherName = "Lê Điều Phối") {
-    if (USE_MOCK) return mockService.createShift(shiftData, dispatcherName);
-    return await axiosClient.post(API_URLS.SHIFTS, shiftData);
+
+  async createShift(shiftData, creatorName) {
+    if (USE_MOCK) return mockRepo.createShift(shiftData, creatorName);
+    return await axiosClient.post("/shifts", shiftData);
   },
-  async getViolations(params) {
-    if (USE_MOCK) return mockService.getViolations();
-    return await axiosClient.get(API_URLS.VIOLATIONS, { params });
+
+  async getTrips() {
+    if (USE_MOCK) return mockRepo.getTrips();
+    return await axiosClient.get("/trips");
   },
-  async getViolationTypes() {
-    if (USE_MOCK) return mockService.getViolationTypes();
-    return await axiosClient.get("/violation-types");
+
+  // 5. THẨM ĐỊNH VI PHẠM AI
+  async getViolations(params = {}) {
+    if (USE_MOCK) return mockRepo.getViolations();
+    return await axiosClient.get("/violations", { params });
   },
-  async reviewViolation(payload) {
-    // payload: { violationId, decision, notes, reviewerName, reviewerId }
-    if (USE_MOCK) return mockService.reviewViolation(payload);
-    return await axiosClient.patch(
-      API_URLS.VIOLATION_REVIEW(payload.violationId),
-      {
-        quyet_dinh: payload.decision,
-        ghi_chu: payload.notes,
-      },
-    );
+
+  async reviewViolation({
+    violationId,
+    decision,
+    notes,
+    reviewerName,
+    reviewerId,
+  }) {
+    if (USE_MOCK) {
+      return mockRepo.reviewViolationTransaction({
+        violationId,
+        decision,
+        notes,
+        reviewerName,
+        reviewerId,
+      });
+    }
+    return await axiosClient.patch(`/violations/${violationId}/review`, {
+      trang_thai_xac_thuc: decision,
+      ghi_chu_duyet: notes,
+    });
   },
-  async getLiveMonitoringData() {
-    if (USE_MOCK) return mockService.getLiveMonitoringData();
-    return await axiosClient.get("/monitoring/live");
-  },
+
+  // 6. GIÁM SÁT REALTIME MAP & THỐNG KÊ DASHBOARD
   async getPriorityFleet() {
-    if (USE_MOCK) return mockService.getPriorityFleet();
+    if (USE_MOCK) return mockRepo.getPriorityFleet();
     return await axiosClient.get("/monitoring/priority-fleet");
   },
-  async getLiveMonitoringStats() {
-    if (USE_MOCK) return mockService.getLiveMonitoringStats();
+
+  async getMonitoringStats() {
+    if (USE_MOCK) return mockRepo.getLiveMonitoringStats();
     return await axiosClient.get("/monitoring/stats");
   },
-  async getDefaultSelectedVehicle() {
-    if (USE_MOCK) return mockService.getDefaultSelectedVehicle();
-    return await axiosClient.get("/monitoring/selected-vehicle");
-  },
+
   async dispatchVehicleToRestStop(payload) {
-    // payload: { vehiclePlate, restStopName, dispatcherName }
-    if (USE_MOCK) return mockService.dispatchVehicleToRestStop(payload);
+    if (USE_MOCK) return mockRepo.dispatchVehicleToRestStop(payload);
     return await axiosClient.post("/trips/dispatch-rest-stop", payload);
   },
-  async getFleetStatus() {
-    if (USE_MOCK) return mockService.getFleetStatus();
-    return await axiosClient.get(API_URLS.FLEET_STATUS);
-  },
-  async getNearestRestStop(tripId) {
-    if (USE_MOCK) return mockService.getNearestRestStop(tripId);
-    return await axiosClient.get(`/routes/nearest-rest-stop?tripId=${tripId}`);
-  },
-  async getAiConfig() {
-    if (USE_MOCK) return mockService.getAiConfig();
-    return await axiosClient.get("/admin/ai-config");
-  },
-  async updateAiConfig(newConfig, adminName = "Trần Quản Trị") {
-    if (USE_MOCK) return mockService.updateAiConfig(newConfig, adminName);
-    return await axiosClient.put("/admin/ai-config", newConfig);
-  },
+
   async getAuditLogs() {
-    if (USE_MOCK) return mockService.getAuditLogs();
-    return await axiosClient.get("/admin/audit-logs");
+    if (USE_MOCK) return mockRepo.getAuditLogs();
+    return await axiosClient.get("/audit-logs");
   },
-  async createAuditLog(logData) {
-    if (USE_MOCK) return mockService.createAuditLog(logData);
-    return await axiosClient.post("/admin/audit-logs", logData);
-  },
-  async getUnreadNotificationCount() {
-    if (USE_MOCK) return 2;
-    return await axiosClient.get(API_URLS.NOTIFICATIONS_UNREAD);
-  },
-  async markAllNotificationsAsRead() {
-    if (USE_MOCK) return true;
-    return await axiosClient.patch(API_URLS.NOTIFICATIONS_READ_ALL);
+
+  async getAiConfig() {
+    if (USE_MOCK) return mockRepo.getAiConfig();
+    return await axiosClient.get("/admin/ai-config");
   },
 };
 

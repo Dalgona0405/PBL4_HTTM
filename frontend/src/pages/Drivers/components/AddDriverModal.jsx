@@ -1,6 +1,16 @@
 import { Plus, UserPlus, X } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import Button from "../../../components/common/Button";
+import InputField from "../../../components/common/InputField";
+import SelectField from "../../../components/common/SelectField";
+
+const LICENSE_OPTIONS = [
+  { value: "FC", label: "Hạng FC (Container)" },
+  { value: "C", label: "Hạng C (Xe tải nặng)" },
+  { value: "D", label: "Hạng D (Xe khách)" },
+  { value: "E", label: "Hạng E (Xe giường nằm)" },
+];
 
 export default function AddDriverModal({ isOpen, onClose, onAddDriver }) {
   const [formData, setFormData] = useState({
@@ -12,13 +22,16 @@ export default function AddDriverModal({ isOpen, onClose, onAddDriver }) {
 
   if (!isOpen) return null;
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.ho_ten.trim()) {
-      toast.error("Vui lòng nhập họ tên tài xế!");
+      toast.error("Vui lòng nhập họ tên!");
       return;
     }
-
     const newDriver = {
       id: Date.now(),
       user_id: Date.now(),
@@ -34,14 +47,17 @@ export default function AddDriverModal({ isOpen, onClose, onAddDriver }) {
         so_dien_thoai: formData.so_dien_thoai || "0905000999",
       },
     };
-
     onAddDriver(newDriver);
     toast.success(
       `Đã thêm thành công tài xế [${newDriver.user.ho_ten}] vào hệ thống!`,
-      {
-        icon: "🎉",
-      },
+      { icon: "👤" },
     );
+    setFormData({
+      ho_ten: "",
+      so_dien_thoai: "",
+      hang_bang_lai: "FC",
+      so_bang_lai: "",
+    });
     onClose();
   };
 
@@ -52,99 +68,60 @@ export default function AddDriverModal({ isOpen, onClose, onAddDriver }) {
           <div className="flex items-center gap-2">
             <UserPlus className="text-brand-blue-sky h-5 w-5" />
             <h3 className="text-brand-text-primary text-sm font-bold">
-              Thêm Hồ sơ Tài xế Mới
+              Thêm Tài xế mới
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="text-brand-text-muted rounded-full p-1 hover:text-white"
+            className="text-brand-text-muted cursor-pointer rounded-full p-1 hover:text-white"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 p-6 text-xs">
-          <div>
-            <label className="text-brand-text-primary mb-1 block font-bold">
-              Họ và tên tài xế <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="VD: Nguyễn Văn An"
-              value={formData.ho_ten}
-              onChange={(e) =>
-                setFormData({ ...formData, ho_ten: e.target.value })
-              }
-              className="border-brand-border bg-brand-dark/90 text-brand-text-primary focus:border-brand-primary w-full rounded-xl border px-3.5 py-2.5 text-xs outline-none"
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-4 p-6">
+          <InputField
+            label="Họ tên tài xế"
+            name="ho_ten"
+            required
+            placeholder="VD: Nguyễn Văn An"
+            value={formData.ho_ten}
+            onChange={handleChange}
+          />
 
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-brand-text-primary mb-1 block font-bold">
-                Số điện thoại
-              </label>
-              <input
-                type="text"
-                placeholder="VD: 0905123456"
-                value={formData.so_dien_thoai}
-                onChange={(e) =>
-                  setFormData({ ...formData, so_dien_thoai: e.target.value })
-                }
-                className="border-brand-border bg-brand-dark/90 text-brand-text-primary w-full rounded-xl border px-3 py-2 text-xs outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="text-brand-text-primary mb-1 block font-bold">
-                Hạng bằng lái
-              </label>
-              <select
-                value={formData.hang_bang_lai}
-                onChange={(e) =>
-                  setFormData({ ...formData, hang_bang_lai: e.target.value })
-                }
-                className="border-brand-border bg-brand-dark text-brand-text-primary w-full rounded-xl border px-3 py-2 text-xs outline-none"
-              >
-                <option value="FC">Hạng FC (Container)</option>
-                <option value="C">Hạng C (Xe tải nặng)</option>
-                <option value="D">Hạng D (Xe khách)</option>
-                <option value="E">Hạng E (Xe giường nằm)</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-brand-text-primary mb-1 block font-bold">
-              Số giấy phép lái xe
-            </label>
-            <input
-              type="text"
-              placeholder="VD: FC-790012345"
-              value={formData.so_bang_lai}
-              onChange={(e) =>
-                setFormData({ ...formData, so_bang_lai: e.target.value })
-              }
-              className="border-brand-border bg-brand-dark/90 text-brand-text-primary w-full rounded-xl border px-3.5 py-2.5 text-xs outline-none"
+            <InputField
+              label="Số điện thoại"
+              name="so_dien_thoai"
+              placeholder="VD: 0905123456"
+              value={formData.so_dien_thoai}
+              onChange={handleChange}
+            />
+            <SelectField
+              label="Hạng bằng lái"
+              name="hang_bang_lai"
+              value={formData.hang_bang_lai}
+              onChange={handleChange}
+              options={LICENSE_OPTIONS}
             />
           </div>
 
-          <div className="border-brand-border-dark bg-brand-dark/80 flex items-center justify-end gap-2.5 border-t pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="border-brand-border bg-brand-surface text-brand-text-muted rounded-xl border px-4 py-2 text-xs font-bold transition-all hover:text-white"
-            >
+          <InputField
+            label="Số giấy phép lái xe"
+            name="so_bang_lai"
+            placeholder="VD: FC-790012345"
+            value={formData.so_bang_lai}
+            onChange={handleChange}
+          />
+
+          <div className="border-brand-border-dark flex items-center justify-end gap-2.5 border-t pt-4">
+            <Button variant="secondary" onClick={onClose}>
               Hủy
-            </button>
-            <button
-              type="submit"
-              className="bg-brand-primary hover:bg-brand-primary-hover flex cursor-pointer items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white shadow-md transition-all active:scale-95"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              <span>Tạo hồ sơ tài xế</span>
-            </button>
+            </Button>
+            <Button type="submit" variant="primary">
+              <Plus className="h-4 w-4" />
+              <span>Tạo tài xế</span>
+            </Button>
           </div>
         </form>
       </div>

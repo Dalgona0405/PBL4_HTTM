@@ -1,25 +1,24 @@
-import React from "react";
-
-// Khuôn đúc cho Ô nhập liệu (Text, Email, Password...)
-function InputField({
-  label, // Tên hiển thị (VD: "Email của bạn")
-  name, // Tên biến để lưu data
-  type = "text", // Loại input (text, email, password, date...)
-  value, // Giá trị hiện tại
-  onChange, // Hàm xử lý khi gõ phím
-  placeholder, // Chữ mờ gợi ý
-  required, // Bắt buộc nhập không?
-  disabled, // Có bị khóa không?
+export default function InputField({
+  label,
+  name,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
+  required = false,
+  disabled = false,
+  min,
+  max,
+  step,
+  className = "",
 }) {
   return (
-    <div className="w-full">
-      {/* Nếu có truyền label vào thì mới hiển thị */}
+    <div className={`w-full ${className}`}>
       {label && (
-        <label className="text-brand-text-primary mb-2 block text-sm font-bold">
-          {label} {required && <span className="text-red-500">*</span>}
+        <label className="text-brand-text-primary mb-1.5 block text-xs font-bold">
+          {label} {required && <span className="text-alert-danger">*</span>}
         </label>
       )}
-
       <input
         type={type}
         name={name}
@@ -28,10 +27,11 @@ function InputField({
         placeholder={placeholder}
         required={required}
         disabled={disabled}
-        className="w-full rounded-xl border border-brand-border bg-brand-surface/90 px-4 py-2.5 text-sm font-medium text-white placeholder:text-brand-text-muted transition-all outline-none focus:border-brand-primary focus:bg-brand-dark focus:ring-2 focus:ring-brand-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
+        min={min}
+        max={max}
+        step={step}
+        className="border-brand-border bg-brand-dark/90 text-brand-text-primary placeholder:text-brand-text-subtle focus:border-brand-primary focus:bg-brand-surface focus:ring-brand-primary/30 w-full rounded-xl border px-3.5 py-2.5 text-xs font-medium transition-all outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
       />
     </div>
   );
 }
-
-export default InputField;
